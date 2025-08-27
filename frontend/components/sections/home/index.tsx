@@ -6,6 +6,7 @@ import { useEnvironmentStore } from "@/components/context";
 import TimeSeriesChart from "../ticker/time-series-chart";
 import TiktokSection from "./tiktok";
 import GraphPreview from "./graph-preview";
+import ScraperStatus from "./tiktok/scraper-status";
 
 export default function Home() {
   const { paid } = useEnvironmentStore((store) => store);
@@ -18,6 +19,12 @@ export default function Home() {
         Realtime tiktok analytics for memecoins. <br />
         Hunt the next moonshot 🚀
       </p>
+      
+      {/* Scraper Status */}
+      <div className="max-w-[1200px] mx-auto mt-8">
+        <ScraperStatus />
+      </div>
+      
       <div className="max-w-[1200px] mx-auto">
         <HeroTable />
       </div>

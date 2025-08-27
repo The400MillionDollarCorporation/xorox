@@ -1,5 +1,7 @@
 import TiktokSectionBody from "./body";
 import TikTokCarousel from "./carousel";
+import RealTimeTikTokFeed from "./real-time-feed";
+import AnalyticsDashboard from "./analytics-dashboard";
 
 export default function TiktokSection() {
   return (
@@ -11,7 +13,17 @@ export default function TiktokSection() {
           <TikTokCarousel />
         </div>
       </div>
-      <div className="absolute w-full h-8 bottom-0 bg-gradient-to-t from-black/80 to-transparent" />
+      <div className="absolute w-full h-8 bottom-0 bg-gradient-t from-black/80 to-transparent" />
+      
+      {/* Real-time TikTok Feed */}
+      <div className="mt-16">
+        <RealTimeTikTokFeed />
+      </div>
+      
+      {/* Analytics Dashboard */}
+      <div className="mt-16">
+        <AnalyticsDashboard />
+      </div>
     </div>
   );
 }
