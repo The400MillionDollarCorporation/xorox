@@ -1,4 +1,3 @@
-// Place these at the very top of the file, before any other imports
 import { createClient } from '@supabase/supabase-js';
 import puppeteer from 'puppeteer';
 import dotenv from 'dotenv';
@@ -219,7 +218,6 @@ const processSearchTerm = async (page, keyword, maxResults = 50) => {
       console.log("\nWaiting for video feed...");
 
       while (results.length < maxResults) {
-        // const videoElements = await page.$$('div[class*="DivItemContainerV2"]');
         const videoElements = await page.$$(
           'div[class*="DivItemContainerForSearch"]'
         );
@@ -324,7 +322,7 @@ const processHashtagTerm = async (page, keyword, maxResults = 50) => {
         }
 
         if (results.length >= maxResults) {
-          console.log(`\nReached target number of videos for '${keyword}'`);
+          console.log(`\nReached target number of videos for '#${keyword}'`);
           break;
         }
 
@@ -340,7 +338,7 @@ const processHashtagTerm = async (page, keyword, maxResults = 50) => {
           "document.documentElement.scrollHeight"
         );
         if (newHeight === previousHeight) {
-          console.log(`\nReached end of feed for '${keyword}'`);
+          console.log(`\nReached end of feed for '#${keyword}'`);
           break;
         }
       }
@@ -397,51 +395,101 @@ const main = async () => {
     logger.info("Chrome started successfully");
 
     const allResults = [];
+    let totalStored = 0;
+    let totalMentions = 0;
 
+    console.log("\n🚀 Starting automated scraping and storage...\n");
+
+    // Process search terms
     for (const search of searchTerms) {
+      console.log(`\n🔍 Processing search term: ${search}`);
       const results = await processSearchTerm(page, search, 100);
+      
       if (results.length) {
         allResults.push({
           search,
           total_videos: results.length,
           videos: results,
         });
-        console.log(
-          `Successfully processed ${results.length} videos for '${search}'`
-        );
+        
+        console.log(`\n💾 Storing ${results.length} videos for '${search}' in Supabase...`);
+        
+        // Store each video immediately
+        for (const video of results) {
+          try {
+            const storedTikTok = await storeTikTokDataImmediately(video);
+            if (storedTikTok) {
+              totalStored++;
+              
+              // Store token mentions if available
+              if (video.comments && video.comments.tickers) {
+                await storeTokenMentionsImmediately(storedTikTok.id, video.comments);
+                totalMentions++;
+              }
+            }
+          } catch (error) {
+            console.error('Error processing video:', error);
+          }
+        }
+        
+        console.log(`✅ Successfully processed and stored ${results.length} videos for '${search}'`);
       }
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
-    console.log("\nAll search terms processed!");
+    console.log("\n🎯 All search terms processed and stored!");
 
+    // Process hashtag terms
     for (const hashtag of hashtagTerms) {
+      console.log(`\n🔍 Processing hashtag: ${hashtag}`);
       const results = await processHashtagTerm(page, hashtag, 200);
+      
       if (results.length) {
         allResults.push({
           search: "#" + hashtag,
           total_videos: results.length,
           videos: results,
         });
-        console.log(
-          `Successfully processed ${results.length} videos for '#${hashtag}'`
-        );
+        
+        console.log(`\n💾 Storing ${results.length} videos for '#${hashtag}' in Supabase...`);
+        
+        // Store each video immediately
+        for (const video of results) {
+          try {
+            const storedTikTok = await storeTikTokDataImmediately(video);
+            if (storedTikTok) {
+              totalStored++;
+              
+              // Store token mentions if available
+              if (video.comments && video.comments.tickers) {
+                await storeTokenMentionsImmediately(storedTikTok.id, video.comments);
+                totalMentions++;
+              }
+            }
+          } catch (error) {
+            console.error('Error processing video:', error);
+          }
+        }
+        
+        console.log(`✅ Successfully processed and stored ${results.length} videos for '#${hashtag}'`);
       }
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
+    // Save combined results to file for backup
     if (allResults.length) {
       const savedPath = saveCombinedResults(allResults);
       if (savedPath) {
-        console.log("\nSuccessfully saved all results!");
+        console.log(`\n📁 Backup results saved to: ${savedPath}`);
       }
-      // The original code had addTiktoks(supabase, ...) here, but addTiktoks is not defined.
-      // Assuming the intent was to store the results directly or that addTiktoks is a placeholder.
-      // For now, removing the line as per the new_code's removal of addTiktoks.
     }
 
-    console.log("\nAll hashtag terms processed!");
-    console.log("Press Enter to close browser...");
+    console.log("\n🎉 SCRAPING AND STORAGE COMPLETE!");
+    console.log(`📊 Total videos stored in Supabase: ${totalStored}`);
+    console.log(`🔗 Total mentions processed: ${totalMentions}`);
+    console.log(`📁 Total search results: ${allResults.length}`);
+    
+    console.log("\nPress Enter to close browser...");
     await new Promise((resolve) => process.stdin.once("data", resolve));
   } catch (e) {
     logger.error(`Unexpected error: ${e}`);

@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@supabase/supabase-js": "^2.56.0",
-    "dotenv": "^16.6.1",
+    "@supabase/supabase-js": "^2.0.0",
+    "dotenv": "^16.0.0",
     "node-fetch": "^2.7.0",
     "puppeteer": "^19.0.0"
   },
   "scripts": {
-    "start": "node index.mjs"
+    "start": "node index.mjs",
+    "auto": "node auto_scrape_and_store.mjs"
   }
 }
