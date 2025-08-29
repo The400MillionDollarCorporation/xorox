@@ -403,12 +403,12 @@ class TelegramChannelScraper {
       }
       
       console.log(`📊 Parsed ${messages.length} messages from RSS feed for @${channelUsername}`);
-      return messages;
-    } catch (error) {
+    return messages;
+  } catch (error) {
       console.error('Error parsing RSS feed:', error);
-      return [];
-    }
+    return [];
   }
+}
 
   /**
    * Extract message ID from Telegram link
