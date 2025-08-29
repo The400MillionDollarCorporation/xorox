@@ -1,27 +1,41 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import * as fs from "fs/promises";
+import path from "path";
 import { pushPrices } from "./supabase/prices.mjs";
+
+// Polyfill for Node.js compatibility
+import fetch from 'node-fetch';
+import { Headers } from 'node-fetch';
+
+// Set global fetch and Headers for Supabase compatibility
+global.fetch = fetch;
+global.Headers = Headers;
 
 dotenv.config();
 
-const path = "results/prices/metadata.json";
+// Ensure results directory exists
+const resultsDir = path.join(process.cwd(), 'results', 'prices');
+const metadataPath = path.join(resultsDir, 'metadata.json');
+
+// Create results directory if it doesn't exist
+await fs.mkdir(resultsDir, { recursive: true });
 
 const getMetadata = async () => {
   try {
-    return JSON.parse(await fs.readFile(path, "utf-8"));
+    return JSON.parse(await fs.readFile(metadataPath, "utf-8"));
   } catch (error) {
-    console.error("Error reading metadata:", error);
+    console.log("Creating new metadata file...");
+    // Return default metadata if file doesn't exist or is invalid
+    return {
+      sinceTimestamp: "2024-12-20T03:46:24Z",
+      latestFetchTimestamp: "2024-12-20T03:46:24Z",
+    };
   }
-  // Return default metadata if file doesn't exist or is invalid
-  return {
-    sinceTimestamp: "2024-12-20T03:46:24Z",
-    latestFetchTimestamp: null,
-  };
 };
 
 async function updateMetadata(metadata) {
-  await fs.writeFile(path, JSON.stringify(metadata, null, 2), "utf-8");
+  await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2), "utf-8");
 }
 
 // axios
@@ -97,22 +111,33 @@ export async function fetchAndPushPrices() {
 
   try {
     const response = await axios.request(config);
+    
+    // Create the prices file path
+    const pricesFilePath = path.join(resultsDir, `prices-${Date.now()}.json`);
+    
     await fs.writeFile(
-      "results/prices/prices-" + Date.now() + ".json",
+      pricesFilePath,
       JSON.stringify(response.data, null, 2),
       "utf-8"
     );
+    
+    console.log(`✅ Prices data saved to: ${pricesFilePath}`);
+    
     metadata.sinceTimestamp = latestFetchTimestamp.toISOString();
     metadata.latestFetchTimestamp =
       response.data.data.Solana.DEXTrades[0].Block.Time;
-    console.log("NEW PRICES METADATA");
+    
+    console.log("📊 NEW PRICES METADATA");
     console.log(metadata);
-    console.log("PUSHING TO SUPABASE");
-    console.log(response.data.data.Solana.DEXTrades.length);
+    console.log("🚀 PUSHING TO SUPABASE");
+    console.log(`📈 Found ${response.data.data.Solana.DEXTrades.length} DEX trades`);
+    
     await updateMetadata(metadata);
     await pushPrices("", response.data);
+    
+    console.log("✅ Prices data successfully processed and stored!");
   } catch (e) {
-    console.error("Error fetching data:", e);
+    console.error("❌ Error fetching data:", e);
     throw e;
   }
 }

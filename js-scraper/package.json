@@ -4,13 +4,27 @@
   "type": "module",
   "scripts": {
     "start": "node telegram_scraper.mjs",
-    "scrape": "node telegram_scraper.mjs"
+    "scrape": "node telegram_scraper.mjs",
+    "test": "node test_web_scraping.mjs",
+    "analyze": "node pattern_analysis.mjs",
+    "test-analysis": "node test_pattern_analysis.mjs",
+    "test-db": "node test_database_storage.mjs",
+    "setup-db": "node setup_database.mjs",
+    "twitter-start": "node twitter_integration.mjs",
+    "twitter-test": "node test_twitter_integration.mjs",
+    "ai-test": "node test_ai_tweets.mjs",
+    "start-all": "node start_all_systems.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.3.1",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^3.3.2",
     "node-telegram-bot-api": "^0.64.0",
-    "node-cron": "^3.0.3"
+    "openai": "^4.20.1",
+    "puppeteer": "^24.17.1",
+    "twitter-api-v2": "^1.15.2"
   }
 }

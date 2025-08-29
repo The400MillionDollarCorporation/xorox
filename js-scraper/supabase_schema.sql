@@ -131,3 +131,85 @@ ALTER TABLE telegram_messages ENABLE ROW LEVEL SECURITY;
 -- Create policies for telegram tables
 CREATE POLICY "Allow all operations" ON telegram_channels FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON telegram_messages FOR ALL USING (true);
+
+-- Create pattern_analysis_results table for storing analysis reports
+CREATE TABLE IF NOT EXISTS pattern_analysis_results (
+    id SERIAL PRIMARY KEY,
+    analysis_type TEXT NOT NULL, -- 'tiktok', 'telegram', 'comprehensive'
+    platform TEXT, -- 'tiktok', 'telegram', 'combined'
+    timestamp TIMESTAMPTZ DEFAULT NOW(),
+    summary JSONB,
+    trending_keywords JSONB,
+    correlations JSONB,
+    recommendations JSONB,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create pattern_correlations table for detailed correlation data
+CREATE TABLE IF NOT EXISTS pattern_correlations (
+    id SERIAL PRIMARY KEY,
+    analysis_id INTEGER REFERENCES pattern_analysis_results(id) ON DELETE CASCADE,
+    keyword TEXT NOT NULL,
+    token_name TEXT,
+    token_symbol TEXT,
+    token_uri TEXT,
+    correlation_score DECIMAL(5,4),
+    social_metrics JSONB,
+    trading_metrics JSONB,
+    risk_level TEXT,
+    recommendation_text TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create trending_keywords table for keyword tracking
+CREATE TABLE IF NOT EXISTS trending_keywords (
+    id SERIAL PRIMARY KEY,
+    keyword TEXT NOT NULL,
+    platform TEXT NOT NULL, -- 'tiktok', 'telegram'
+    frequency INTEGER DEFAULT 1,
+    first_seen TIMESTAMPTZ DEFAULT NOW(),
+    last_seen TIMESTAMPTZ DEFAULT NOW(),
+    total_mentions INTEGER DEFAULT 1,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_pattern_analysis_type ON pattern_analysis_results(analysis_type);
+CREATE INDEX IF NOT EXISTS idx_pattern_analysis_timestamp ON pattern_analysis_results(timestamp);
+CREATE INDEX IF NOT EXISTS idx_pattern_correlations_analysis_id ON pattern_correlations(analysis_id);
+CREATE INDEX IF NOT EXISTS idx_pattern_correlations_keyword ON pattern_correlations(keyword);
+CREATE INDEX IF NOT EXISTS idx_trending_keywords_platform ON trending_keywords(platform);
+CREATE INDEX IF NOT EXISTS idx_trending_keywords_frequency ON trending_keywords(frequency);
+
+-- Enable Row Level Security for pattern analysis tables
+ALTER TABLE pattern_analysis_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pattern_correlations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trending_keywords ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for pattern analysis tables
+CREATE POLICY "Allow all operations" ON pattern_analysis_results FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON pattern_correlations FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON trending_keywords FOR ALL USING (true);
+
+-- Create twitter_alerts table for storing Twitter alert history
+CREATE TABLE IF NOT EXISTS twitter_alerts (
+    id SERIAL PRIMARY KEY,
+    alert_type TEXT NOT NULL, -- 'volume_growth', 'growth_rate', 'trending_discovery'
+    token_uri TEXT,
+    data JSONB,
+    posted_at TIMESTAMPTZ DEFAULT NOW(),
+    tweet_id TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create indexes for twitter_alerts
+CREATE INDEX IF NOT EXISTS idx_twitter_alerts_type ON twitter_alerts(alert_type);
+CREATE INDEX IF NOT EXISTS idx_twitter_alerts_token ON twitter_alerts(token_uri);
+CREATE INDEX IF NOT EXISTS idx_twitter_alerts_posted_at ON twitter_alerts(posted_at);
+
+-- Enable Row Level Security for twitter_alerts
+ALTER TABLE twitter_alerts ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for twitter_alerts
+CREATE POLICY "Allow all operations" ON twitter_alerts FOR ALL USING (true);

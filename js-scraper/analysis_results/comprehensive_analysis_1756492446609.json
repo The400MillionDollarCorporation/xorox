@@ -1,0 +1,47 @@
+{
+  "timestamp": "2025-08-29T18:34:06.097Z",
+  "summary": {
+    "tiktok": {
+      "totalVideos": 0,
+      "totalTokens": 0,
+      "keywordMatches": 0,
+      "averageCorrelation": 0
+    },
+    "telegram": {
+      "totalMessages": 0,
+      "totalTokens": 0,
+      "keywordMatches": 0,
+      "averageCorrelation": 0
+    },
+    "totalCorrelations": 0
+  },
+  "platforms": {
+    "tiktok": {
+      "timestamp": "2025-08-29T18:34:04.482Z",
+      "platform": "TikTok",
+      "summary": {
+        "totalVideos": 0,
+        "totalTokens": 0,
+        "keywordMatches": 0,
+        "averageCorrelation": 0
+      },
+      "trendingKeywords": [],
+      "correlations": [],
+      "recommendations": []
+    },
+    "telegram": {
+      "timestamp": "2025-08-29T18:34:05.719Z",
+      "platform": "Telegram",
+      "summary": {
+        "totalMessages": 0,
+        "totalTokens": 0,
+        "keywordMatches": 0,
+        "averageCorrelation": 0
+      },
+      "trendingKeywords": [],
+      "correlations": [],
+      "recommendations": []
+    }
+  },
+  "topRecommendations": []
+}

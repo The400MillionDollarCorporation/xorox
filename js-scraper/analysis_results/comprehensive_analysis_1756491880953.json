@@ -1,0 +1,162 @@
+{
+  "timestamp": "2025-08-29T18:24:40.953Z",
+  "summary": {
+    "tiktok": {
+      "totalVideos": 30,
+      "totalTokens": 1000,
+      "keywordMatches": 0,
+      "averageCorrelation": 0
+    },
+    "telegram": {
+      "totalMessages": 123,
+      "totalTokens": 1000,
+      "keywordMatches": 7,
+      "averageCorrelation": 0
+    },
+    "totalCorrelations": 0
+  },
+  "platforms": {
+    "tiktok": {
+      "timestamp": "2025-08-29T18:24:35.317Z",
+      "platform": "TikTok",
+      "summary": {
+        "totalVideos": 30,
+        "totalTokens": 1000,
+        "keywordMatches": 0,
+        "averageCorrelation": 0
+      },
+      "trendingKeywords": [],
+      "correlations": [],
+      "recommendations": []
+    },
+    "telegram": {
+      "timestamp": "2025-08-29T18:24:40.930Z",
+      "platform": "Telegram",
+      "summary": {
+        "totalMessages": 123,
+        "totalTokens": 1000,
+        "keywordMatches": 7,
+        "averageCorrelation": 0
+      },
+      "trendingKeywords": [
+        {
+          "keyword": "trading",
+          "matchCount": 1,
+          "tokens": [
+            {
+              "name": "anything but trading",
+              "symbol": "ANYTHING",
+              "uri": "https://ipfs.io/ipfs/QmbDVVau3QAEVntz8xa5cbBE6AUuXECAgEQJUbzrqvPGs4",
+              "created_at": "2025-08-29T16:51:26+00:00"
+            }
+          ]
+        },
+        {
+          "keyword": "spot",
+          "matchCount": 1,
+          "tokens": [
+            {
+              "name": "AppleMetaOpNetflixGooglUberSpoti",
+              "symbol": "AMONGUS",
+              "uri": "https://ipfs.io/ipfs/bafkreiatxlpawgpnze4jym5eb5rdx6i4iobgle7fnxquuie26voj2ewcma",
+              "created_at": "2025-08-29T17:02:53+00:00"
+            }
+          ]
+        },
+        {
+          "keyword": "your",
+          "matchCount": 1,
+          "tokens": [
+            {
+              "name": "raise your weapons",
+              "symbol": "⚔️",
+              "uri": "https://metadata.pumployer.fun/metadata/rZvxeAdq0aPI",
+              "created_at": "2025-08-29T16:45:14+00:00"
+            }
+          ]
+        },
+        {
+          "keyword": "bitcoin",
+          "matchCount": 1,
+          "tokens": [
+            {
+              "name": "The Next Bitcoin",
+              "symbol": "Heineken",
+              "uri": "https://ipfs.io/ipfs/bafkreibl2jvoyiygp4wqwvbzbxtqlukrlhhig4x75cpt2khduvhtg4sp74",
+              "created_at": "2025-08-29T17:10:24+00:00"
+            }
+          ]
+        },
+        {
+          "keyword": "ethereum",
+          "matchCount": 2,
+          "tokens": [
+            {
+              "name": "The Next Ethereum",
+              "symbol": "Starbucks",
+              "uri": "https://high-purple-snake.myfilebase.com/ipfs/QmVPJa5FPj7uXpg2phoCuBW4A78dDfkZEzJxz1y5wVQxma",
+              "created_at": "2025-08-29T17:05:11+00:00"
+            },
+            {
+              "name": "The Next Ethereum",
+              "symbol": "TABASCO",
+              "uri": "https://ipfs.io/ipfs/bafkreidszugpe2br4zwlids6tv4u63vrk5ak56uk6pxes5gnp3glpyts7q",
+              "created_at": "2025-08-29T17:00:11+00:00"
+            }
+          ]
+        },
+        {
+          "keyword": "entry",
+          "matchCount": 1,
+          "tokens": [
+            {
+              "name": "entry into the virtual world",
+              "symbol": "EITVW",
+              "uri": "https://ipfs.io/ipfs/bafkreiaruapvzvqzkt6knfdiyylodtphlr3a7agdwokazvss7seolpuuf4",
+              "created_at": "2025-08-29T16:48:33+00:00"
+            }
+          ]
+        },
+        {
+          "keyword": "our",
+          "matchCount": 5,
+          "tokens": [
+            {
+              "name": "Colours",
+              "symbol": "COLOURS",
+              "uri": "https://1ea5c9284bee4d1c815c8bd0.blob.core.windows.net/deploy/bd3e830d-76e2-45c6-80ce-4232aac59816.json",
+              "created_at": "2025-08-29T16:46:24+00:00"
+            },
+            {
+              "name": "raise your weapons",
+              "symbol": "⚔️",
+              "uri": "https://metadata.pumployer.fun/metadata/rZvxeAdq0aPI",
+              "created_at": "2025-08-29T16:45:14+00:00"
+            },
+            {
+              "name": "halflife.fun",
+              "symbol": "HALFLIFE",
+              "uri": "https://ipfs.io/ipfs/bafkreicpxogxu6qgkhpznkv3tl5uour4rbdweki3zfyzpcbiqimdntu26i",
+              "created_at": "2025-08-29T16:31:46+00:00"
+            },
+            {
+              "name": "Raise The Colours",
+              "symbol": "ELON",
+              "uri": "https://ipfs.io/ipfs/bafkreia2cmyucqy5rha74w7s5ssh23yha23qjrevkzx4dx5nocgszerd6e",
+              "created_at": "2025-08-29T16:26:37+00:00"
+            },
+            {
+              "name": "Raise The Colours",
+              "symbol": "ELON",
+              "uri": "https://metadata.pumplify.eu/data/QmWyEcYSK6hL4Vx9VdzzBZdRfwQ3PinNxYbskicvxWLedC",
+              "created_at": "2025-08-29T16:25:48+00:00"
+            }
+          ]
+        }
+      ],
+      "correlations": [],
+      "recommendations": []
+    }
+  },
+  "topRecommendations": []
+}

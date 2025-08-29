@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
+import * as cheerio from 'cheerio';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
 
@@ -14,8 +15,10 @@ class TelegramChannelScraper {
     // Validate required environment variables
     this.validateEnv();
 
-    // Initialize Telegram Bot
-    this.bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
+    // Initialize Telegram Bot (optional - only if token provided)
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      this.bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
+    }
 
     // Initialize Supabase Client
     this.supabase = createClient(
@@ -41,7 +44,6 @@ class TelegramChannelScraper {
 
   validateEnv() {
     const requiredEnvVars = [
-      'TELEGRAM_BOT_TOKEN', 
       'SUPABASE_URL', 
       'SUPABASE_ANON_KEY'
     ];
@@ -51,6 +53,11 @@ class TelegramChannelScraper {
         throw new Error(`Missing required environment variable: ${varName}`);
       }
     });
+
+    // Bot token is optional for web scraping
+    if (!process.env.TELEGRAM_BOT_TOKEN) {
+      console.log('⚠️ TELEGRAM_BOT_TOKEN not provided - using web scraping only');
+    }
   }
 
   ensureMediaDirectory() {
@@ -149,26 +156,13 @@ class TelegramChannelScraper {
     }
   }
 
-  /**
-   * Scrape messages from a specific channel with full details
+    /**
+   * Scrape messages from a specific channel using both web scraping and RSS
    * Starting from December 2024 until current date/time
    */
   async scrapeChannel(channelUsername, limit = 1000) {
     try {
-      console.log(`🔍 Scraping channel: @${channelUsername}`);
-      
-      // Get channel info first
-      let chat;
-      try {
-        chat = await this.bot.getChat(`@${channelUsername}`);
-        console.log(`📺 Channel: ${chat.title} (@${chat.username})`);
-      } catch (error) {
-        console.error(`❌ Could not access channel @${channelUsername}:`, error.message);
-        return [];
-      }
-
-      const messages = [];
-      let scrapedCount = 0;
+      console.log(`🔍 Scraping channel: @${channelUsername} using dual method approach`);
       
       // Set start date to December 1, 2024
       const startDate = new Date('2024-12-01T00:00:00Z');
@@ -177,74 +171,293 @@ class TelegramChannelScraper {
       console.log(`📅 Scraping from: ${startDate.toISOString()}`);
       console.log(`📅 Scraping until: ${currentDate.toISOString()}`);
       
-      // Start from a reasonable message ID and work backwards
-      // We'll use a higher starting point to get more recent messages first
-      let currentMessageId = 10000; // Start from a high number
-      let consecutiveFailures = 0;
-      const maxConsecutiveFailures = 50; // Stop if we hit too many failures in a row
+      const allMessages = [];
       
-      while (scrapedCount < limit && consecutiveFailures < maxConsecutiveFailures) {
-        try {
-          // Try to get message info
-          const message = await this.bot.forwardMessage(
-            process.env.TELEGRAM_BOT_TOKEN, // Forward to bot's own chat
-            `@${channelUsername}`,
-            currentMessageId
-          );
-
-          if (message) {
-            // Check if message date is within our target range
-            const messageDate = new Date(message.date * 1000); // Convert Unix timestamp to Date
-            
-            if (messageDate >= startDate && messageDate <= currentDate) {
-              const processedMessage = await this.processMessage(message, chat);
-              if (processedMessage) {
-                messages.push(processedMessage);
-                scrapedCount++;
-                console.log(`📝 Processed message ${currentMessageId} from @${channelUsername} (${messageDate.toISOString()})`);
-                
-                // Reset failure counter on success
-                consecutiveFailures = 0;
-              }
-            } else if (messageDate < startDate) {
-              // We've gone too far back, stop scraping this channel
-              console.log(`⏹️ Reached messages before ${startDate.toISOString()}, stopping for @${channelUsername}`);
-              break;
-            }
-          }
-        } catch (error) {
-          consecutiveFailures++;
-          
-          // Message might not exist or be accessible
-          if (!error.message.includes('message not found') && 
-              !error.message.includes('message to forward not found')) {
-            console.error(`Error getting message ${currentMessageId}:`, error.message);
-          }
-        }
-        
-        currentMessageId--;
-        
-        // Rate limiting to avoid hitting API limits
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-
-      console.log(`✅ Scraped ${messages.length} messages from @${channelUsername} (Dec 2024 - Now)`);
-    return messages;
-  } catch (error) {
+      // METHOD 1: Web Scraping
+      console.log(`\n🌐 METHOD 1: Web Scraping from public preview page...`);
+      const webMessages = await this.scrapePublicChannelWeb(channelUsername, limit);
+      console.log(`✅ Web scraping completed: ${webMessages.length} messages`);
+      
+      // METHOD 2: RSS Feed Scraping
+      console.log(`\n📡 METHOD 2: RSS Feed scraping...`);
+      const rssMessages = await this.scrapeChannelRSS(channelUsername);
+      console.log(`✅ RSS scraping completed: ${rssMessages.length} messages`);
+      
+      // Combine and deduplicate messages
+      const combinedMessages = [...webMessages, ...rssMessages];
+      const uniqueMessages = this.deduplicateMessages(combinedMessages);
+      
+      console.log(`📊 Combined messages: ${combinedMessages.length}`);
+      console.log(`📊 Unique messages after deduplication: ${uniqueMessages.length}`);
+      
+      // Filter messages by date range
+      const filteredMessages = uniqueMessages.filter(msg => {
+        const messageDate = new Date(msg.date * 1000);
+        return messageDate >= startDate && messageDate <= currentDate;
+      });
+      
+      console.log(`✅ Final result: ${filteredMessages.length} messages from @${channelUsername} (Dec 2024 - Now)`);
+      return filteredMessages;
+    } catch (error) {
       console.error(`Error scraping channel @${channelUsername}:`, error);
-    return [];
+      return [];
+    }
   }
-}
 
   /**
-   * Process a single message and extract all required data according to schema
+   * Deduplicate messages based on message_id and channel_id
+   */
+  deduplicateMessages(messages) {
+    const seen = new Set();
+    const uniqueMessages = [];
+    
+    for (const message of messages) {
+      const key = `${message.channel_id}_${message.message_id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueMessages.push(message);
+      }
+    }
+    
+    return uniqueMessages;
+  }
+
+  /**
+   * METHOD 1: Web Scraping Telegram's Public Preview Pages
+   * This is the most reliable method for public channels
+   */
+  async scrapePublicChannelWeb(channelUsername, limit = 1000) {
+    try {
+      console.log(`🌐 Scraping public web preview for @${channelUsername}`);
+      
+      const url = `https://t.me/s/${channelUsername}`;
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+
+      const $ = cheerio.load(response.data);
+      const messages = [];
+
+      $('.tgme_widget_message').each((index, element) => {
+        if (messages.length >= limit) return;
+
+        const $msg = $(element);
+        const messageId = parseInt($msg.attr('data-post')?.split('/')[1] || '0');
+        const text = $msg.find('.tgme_widget_message_text').text().trim();
+        const dateStr = $msg.find('.tgme_widget_message_date time').attr('datetime');
+        const viewsText = $msg.find('.tgme_widget_message_views').text();
+        
+        // Extract media information
+        const hasPhoto = $msg.find('.tgme_widget_message_photo').length > 0;
+        const hasVideo = $msg.find('.tgme_widget_message_video').length > 0;
+        const photoUrl = $msg.find('.tgme_widget_message_photo_wrap').attr('style')?.match(/url\('([^']+)'\)/)?.[1];
+
+        if (messageId && (text || hasPhoto || hasVideo)) {
+          messages.push({
+            channel_id: channelUsername,
+            channel_title: channelUsername,
+            message_id: messageId,
+            text: text || '[Media]',
+            date: dateStr ? Math.floor(new Date(dateStr).getTime() / 1000) : 0,
+            views: viewsText ? this.parseViews(viewsText) : null,
+            has_photo: hasPhoto,
+            has_video: hasVideo,
+            photo_urls: photoUrl ? [photoUrl] : [],
+            scraped_at: new Date().toISOString(),
+            raw_data: {
+              message_id: messageId,
+              text: text,
+              date: dateStr,
+              views: viewsText,
+              has_photo: hasPhoto,
+              has_video: hasVideo,
+              photo_url: photoUrl
+            }
+          });
+        }
+      });
+
+      console.log(`✅ Scraped ${messages.length} messages from web preview`);
+      return messages;
+    } catch (error) {
+      console.error('Error scraping web preview:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Parse view count from Telegram's view text
+   */
+  parseViews(viewsText) {
+    if (!viewsText) return null;
+    
+    const views = viewsText.trim();
+    if (views.includes('K')) {
+      return parseInt(views.replace('K', '')) * 1000;
+    } else if (views.includes('M')) {
+      return parseInt(views.replace('M', '')) * 1000000;
+    } else {
+      return parseInt(views) || null;
+    }
+  }
+
+  /**
+   * METHOD 2: Using Telegram's RSS Feeds (if available)
+   * Some public channels provide RSS feeds
+   */
+  async scrapeChannelRSS(channelUsername) {
+    try {
+      console.log(`📡 Attempting RSS scraping for @${channelUsername}`);
+      
+      // Try common RSS feed patterns
+      const rssUrls = [
+        `https://rsshub.app/telegram/channel/${channelUsername}`,
+        `https://t.me/s/${channelUsername}/rss`,
+        `https://rsshub.app/telegram/channel/${channelUsername}/rss`
+      ];
+
+      for (const rssUrl of rssUrls) {
+        try {
+          console.log(`🔍 Trying RSS URL: ${rssUrl}`);
+          const response = await axios.get(rssUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            },
+            timeout: 10000
+          });
+
+          if (response.status === 200 && response.data) {
+            console.log(`✅ Found RSS feed for @${channelUsername} at ${rssUrl}`);
+            return await this.parseRSSFeed(response.data, channelUsername);
+          }
+        } catch (error) {
+          console.log(`❌ RSS URL failed: ${rssUrl} - ${error.message}`);
+          continue; // Try next URL
+        }
+      }
+
+      console.log(`⚠️ No RSS feed found for @${channelUsername}`);
+      return [];
+    } catch (error) {
+      console.error('Error scraping RSS:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Parse RSS feed XML data
+   */
+  async parseRSSFeed(xmlData, channelUsername) {
+    try {
+      // Simple XML parsing for RSS feeds
+      // Note: For production use, consider using 'xml2js' package
+      const messages = [];
+      
+      // Extract items from RSS XML
+      const itemMatches = xmlData.match(/<item>([\s\S]*?)<\/item>/g);
+      
+      if (itemMatches) {
+        for (const item of itemMatches) {
+          try {
+            // Extract message data from RSS item
+            const titleMatch = item.match(/<title>(.*?)<\/title>/);
+            const descriptionMatch = item.match(/<description>(.*?)<\/description>/);
+            const linkMatch = item.match(/<link>(.*?)<\/link>/);
+            const pubDateMatch = item.match(/<pubDate>(.*?)<\/pubDate>/);
+            const guidMatch = item.match(/<guid>(.*?)<\/guid>/);
+            
+            if (titleMatch || descriptionMatch) {
+              const messageId = this.extractMessageIdFromLink(linkMatch?.[1] || guidMatch?.[1] || '');
+              const text = (titleMatch?.[1] || '') + (descriptionMatch?.[1] ? ' ' + descriptionMatch?.[1] : '');
+              const pubDate = pubDateMatch?.[1] ? new Date(pubDateMatch[1]) : new Date();
+              
+              if (messageId && text) {
+                messages.push({
+                  channel_id: channelUsername,
+                  channel_title: channelUsername,
+                  message_id: messageId,
+                  text: text.trim(),
+                  date: Math.floor(pubDate.getTime() / 1000),
+                  has_photo: text.includes('[Photo]') || text.includes('[Image]'),
+                  has_video: text.includes('[Video]') || text.includes('[Media]'),
+                  photo_urls: [],
+                  scraped_at: new Date().toISOString(),
+                  raw_data: {
+                    title: titleMatch?.[1],
+                    description: descriptionMatch?.[1],
+                    link: linkMatch?.[1],
+                    pubDate: pubDateMatch?.[1],
+                    guid: guidMatch?.[1],
+                    source: 'RSS'
+                  }
+                });
+              }
+            }
+          } catch (itemError) {
+            console.error('Error parsing RSS item:', itemError);
+            continue;
+          }
+        }
+      }
+      
+      console.log(`📊 Parsed ${messages.length} messages from RSS feed for @${channelUsername}`);
+      return messages;
+    } catch (error) {
+      console.error('Error parsing RSS feed:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Extract message ID from Telegram link
+   */
+  extractMessageIdFromLink(link) {
+    try {
+      // Extract message ID from various Telegram link formats
+      const patterns = [
+        /t\.me\/[^\/]+\/(\d+)/,           // t.me/channel/123
+        /telegram\.me\/[^\/]+\/(\d+)/,    // telegram.me/channel/123
+        /\/s\/[^\/]+\/(\d+)/,             // /s/channel/123
+        /post\/(\d+)/,                     // post/123
+        /message\/(\d+)/                   // message/123
+      ];
+      
+      for (const pattern of patterns) {
+        const match = link.match(pattern);
+        if (match && match[1]) {
+          return parseInt(match[1]);
+        }
+      }
+      
+      // If no pattern matches, generate a hash-based ID
+      return Math.abs(link.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0));
+    } catch (error) {
+      console.error('Error extracting message ID from link:', error);
+      return Date.now(); // Fallback to timestamp
+    }
+  }
+
+  /**
+   * Process a single message and extract all required data
+   * Now works with web scraped data
    */
   async processMessage(message, chat) {
     try {
+      // If message is already in the correct format from web scraping, return it
+      if (message.channel_id && message.message_id) {
+        return message;
+      }
+
+      // Fallback for bot API messages (if needed)
       const processedMessage = {
-        channel_id: chat.id.toString(),
-        channel_title: chat.title || chat.username || 'Unknown',
-        message_id: message.message_id,
+        channel_id: chat?.id?.toString() || message.channel_id || 'unknown',
+        channel_title: chat?.title || chat?.username || message.channel_title || 'Unknown',
+        message_id: message.message_id || message.id,
         text: message.text || message.caption || null,
         date: message.date,
         author_signature: message.author_signature || null,
@@ -255,36 +468,30 @@ class TelegramChannelScraper {
         reply_to_message_id: message.reply_to_message?.message_id || null,
         edit_date: message.edit_date || null,
         media_group_id: message.media_group_id || null,
-        has_photo: Boolean(message.photo && message.photo.length > 0),
-        has_video: Boolean(message.video),
-        has_document: Boolean(message.document),
-        has_audio: Boolean(message.audio),
-        has_voice: Boolean(message.voice),
-        has_video_note: Boolean(message.video_note),
-        has_sticker: Boolean(message.sticker),
-        has_animation: Boolean(message.animation),
-        has_contact: Boolean(message.contact),
-        has_location: Boolean(message.location),
-        has_venue: Boolean(message.venue),
-        has_poll: Boolean(message.poll),
-        photo_urls: [],
-        video_url: null,
-        document_url: null,
-        audio_url: null,
-        voice_url: null,
+        has_photo: Boolean(message.photo && message.photo.length > 0) || message.has_photo || false,
+        has_video: Boolean(message.video) || message.has_video || false,
+        has_document: Boolean(message.document) || false,
+        has_audio: Boolean(message.audio) || false,
+        has_voice: Boolean(message.voice) || false,
+        has_video_note: Boolean(message.video_note) || false,
+        has_sticker: Boolean(message.sticker) || false,
+        has_animation: Boolean(message.animation) || false,
+        has_contact: Boolean(message.contact) || false,
+        has_location: Boolean(message.location) || false,
+        has_venue: Boolean(message.venue) || false,
+        has_poll: Boolean(message.poll) || false,
+        photo_urls: message.photo_urls || [],
+        video_url: message.video_url || null,
+        document_url: message.document_url || null,
+        audio_url: message.audio_url || null,
+        voice_url: message.voice_url || null,
         views: message.views || null,
         reactions_count: message.reactions_count || null,
         entities: message.entities || null,
         caption: message.caption || null,
-        scraped_at: new Date().toISOString(),
-        raw_data: message
+        scraped_at: message.scraped_at || new Date().toISOString(),
+        raw_data: message.raw_data || message
       };
-
-      // Download media if enabled for this channel
-      const channelConfig = this.channels.find(c => c.username === chat.username);
-      if (channelConfig?.scrape_media) {
-        await this.downloadMedia(message, processedMessage);
-      }
 
       return processedMessage;
     } catch (error) {
@@ -409,7 +616,7 @@ class TelegramChannelScraper {
     }
   }
 
-  async scrapeAllChannels(messagesPerChannel = 1000) {
+  async scrapeAllChannels(messagesPerChannel = 50) {
     // Ensure channels are loaded before scraping
     if (this.channels.length === 0) {
       await this.loadChannels();
@@ -419,19 +626,9 @@ class TelegramChannelScraper {
     
     for (const channel of this.channels) {
       try {
-        // Double-check that channel still has recent messages before scraping
-        const hasRecentMessages = await this.checkChannelHasRecentMessages(channel.username);
-        
-        if (hasRecentMessages) {
-          console.log(`🔍 Scraping channel @${channel.username} - Has recent messages`);
-          const messages = await this.scrapeChannel(channel.username, messagesPerChannel);
-          if (messages.length > 0) {
-            await this.storeMessages(messages);
-          }
-        } else {
-          console.log(`⏭️ Skipping channel @${channel.username} - No recent messages from Dec 2024`);
-          // Optionally disable the channel in database
-          await this.disableChannel(channel.username);
+        const messages = await this.scrapeChannel(channel.username, messagesPerChannel);
+        if (messages.length > 0) {
+          await this.storeMessages(messages);
         }
         
         // Rate limiting between channels
@@ -486,25 +683,18 @@ class TelegramChannelScraper {
           const existingChannel = await this.checkChannelExists(channel.username);
           
           if (!existingChannel) {
-            // Check if channel has messages from December 2024 before adding
-            const hasRecentMessages = await this.checkChannelHasRecentMessages(channel.username);
-            
-            if (hasRecentMessages) {
-              // Add new channel only if it has recent messages
-              const addedChannel = await this.addChannel({
-                username: channel.username,
-                display_name: channel.title,
-                enabled: true,
-                scrape_media: true,
-                scrape_interval_minutes: 15
-              });
+            // Add new channel
+            const addedChannel = await this.addChannel({
+              username: channel.username,
+              display_name: channel.title,
+              enabled: true,
+              scrape_media: true,
+              scrape_interval_minutes: 15
+            });
 
-              if (addedChannel) {
-                discoveredChannels.push(addedChannel);
-                console.log(`🆕 Discovered channel: @${channel.username} (${channel.title}) - Has messages from Dec 2024`);
-              }
-            } else {
-              console.log(`⏭️ Skipping channel @${channel.username} - No messages from Dec 2024`);
+            if (addedChannel) {
+              discoveredChannels.push(addedChannel);
+              console.log(`🆕 Discovered channel: @${channel.username} (${channel.title})`);
             }
           }
         }
@@ -516,7 +706,7 @@ class TelegramChannelScraper {
       }
     }
 
-    console.log(`✅ Channel discovery completed. Found ${discoveredChannels.length} new channels with recent messages.`);
+    console.log(`✅ Channel discovery completed. Found ${discoveredChannels.length} new channels.`);
     return discoveredChannels;
   }
 
@@ -541,6 +731,76 @@ class TelegramChannelScraper {
         username: 'solana_memes', 
         title: 'Solana Meme Coins',
         description: 'Tracking the hottest meme coins in the Solana ecosystem'
+      },
+      { 
+        username: 'nitrotrades10', 
+        title: 'Nitro Trades',
+        description: 'Premium trading signals and crypto analysis for profitable trades'
+      },
+      { 
+        username: 'garden_btc', 
+        title: 'Garden BTC',
+        description: 'Bitcoin trading community with expert insights and market analysis'
+      },
+      { 
+        username: 'cryptofuturesspotsignals', 
+        title: 'Crypto Futures Spot Signals',
+        description: 'Professional crypto futures and spot trading signals with high accuracy'
+      },
+      { 
+        username: 'binancetrade9', 
+        title: 'Binance Trade',
+        description: 'Binance trading signals and cryptocurrency market analysis'
+      },
+      { 
+        username: 'crypto_miami', 
+        title: 'Crypto Miami',
+        description: 'Miami-based crypto community with trading insights and market updates'
+      },
+      { 
+        username: 'okx_encryption', 
+        title: 'OKX Encryption',
+        description: 'OKX exchange trading signals and cryptocurrency analysis'
+      },
+      { 
+        username: 'currency_flashing', 
+        title: 'Currency Flashing',
+        description: 'Real-time currency and crypto trading signals with flash updates'
+      },
+      { 
+        username: 'wallstreetqueentrade', 
+        title: 'Wall Street Queen Official',
+        description: 'Welcome to Wall Street Queen Official Your premier source for stock market insights, trading tips, and investing strategies. Expert analysis | Daily market updates | Smart investing Empowering traders to conquer Wall Street with confidence.'
+      },
+      { 
+        username: 'predictumindicatorcrypto', 
+        title: 'Predictum Indicator Crypto',
+        description: 'Advanced crypto trading indicators and predictive analysis tools'
+      },
+      { 
+        username: 'hodlnations', 
+        title: 'HODL Nations',
+        description: 'Long-term crypto holding community with strategic investment advice'
+      },
+      { 
+        username: 'ayub_khan_admin', 
+        title: 'Ayub Khan Admin',
+        description: 'Crypto trading bot and automated trading signals by Ayub Khan'
+      },
+      { 
+        username: 'cryptoninjas_tradings', 
+        title: 'Crypto Ninjas Trading',
+        description: 'Stealth trading strategies and ninja-level crypto market analysis'
+      },
+      { 
+        username: 'remoteweb3jobs', 
+        title: 'Remote Web3 Jobs',
+        description: 'Job opportunities in Web3, blockchain, and cryptocurrency industries'
+      },
+      { 
+        username: 'usdtgainandfreebnb', 
+        title: 'USDT Gain and Free BNB',
+        description: 'USDT earning strategies and free BNB giveaways for crypto enthusiasts'
       },
       { 
         username: 'crypto_bags', 
@@ -575,102 +835,6 @@ class TelegramChannelScraper {
     } catch (error) {
       console.error(`Error checking channel ${username}:`, error);
       return null;
-    }
-  }
-
-  /**
-   * Check if a channel has messages from December 2024 onwards
-   */
-  async checkChannelHasRecentMessages(username) {
-    try {
-      console.log(`🔍 Checking if @${username} has messages from Dec 2024...`);
-      
-      // Try to access the channel first
-      let chat;
-      try {
-        chat = await this.bot.getChat(`@${username}`);
-      } catch (error) {
-        console.log(`❌ Cannot access channel @${username}: ${error.message}`);
-        return false;
-      }
-
-      const startDate = new Date('2024-12-01T00:00:00Z');
-      let hasRecentMessages = false;
-      let checkedCount = 0;
-      const maxCheckCount = 100; // Check up to 100 messages to find recent ones
-      
-      // Start from a reasonable message ID and check for recent messages
-      let currentMessageId = 10000;
-      
-      while (checkedCount < maxCheckCount && !hasRecentMessages) {
-        try {
-          // Try to get message info
-          const message = await this.bot.forwardMessage(
-            process.env.TELEGRAM_BOT_TOKEN,
-            `@${username}`,
-            currentMessageId
-          );
-
-          if (message) {
-            const messageDate = new Date(message.date * 1000);
-            
-            if (messageDate >= startDate) {
-              hasRecentMessages = true;
-              console.log(`✅ Found recent message in @${username}: ${messageDate.toISOString()}`);
-              break;
-            } else if (messageDate < startDate) {
-              // We've gone too far back, this channel doesn't have recent messages
-              console.log(`⏹️ Channel @${username} has no messages from Dec 2024 (oldest: ${messageDate.toISOString()})`);
-              break;
-            }
-          }
-          
-          checkedCount++;
-        } catch (error) {
-          // Message might not exist or be accessible
-          if (!error.message.includes('message not found') && 
-              !error.message.includes('message to forward not found')) {
-            console.error(`Error checking message ${currentMessageId} in @${username}:`, error.message);
-          }
-        }
-        
-        currentMessageId--;
-        
-        // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-
-      if (!hasRecentMessages) {
-        console.log(`⏭️ Channel @${username} has no recent messages from Dec 2024`);
-      }
-
-      return hasRecentMessages;
-    } catch (error) {
-      console.error(`Error checking recent messages for @${username}:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Disable a channel in the database if it has no recent messages
-   */
-  async disableChannel(username) {
-    try {
-      const { error } = await this.supabase
-        .from('telegram_channels')
-        .update({
-          enabled: false,
-          updated_at: new Date().toISOString()
-        })
-        .eq('username', username);
-
-      if (error) {
-        console.error(`Error disabling channel ${username}:`, error);
-      } else {
-        console.log(`🔒 Disabled channel @${username} - No recent messages`);
-      }
-    } catch (error) {
-      console.error(`Error disabling channel ${username}:`, error);
     }
   }
 

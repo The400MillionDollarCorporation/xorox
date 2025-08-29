@@ -4,6 +4,14 @@ import * as fs from "fs/promises";
 import { pushMemecoins } from "./supabase/memecoins.mjs";
 import path from "path";
 
+// Polyfill for Node.js compatibility
+import fetch from 'node-fetch';
+import { Headers } from 'node-fetch';
+
+// Set global fetch and Headers for Supabase compatibility
+global.fetch = fetch;
+global.Headers = Headers;
+
 dotenv.config();
 
 // Ensure results directory exists

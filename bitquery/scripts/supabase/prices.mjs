@@ -2,6 +2,14 @@ import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs/promises";
 
+// Polyfill for Node.js compatibility
+import fetch from 'node-fetch';
+import { Headers } from 'node-fetch';
+
+// Set global fetch and Headers for Supabase compatibility
+global.fetch = fetch;
+global.Headers = Headers;
+
 dotenv.config();
 
 export async function pushPrices(filePath, dataJson) {
