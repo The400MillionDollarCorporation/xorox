@@ -107,6 +107,16 @@ export default function Layout({
 
           <Button
             variant="ghost"
+            className="hover:bg-transparent hover:border-[1px] hover:border-white transform transition hover:scale-105"
+            onClick={() => {
+              router.push("/trending-coins");
+            }}
+          >
+            <p className="sen text-sm sm:text-md font-bold">🚀 Trending Coins</p>
+          </Button>
+
+          <Button
+            variant="ghost"
             className="hidden lg:flex hover:bg-transparent hover:border-[1px] hover:border-white transform transition hover:scale-105"
             onClick={() => {
               window.open("https://x.com/TokenHunterZoro", "_blank");
@@ -192,6 +202,16 @@ export default function Layout({
             Live Dashboard
           </p>
           <div className="w-2 h-2 bg-[#F8D12E] rounded-full animate-pulse ml-2"></div>
+        </Button>
+
+        <Button
+          variant="ghost"
+          className="hover:bg-transparent hover:border-[1px] hover:border-white transform transition hover:scale-105"
+          onClick={() => {
+            router.push("/trending-coins");
+          }}
+        >
+          <p className="sen text-sm sm:text-md font-bold">🚀 Trending Coins</p>
         </Button>
 
         <Button

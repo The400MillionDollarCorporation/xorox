@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import RealTimeData from '@/components/dashboard/real-time-data';
+import TrendingCoinsSummary from '@/components/dashboard/trending-coins-summary';
+import TrendingCoinsAnalytics from '@/components/dashboard/trending-coins-analytics';
 
 interface ScraperStatus {
   tiktok: {
@@ -199,6 +201,22 @@ export default function DashboardPage() {
 
       {/* Real-time Data Overview */}
       <RealTimeData />
+
+      {/* Trending Coins Analytics */}
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-4">🚀 Trending Coins Analytics</h2>
+          <p className="text-muted-foreground">
+            Monitor top trending coins with 24-hour trading volume, TikTok view counts, and volume/social correlation metrics
+          </p>
+        </div>
+        
+        {/* Summary Metrics */}
+        <TrendingCoinsSummary />
+        
+        {/* Detailed Analytics */}
+        <TrendingCoinsAnalytics />
+      </div>
 
       {/* Scraper Status Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
