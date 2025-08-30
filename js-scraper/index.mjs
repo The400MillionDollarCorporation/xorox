@@ -15,10 +15,10 @@ dotenv.config();
 
 // Initialize Supabase client for immediate storage
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_SECRET;
+const supabaseKey = process.env.SUPABASE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing SUPABASE_URL or SUPABASE_ANON_SECRET in environment variables');
+  console.error('Missing SUPABASE_URL or SUPABASE_KEY in environment variables');
   process.exit(1);
 }
 
@@ -165,7 +165,8 @@ async function storeTokenMentionsImmediately(tiktokId, comments) {
 async function initBrowser() {
   try {
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/google-chrome',
+      // Remove hardcoded Linux path - let Puppeteer auto-detect on Windows
+      // executablePath: '/usr/bin/google-chrome',
       headless: true,
       args: [
         '--no-sandbox',
@@ -397,7 +398,10 @@ const main = async () => {
     logger.info("Chrome started successfully");
 
     const allResults = [];
+    let totalStored = 0;
+    let totalErrors = 0;
 
+    // Process search terms
     for (const search of searchTerms) {
       const results = await processSearchTerm(page, search, 100);
       if (results.length) {
@@ -409,12 +413,30 @@ const main = async () => {
         console.log(
           `Successfully processed ${results.length} videos for '${search}'`
         );
+
+        // Store each video immediately in Supabase
+        for (const video of results) {
+          try {
+            const storedTikTok = await storeTikTokDataImmediately(video);
+            if (storedTikTok) {
+              totalStored++;
+              // Store token mentions if available
+              if (video.comments && video.comments.tickers) {
+                await storeTokenMentionsImmediately(storedTikTok.id, video.comments);
+              }
+            }
+          } catch (error) {
+            totalErrors++;
+            console.error(`Error storing video ${video.video_url}:`, error.message);
+          }
+        }
       }
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
     console.log("\nAll search terms processed!");
 
+    // Process hashtag terms
     for (const hashtag of hashtagTerms) {
       const results = await processHashtagTerm(page, hashtag, 200);
       if (results.length) {
@@ -426,6 +448,23 @@ const main = async () => {
         console.log(
           `Successfully processed ${results.length} videos for '#${hashtag}'`
         );
+
+        // Store each video immediately in Supabase
+        for (const video of results) {
+          try {
+            const storedTikTok = await storeTikTokDataImmediately(video);
+            if (storedTikTok) {
+              totalStored++;
+              // Store token mentions if available
+              if (video.comments && video.comments.tickers) {
+                await storeTokenMentionsImmediately(storedTikTok.id, video.comments);
+              }
+            }
+          } catch (error) {
+            totalErrors++;
+            console.error(`Error storing video ${video.video_url}:`, error.message);
+          }
+        }
       }
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
@@ -433,11 +472,19 @@ const main = async () => {
     if (allResults.length) {
       const savedPath = saveCombinedResults(allResults);
       if (savedPath) {
-        console.log("\nSuccessfully saved all results!");
+        console.log("\nSuccessfully saved all results to file!");
       }
-      // The original code had addTiktoks(supabase, ...) here, but addTiktoks is not defined.
-      // Assuming the intent was to store the results directly or that addTiktoks is a placeholder.
-      // For now, removing the line as per the new_code's removal of addTiktoks.
+      
+      // Summary of database operations
+      console.log("\n📊 DATABASE STORAGE SUMMARY:");
+      console.log(`✅ Successfully stored: ${totalStored} TikTok videos`);
+      console.log(`❌ Storage errors: ${totalErrors}`);
+      console.log(`📁 Total processed: ${allResults.reduce((sum, result) => sum + result.total_videos, 0)} videos`);
+      
+      if (totalStored > 0) {
+        console.log("\n🎉 TikTok data has been successfully stored in Supabase database!");
+        console.log("You can now view this data in your frontend dashboard.");
+      }
     }
 
     console.log("\nAll hashtag terms processed!");

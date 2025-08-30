@@ -29,6 +29,24 @@ export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("24h");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
+    fetchAnalytics();
+    
+    // Auto-refresh every minute
+    const interval = setInterval(fetchAnalytics, 60000);
+    
+    return () => clearInterval(interval);
+  }, [isClient]);
 
   const fetchAnalytics = async () => {
     try {
@@ -58,13 +76,17 @@ export default function AnalyticsDashboard() {
       });
       
       const topTokens = Array.from(tokenCounts.entries())
-        .map(([symbol, count]) => ({ symbol, mentionCount: count, change: Math.floor(Math.random() * 20) - 10 }))
+        .map(([symbol, count]) => ({ 
+          symbol, 
+          mentionCount: count, 
+          change: Math.abs(symbol.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 20 - 10 
+        }))
         .sort((a, b) => b.mentionCount - a.mentionCount)
         .slice(0, 5);
       
       // Generate recent activity
       const recentActivity = videos.slice(0, 5).map((video: any) => ({
-        time: new Date(video.fetched_at).toLocaleTimeString(),
+        time: video.fetched_at, // Store the raw timestamp
         action: "New TikTok",
         details: `@${video.username} posted with ${video.views} views`
       }));
@@ -85,22 +107,21 @@ export default function AnalyticsDashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchAnalytics();
-    
-    // Auto-refresh every minute
-    const interval = setInterval(fetchAnalytics, 60000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
   };
 
-  if (loading) {
+  const formatTime = (timestamp: string) => {
+    try {
+      return new Date(timestamp).toLocaleTimeString();
+    } catch {
+      return timestamp;
+    }
+  };
+
+  if (loading || !isClient) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F8D12E]"></div>
@@ -202,13 +223,13 @@ export default function AnalyticsDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
               <Activity className="h-4 w-4" />
-              Engagement
+              Total Comments
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-[#F8D12E]">{analytics.totalComments}</p>
+            <p className="text-2xl font-bold text-[#F8D12E]">{formatNumber(analytics.totalComments)}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Total comments
+              User engagement
             </p>
           </CardContent>
         </Card>
@@ -219,40 +240,28 @@ export default function AnalyticsDashboard() {
         <CardHeader>
           <CardTitle className="text-white">Top Mentioned Tokens</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Most frequently mentioned memecoins in TikTok videos
+            Most referenced tokens in TikTok content
           </p>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {analytics.topTokens.map((token, index) => (
-              <div key={token.symbol} className="flex items-center justify-between p-3 bg-black/10 rounded-lg">
+              <div key={index} className="flex items-center justify-between p-3 bg-black/10 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#F8D12E] rounded-full flex items-center justify-center">
-                    <span className="text-black text-sm font-bold">{index + 1}</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">{token.symbol}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {token.mentionCount} mentions
-                    </p>
-                  </div>
+                  <Badge variant="outline" className="border-[#F8D12E]/30 text-[#F8D12E]">
+                    {token.symbol}
+                  </Badge>
+                  <span className="text-sm text-white">{token.mentionCount} mentions</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge
-                    variant="secondary"
-                    className={`${
-                      token.change >= 0 
-                        ? 'bg-green-500/20 text-green-400 border-green-500/30' 
-                        : 'bg-red-500/20 text-red-400 border-red-500/30'
-                    }`}
-                  >
-                    {token.change >= 0 ? '+' : ''}{token.change}%
-                  </Badge>
-                  {token.change >= 0 ? (
-                    <TrendingUp className="h-4 w-4 text-green-400" />
+                  {token.change > 0 ? (
+                    <TrendingUp className="h-4 w-4 text-green-500" />
                   ) : (
-                    <TrendingDown className="h-4 w-4 text-red-400" />
+                    <TrendingDown className="h-4 w-4 text-red-500" />
                   )}
+                  <span className={`text-sm ${token.change > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {Math.abs(token.change)}%
+                  </span>
                 </div>
               </div>
             ))}
@@ -277,7 +286,7 @@ export default function AnalyticsDashboard() {
                   <p className="text-sm text-white">{activity.action}</p>
                   <p className="text-xs text-muted-foreground">{activity.details}</p>
                 </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
+                <span className="text-xs text-muted-foreground">{formatTime(activity.time)}</span>
               </div>
             ))}
           </div>

@@ -164,7 +164,8 @@ async function storeTokenMentionsImmediately(tiktokId, comments) {
 async function initBrowser() {
   try {
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/google-chrome',
+      // Remove hardcoded Linux path - let Puppeteer auto-detect on Windows
+      // executablePath: '/usr/bin/google-chrome',
       headless: true,
       args: [
         '--no-sandbox',

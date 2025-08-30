@@ -23,7 +23,7 @@ class TelegramChannelScraper {
     // Initialize Supabase Client
     this.supabase = createClient(
       process.env.SUPABASE_URL, 
-      process.env.SUPABASE_ANON_KEY
+      process.env.SUPABASE_KEY
     );
 
     // Media storage directory
@@ -45,7 +45,7 @@ class TelegramChannelScraper {
   validateEnv() {
     const requiredEnvVars = [
       'SUPABASE_URL', 
-      'SUPABASE_ANON_KEY'
+      'SUPABASE_KEY'
     ];
 
     requiredEnvVars.forEach(varName => {
@@ -611,8 +611,90 @@ class TelegramChannelScraper {
       if (error) throw error;
 
       console.log(`✅ Stored ${messages.length} messages`);
+      
+      // Extract and store token mentions from messages
+      await this.extractAndStoreTokenMentions(messages);
     } catch (error) {
       console.error('Error storing messages:', error);
+    }
+  }
+
+  /**
+   * Extract token mentions from Telegram messages and store them
+   */
+  async extractAndStoreTokenMentions(messages) {
+    try {
+      // Get all tokens from database
+      const { data: tokens, error: tokensError } = await this.supabase
+        .from('tokens')
+        .select('id, symbol')
+        .order('id', { ascending: true });
+
+      if (tokensError) {
+        console.error('Error fetching tokens:', tokensError);
+        return;
+      }
+
+      // Create a map of symbol to token IDs
+      const symbolToTokens = new Map();
+      tokens.forEach((token) => {
+        if (!symbolToTokens.has(token.symbol)) {
+          symbolToTokens.set(token.symbol, []);
+        }
+        symbolToTokens.get(token.symbol).push(token.id);
+      });
+
+      const mentionsData = [];
+      const mentionAt = new Date().toISOString();
+
+      // Process each message for token mentions
+      for (const message of messages) {
+        if (!message.text) continue;
+
+        const messageText = message.text.toLowerCase();
+        
+        // Check for token symbols in the message
+        for (const [symbol, tokenIds] of symbolToTokens) {
+          const symbolLower = symbol.toLowerCase();
+          
+          // Simple keyword matching - you can enhance this with regex or NLP
+          if (messageText.includes(symbolLower) || 
+              messageText.includes(`#${symbolLower}`) ||
+              messageText.includes(`$${symbolLower}`)) {
+            
+            // Count occurrences
+            const count = (messageText.match(new RegExp(symbolLower, 'gi')) || []).length;
+            
+            // Add mention entry for each token ID associated with the symbol
+            for (const tokenId of tokenIds) {
+              mentionsData.push({
+                tiktok_id: null, // Telegram messages don't have TikTok IDs
+                token_id: tokenId,
+                count: count,
+                mention_at: mentionAt,
+                source: 'telegram',
+                channel_id: message.channel_id,
+                message_id: message.message_id
+              });
+            }
+          }
+        }
+      }
+
+      if (mentionsData.length > 0) {
+        // Store mentions in the mentions table
+        const { error: mentionsError } = await this.supabase
+          .from('mentions')
+          .insert(mentionsData);
+
+        if (mentionsError) {
+          console.error('Error inserting mentions:', mentionsError);
+        } else {
+          console.log(`🔗 Stored ${mentionsData.length} token mentions from Telegram messages`);
+        }
+      }
+    } catch (error) {
+      console.error('Error extracting token mentions:', error);
     }
   }
 

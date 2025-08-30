@@ -30,7 +30,10 @@ CREATE TABLE mentions (
     tiktok_id TEXT REFERENCES tiktoks(id),
     token_id INTEGER REFERENCES tokens(id),
     count INTEGER DEFAULT 1,
-    mention_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    mention_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    source TEXT DEFAULT 'tiktok', -- 'tiktok' or 'telegram'
+    channel_id TEXT, -- For Telegram messages
+    message_id BIGINT -- For Telegram messages
 );
 
 -- Create prices table (if not already exists)
@@ -46,6 +49,9 @@ CREATE TABLE prices (
 -- Create indexes for performance
 CREATE INDEX idx_mentions_tiktok_id ON mentions(tiktok_id);
 CREATE INDEX idx_mentions_token_id ON mentions(token_id);
+CREATE INDEX idx_mentions_source ON mentions(source);
+CREATE INDEX idx_mentions_channel_id ON mentions(channel_id);
+CREATE INDEX idx_mentions_message_id ON mentions(message_id);
 CREATE INDEX idx_prices_token_id ON prices(token_id);
 CREATE INDEX idx_prices_is_latest ON prices(is_latest);
 CREATE INDEX idx_tokens_uri ON tokens(uri);

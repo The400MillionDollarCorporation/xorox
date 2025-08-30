@@ -6,6 +6,7 @@ import { Moving } from "@/components/ui/acternity/moving";
 const TikTokCarousel = () => {
   const [hoveredColumn, setHoveredColumn] = useState<number | null>(null);
   const [positions, setPositions] = useState([0, 0, 0]);
+  const [isClient, setIsClient] = useState(false);
 
   const thumbnails = pumpfunSample.results.pumpfun.videos.map(
     (video) => video.thumbnail_url
@@ -15,6 +16,14 @@ const TikTokCarousel = () => {
   const totalHeight = itemHeight * thumbnails.length;
 
   useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only start scrolling after we're on the client side
+    if (!isClient) return;
+
     const interval = setInterval(() => {
       setPositions((prev) =>
         prev.map((pos, idx) => {
@@ -35,7 +44,16 @@ const TikTokCarousel = () => {
     }, 50); // Scrolling speed
 
     return () => clearInterval(interval);
-  }, [hoveredColumn, totalHeight, visibleHeight]);
+  }, [hoveredColumn, totalHeight, visibleHeight, isClient]);
+
+  // Don't render the carousel until we're on the client side
+  if (!isClient) {
+    return (
+      <div className="w-[70%] lg:w-[60%] xl:w-[50%] max-w-5xl mx-auto px-4 py-12">
+        <Moving />
+      </div>
+    );
+  }
 
   const renderColumn = (columnIdx: number) => {
     const style = {

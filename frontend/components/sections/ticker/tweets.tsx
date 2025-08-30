@@ -2,20 +2,29 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TokenData } from "@/lib/types";
 import Image from "next/image";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function Tweets({
+  tweets,
   symbol,
   growth,
-  tweets,
 }: {
+  tweets: Tweet[];
   symbol: string;
   growth: string;
-  tweets: any[];
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only start scrolling after we're on the client side
+    if (!isClient) return;
+
     const scrollContainer = scrollContainerRef.current;
     let scrollInterval: NodeJS.Timeout;
     let isAtEnd = false;
@@ -60,7 +69,7 @@ export default function Tweets({
         scrollContainer.onmouseleave = null;
       }
     };
-  }, []);
+  }, [isClient]);
   function timeAgo(timestamp: string): string {
     const now = new Date();
     const timeDifferenceInSeconds = Math.floor(

@@ -26,8 +26,17 @@ export default function Layout({
     useEnvironmentStore((store) => store);
   const router = useRouter();
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only make API calls after we're on the client side
+    if (!isClient) return;
+
     if (walletAddress.length > 0) {
       fetch(`/api/supabase/get-sub?address=${walletAddress}`)
         .then((res) => res.json())
@@ -44,7 +53,7 @@ export default function Layout({
         setBalances(balances.sol.toString(), balances.token.toString());
       });
     }
-  }, [walletAddress]);
+  }, [walletAddress, isClient, setPaid, setBalances]);
   return (
     <div className="w-full py-4 sm:py-6">
       <div className="flex flex-col sm:flex-row justify-between items-center px-4 sm:px-6 space-y-4 sm:space-y-0">

@@ -22,6 +22,12 @@ export default function ScraperStatus() {
     nextRun: null
   });
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
 
   const fetchStatus = async () => {
     try {
@@ -67,13 +73,16 @@ export default function ScraperStatus() {
   };
 
   useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
     fetchStatus();
     
     // Update status every minute
     const interval = setInterval(fetchStatus, 60000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [isClient]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);

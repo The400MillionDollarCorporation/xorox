@@ -34,25 +34,28 @@ export default function RealTimeTikTokFeed() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   const fetchTikTokData = async () => {
     try {
       setRefreshing(true);
       
       // Fetch TikTok data
-      const tiktokResponse = await fetch('/api/supabase/get-tiktoks');
-      if (tiktokResponse.ok) {
-        const tiktokData = await tiktokResponse.json();
-        setTiktoks(tiktokData.data || []);
+      const tiktokResponse = await fetch('/api/supabase/get-tiktoks?limit=100');
+      const tiktokData = await tiktokResponse.json();
+      
+      // Fetch mentions data
+      const mentionsResponse = await fetch('/api/supabase/get-mentions?limit=1000');
+      const mentionsData = await mentionsResponse.json();
+      
+      if (tiktokData.data) {
+        setTiktoks(tiktokData.data);
       }
-
-      // Fetch token mentions
-      const mentionsResponse = await fetch('/api/supabase/get-mentions');
-      if (mentionsResponse.ok) {
-        const mentionsData = await mentionsResponse.json();
-        setMentions(mentionsData.data || []);
+      
+      if (mentionsData.data) {
+        setMentions(mentionsData.data);
       }
-
+      
       setLastUpdate(new Date());
       setLoading(false);
     } catch (error) {
@@ -64,13 +67,21 @@ export default function RealTimeTikTokFeed() {
   };
 
   useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+
     fetchTikTokData();
     
     // Set up auto-refresh every 30 seconds
     const interval = setInterval(fetchTikTokData, 30000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [isClient]);
 
   const formatViews = (views: number) => {
     if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
@@ -93,7 +104,7 @@ export default function RealTimeTikTokFeed() {
     return mentions.filter(mention => mention.tiktok_id === tiktokId);
   };
 
-  if (loading) {
+  if (loading || !isClient) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F8D12E]"></div>

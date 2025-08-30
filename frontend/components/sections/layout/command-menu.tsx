@@ -6,7 +6,7 @@ import { debounce } from "lodash";
 import { useRouter } from "next/navigation";
 import { type DialogProps } from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   CommandDialog,
   CommandEmpty,
@@ -22,16 +22,25 @@ import { SearchTokenResponse } from "@/lib/types";
 import Image from "next/image";
 import { IPFS_GATEWAY_URL, IPFS_GATEWAY_URL_4 } from "@/lib/constants";
 
-export function CommandMenu({ ...props }: DialogProps) {
+export default function CommandMenu({ ...props }: ButtonProps) {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const { paid } = useEnvironmentStore((store) => store);
-  const [searchResults, setSearchResults] = useState<SearchTokenResponse[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isClient, setIsClient] = useState(false);
   const { searchBarValue, setSearchBarValue, leaderboard } =
     useEnvironmentStore((store) => store);
   const [searchState, setSearchState] = useState(0);
 
   React.useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  React.useEffect(() => {
+    // Only add event listeners after we're on the client side
+    if (!isClient) return;
+
     const down = (e: KeyboardEvent) => {
       if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
         if (
@@ -50,7 +59,7 @@ export function CommandMenu({ ...props }: DialogProps) {
 
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [isClient]);
 
   const runCommand = React.useCallback((command: () => unknown) => {
     setOpen(false);

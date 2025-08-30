@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,7 @@ import {
   ReferenceLine,
   TooltipProps,
 } from "recharts";
+import ClientOnly from "@/components/ui/client-only";
 import {
   ArrowUpRightFromSquare,
   ChevronDown,
@@ -57,6 +58,34 @@ function ChartContent({
   startingPrice: number;
   isPriceUp: boolean;
 }) {
+  const [windowWidth, setWindowWidth] = useState<number>(0);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+    
+    // Set initial window width
+    setWindowWidth(window.innerWidth);
+    
+    // Add resize listener
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Don't render chart until we're on the client side
+  if (!isClient) {
+    return (
+      <CardContent className="p-0 sm:p-6">
+        <div className="h-[300px] sm:h-[400px] w-full flex items-center justify-center">
+          <p className="text-muted-foreground">Loading chart...</p>
+        </div>
+      </CardContent>
+    );
+  }
+
   const maxPrice = Math.max(...data.map((d) => d.price));
   const minPrice = Math.min(...data.map((d) => d.price));
   const priceMargin = (maxPrice - minPrice) * 1.5;
@@ -82,8 +111,8 @@ function ChartContent({
             data={data}
             margin={{
               top: 20,
-              right: window.innerWidth < 768 ? 10 : 20,
-              left: window.innerWidth < 768 ? 10 : 20,
+              right: windowWidth < 768 ? 10 : 20,
+              left: windowWidth < 768 ? 10 : 20,
               bottom: 5,
             }}
           >
@@ -121,7 +150,7 @@ function ChartContent({
               axisLine={{ stroke: "#E5E7EB" }}
               tick={{
                 fill: "#6B7280",
-                fontSize: window.innerWidth < 768 ? 10 : 12,
+                fontSize: windowWidth < 768 ? 10 : 12,
               }}
               interval={Math.floor(data.length / getTickCount())}
             />
@@ -129,11 +158,11 @@ function ChartContent({
               yAxisId="price"
               orientation="left"
               domain={[minPrice - priceMargin * 0.1, maxPrice]}
-              width={window.innerWidth < 768 ? 40 : 50}
+              width={windowWidth < 768 ? 40 : 50}
               axisLine={{ stroke: "#E5E7EB" }}
               tick={{
                 fill: "#6B7280",
-                fontSize: window.innerWidth < 768 ? 10 : 12,
+                fontSize: windowWidth < 768 ? 10 : 12,
               }}
               tickFormatter={(value) => formatFloatingNumber(value)}
             />
@@ -141,11 +170,11 @@ function ChartContent({
               yAxisId="secondary"
               orientation="right"
               domain={[0, "auto"]}
-              width={window.innerWidth < 768 ? 40 : 50}
+              width={windowWidth < 768 ? 40 : 50}
               axisLine={{ stroke: "#E5E7EB" }}
               tick={{
                 fill: "#6B7280",
-                fontSize: window.innerWidth < 768 ? 10 : 12,
+                fontSize: windowWidth < 768 ? 10 : 12,
               }}
             />
 
@@ -389,14 +418,16 @@ export default function TimeSeriesChartWithPaywall({
       </CardHeader>
 
       <div className="relative">
-        <ChartContent
-          data={data}
-          showPrice={showPrice}
-          showPopularity={showPopularity}
-          timeframe={timeframe}
-          startingPrice={startingPrice}
-          isPriceUp={isPriceUp}
-        />
+        <ClientOnly>
+          <ChartContent
+            data={data}
+            showPrice={showPrice}
+            showPopularity={showPopularity}
+            timeframe={timeframe}
+            startingPrice={startingPrice}
+            isPriceUp={isPriceUp}
+          />
+        </ClientOnly>
         {!paid && <PaywallOverlay />}
       </div>
     </Card>

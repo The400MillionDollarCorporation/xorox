@@ -4,41 +4,51 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-interface TrendingCoin {
-  uri: string;
-  symbol: string;
-  name: string;
-  trading_volume_24h: number;
-  tiktok_views_24h: number;
-  correlation_score: number;
-  price_change_24h: number;
-  total_mentions: number;
-  market_cap?: number;
-  last_updated: string;
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TrendingUp, TrendingDown, Activity, Target, Zap } from 'lucide-react';
+import { realTimeService } from '@/lib/real-time-service';
 
 interface TrendingCoinsData {
-  coins: TrendingCoin[];
+  coins: any[];
   total: number;
   sortBy: string;
   limit: number;
 }
 
 export default function TrendingCoinsAnalytics() {
-  const [data, setData] = useState<TrendingCoinsData | null>(null);
+  const [data, setData] = useState<TrendingCoinsData>({ coins: [], total: 0, sortBy: 'correlation', limit: 20 });
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<string>('correlation');
-  const [limit, setLimit] = useState<number>(20);
+  const [sortBy, setSortBy] = useState('correlation');
+  const [limit, setLimit] = useState(20);
   const [activeTab, setActiveTab] = useState<string>('overview');
+  const [lastUpdated, setLastUpdated] = useState<string>('--');
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
     fetchTrendingCoins();
-    const interval = setInterval(fetchTrendingCoins, 60000); // Refresh every minute
-    return () => clearInterval(interval);
-  }, [sortBy, limit]);
+    
+    // Subscribe to real-time trending updates
+    const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
+      // Update data when new trending coin data arrives
+      fetchTrendingCoins();
+      // Update time on client side only
+      setLastUpdated(new Date().toLocaleTimeString());
+    });
+
+    // Cleanup subscription
+    return () => {
+      unsubscribeTrending();
+    };
+  }, [isClient, sortBy, limit]);
 
   const fetchTrendingCoins = async () => {
     try {
@@ -47,6 +57,8 @@ export default function TrendingCoinsAnalytics() {
       if (response.ok) {
         const result = await response.json();
         setData(result);
+        // Update time on client side only
+        setLastUpdated(new Date().toLocaleTimeString());
       }
     } catch (error) {
       console.error('Error fetching trending coins:', error);
@@ -97,7 +109,7 @@ export default function TrendingCoinsAnalytics() {
     return 'destructive';
   };
 
-  if (isLoading) {
+  if (isLoading || !isClient) {
     return (
       <Card>
         <CardHeader>
@@ -121,54 +133,44 @@ export default function TrendingCoinsAnalytics() {
     );
   }
 
-  if (!data || !data.coins.length) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Trending Coins Analytics</CardTitle>
-          <CardDescription>No trending coins data available</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={fetchTrendingCoins} variant="outline">
-            Refresh Data
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle>🚀 Trending Coins Analytics</CardTitle>
+            <CardTitle>Trending Coins Analytics</CardTitle>
             <CardDescription>
-              Top {data.limit} trending coins with 24h trading volume, TikTok views, and correlation metrics
+              Real-time analysis of trending memecoins with live updates
             </CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-4">
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="correlation">Correlation</SelectItem>
-                <SelectItem value="volume">Trading Volume</SelectItem>
-                <SelectItem value="views">TikTok Views</SelectItem>
+                <SelectItem value="volume">Volume</SelectItem>
+                <SelectItem value="views">Views</SelectItem>
+                <SelectItem value="mentions">Mentions</SelectItem>
               </SelectContent>
             </Select>
             <Select value={limit.toString()} onValueChange={(value) => setLimit(parseInt(value))}>
-              <SelectTrigger className="w-20">
+              <SelectTrigger className="w-24">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="10">10</SelectItem>
                 <SelectItem value="20">20</SelectItem>
                 <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>Showing {data.coins.length} of {data.total} coins</span>
+          <span>Last updated: {lastUpdated}</span>
         </div>
       </CardHeader>
       <CardContent>
@@ -176,47 +178,36 @@ export default function TrendingCoinsAnalytics() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="correlation">Correlation</TabsTrigger>
-            <TabsTrigger value="volume">Volume</TabsTrigger>
+            <TabsTrigger value="social">Social</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4">
               {data.coins.slice(0, 10).map((coin, index) => (
-                <div key={coin.uri} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center space-x-4">
-                    <Badge variant="outline" className="text-sm">
-                      #{index + 1}
-                    </Badge>
+                <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{coin.symbol}</h3>
-                        <Badge variant={getCorrelationBadgeVariant(coin.correlation_score)}>
-                          {formatCorrelation(coin.correlation_score)}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{coin.name}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-6 text-sm">
-                    <div className="text-center">
-                      <p className="text-muted-foreground">24h Volume</p>
-                      <p className="font-semibold">{formatCurrency(coin.trading_volume_24h)}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-muted-foreground">TikTok Views</p>
-                      <p className="font-semibold">{formatViews(coin.tiktok_views_24h)}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-muted-foreground">Price Change</p>
-                      <p className={`font-semibold ${getPriceChangeColor(coin.price_change_24h)}`}>
-                        {coin.price_change_24h > 0 ? '+' : ''}{coin.price_change_24h.toFixed(2)}%
+                      <h3 className="font-semibold">{coin.symbol}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Volume: {formatCurrency(coin.trading_volume_24h)}
                       </p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-muted-foreground">Mentions</p>
-                      <p className="font-semibold">{coin.total_mentions}</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-sm font-medium">Correlation</p>
+                      <p className={`text-lg font-bold ${getCorrelationColor(coin.correlation_score)}`}>
+                        {formatCorrelation(coin.correlation_score)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">Views</p>
+                      <p className="text-lg font-bold text-blue-600">
+                        {formatViews(coin.tiktok_views_24h)}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -224,37 +215,33 @@ export default function TrendingCoinsAnalytics() {
             </div>
           </TabsContent>
 
-          {/* Correlation Tab */}
           <TabsContent value="correlation" className="space-y-4">
             <div className="grid gap-4">
               {data.coins
-                .filter(coin => coin.correlation_score > 0.5)
                 .sort((a, b) => b.correlation_score - a.correlation_score)
+                .slice(0, 10)
                 .map((coin, index) => (
-                  <div key={coin.uri} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <Badge variant="outline">#{index + 1}</Badge>
-                        <div>
-                          <h3 className="font-semibold">{coin.symbol}</h3>
-                          <p className="text-sm text-muted-foreground">{coin.name}</p>
-                        </div>
+                  <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
+                        {index + 1}
                       </div>
-                      <Badge variant={getCorrelationBadgeVariant(coin.correlation_score)} className="text-lg">
-                        {formatCorrelation(coin.correlation_score)}
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-muted-foreground">Volume/Views Ratio</p>
-                        <p className="font-semibold">
-                          {coin.tiktok_views_24h > 0 ? (coin.trading_volume_24h / coin.tiktok_views_24h).toFixed(4) : 'N/A'}
+                        <h3 className="font-semibold">{coin.symbol}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Volume: {formatCurrency(coin.trading_volume_24h)}
                         </p>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">Social Activity</p>
-                        <p className="font-semibold">{coin.total_mentions} mentions</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge variant={getCorrelationBadgeVariant(coin.correlation_score)}>
+                        {formatCorrelation(coin.correlation_score)}
+                      </Badge>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Views</p>
+                        <p className="text-lg font-bold text-blue-600">
+                          {formatViews(coin.tiktok_views_24h)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -262,46 +249,35 @@ export default function TrendingCoinsAnalytics() {
             </div>
           </TabsContent>
 
-          {/* Volume Tab */}
-          <TabsContent value="volume" className="space-y-4">
+          <TabsContent value="social" className="space-y-4">
             <div className="grid gap-4">
               {data.coins
-                .sort((a, b) => b.trading_volume_24h - a.trading_volume_24h)
+                .sort((a, b) => b.tiktok_views_24h - a.tiktok_views_24h)
+                .slice(0, 10)
                 .map((coin, index) => (
-                  <div key={coin.uri} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <Badge variant="outline">#{index + 1}</Badge>
-                        <div>
-                          <h3 className="font-semibold">{coin.symbol}</h3>
-                          <p className="text-sm text-muted-foreground">{coin.name}</p>
-                        </div>
+                  <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
+                        {index + 1}
                       </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-green-600">
-                          {formatCurrency(coin.trading_volume_24h)}
+                      <div>
+                        <h3 className="font-semibold">{coin.symbol}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Correlation: {formatCorrelation(coin.correlation_score)}
                         </p>
-                        <p className="text-sm text-muted-foreground">24h Volume</p>
                       </div>
                     </div>
-                    
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Price Change</p>
-                        <p className={`font-semibold ${getPriceChangeColor(coin.price_change_24h)}`}>
-                          {coin.price_change_24h > 0 ? '+' : ''}{coin.price_change_24h.toFixed(2)}%
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Views</p>
+                        <p className="text-lg font-bold text-blue-600">
+                          {formatViews(coin.tiktok_views_24h)}
                         </p>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">Correlation</p>
-                        <p className={`font-semibold ${getCorrelationColor(coin.correlation_score)}`}>
-                          {formatCorrelation(coin.correlation_score)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Market Cap</p>
-                        <p className="font-semibold">
-                          {coin.market_cap ? formatCurrency(coin.market_cap) : 'N/A'}
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Mentions</p>
+                        <p className="text-lg font-bold text-purple-600">
+                          {coin.total_mentions || 0}
                         </p>
                       </div>
                     </div>
@@ -310,13 +286,6 @@ export default function TrendingCoinsAnalytics() {
             </div>
           </TabsContent>
         </Tabs>
-
-        <div className="mt-6 pt-4 border-t">
-          <div className="flex justify-between items-center text-sm text-muted-foreground">
-            <span>Total coins analyzed: {data.total}</span>
-            <span>Last updated: {new Date().toLocaleTimeString()}</span>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );

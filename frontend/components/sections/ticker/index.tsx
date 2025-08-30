@@ -13,9 +13,18 @@ export default function Ticker({ params }: { params: { id: string } }) {
   const { setToken, tokens } = useEnvironmentStore((store) => store);
   const [imageFetched, setImageFetched] = useState(false);
   const [isUpdatingPrice, setIsUpdatingPrice] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
 
   // First useEffect for fetching initial coin data
   useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
     const fetchCoinDataAndPrices = async () => {
       if (isUpdatingPrice) return; // Prevent concurrent updates
 
@@ -92,10 +101,13 @@ export default function Ticker({ params }: { params: { id: string } }) {
     };
 
     fetchCoinDataAndPrices();
-  }, [params.id]); // Remove setToken and tokens from dependencies
+  }, [isClient, params.id]); // Add isClient to dependencies
 
   // Second useEffect for fetching image
   useEffect(() => {
+    // Only fetch image after we're on the client side
+    if (!isClient) return;
+    
     const fetchImage = async () => {
       if (!coinData?.uri || imageFetched) return;
 
@@ -113,7 +125,6 @@ export default function Ticker({ params }: { params: { id: string } }) {
               }
             : null
         );
-
         setImageFetched(true);
       } catch (error) {
         console.error("Error fetching image:", error);
@@ -121,7 +132,7 @@ export default function Ticker({ params }: { params: { id: string } }) {
     };
 
     fetchImage();
-  }, [coinData?.uri, imageFetched]); // Only depend on uri and imageFetched
+  }, [isClient, coinData?.uri, imageFetched]); // Add isClient to dependencies
 
   if (coinData === null) {
     return (

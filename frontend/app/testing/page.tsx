@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createChart, Time } from "lightweight-charts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IChartApi } from "lightweight-charts";
 
 type TimeRange = "1H" | "12H" | "1D" | "7D" | "1M" | "1Y" | "ALL";
 
@@ -67,17 +68,24 @@ const generateCandleData = (timeRange: TimeRange) => {
   return data;
 };
 
-const MemeChart = () => {
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
-
+export default function TestingPage() {
   const [timeRange, setTimeRange] = React.useState<TimeRange>("1D");
+  const chartContainerRef = React.useRef<HTMLDivElement>(null);
+  const chartRef = React.useRef<IChartApi | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
   const [data, setData] = React.useState<ReturnType<typeof generateCandleData>>(
     []
   );
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only create chart after we're on the client side
+    if (!isClient || !chartContainerRef.current) return;
 
     const handleResize = () => {
       if (chartRef.current) {
@@ -146,7 +154,7 @@ const MemeChart = () => {
       window.removeEventListener("resize", handleResize);
       chart.remove();
     };
-  }, [timeRange]);
+  }, [timeRange, isClient]);
 
   return (
     <div className="w-full max-w-[1200px] mx-auto px-4">
@@ -178,5 +186,3 @@ const MemeChart = () => {
     </div>
   );
 };
-
-export default MemeChart;

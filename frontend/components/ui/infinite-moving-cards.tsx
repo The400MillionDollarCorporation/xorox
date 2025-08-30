@@ -18,10 +18,20 @@ export const InfiniteMovingCards = ({
 }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollerRef = React.useRef<HTMLUListElement>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    addAnimation();
+    // Mark that we're on the client side
+    setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    // Only add animation after we're on the client side
+    if (!isClient) return;
+
+    addAnimation();
+  }, [isClient]);
+
   const [start, setStart] = useState(false);
   function addAnimation() {
     if (containerRef.current && scrollerRef.current) {

@@ -34,9 +34,15 @@ export default function HeroTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [imagesFetched, setImagesFetched] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState(new Set());
+  const [isClient, setIsClient] = useState(false);
   const { setLeaderboard, leaderboard, paid } = useEnvironmentStore(
     (store) => store
   );
+
+  useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -53,6 +59,9 @@ export default function HeroTable() {
   };
 
   useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
     let isMounted = true;
 
     (async function () {
@@ -92,7 +101,7 @@ export default function HeroTable() {
     return () => {
       isMounted = false;
     };
-  }, [currentPage, setLeaderboard]);
+  }, [isClient, currentPage, setLeaderboard]);
 
   useEffect(() => {
     if (leaderboard.length > 0 && !imagesFetched) {

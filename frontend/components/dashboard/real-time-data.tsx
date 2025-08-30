@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { TrendingUp, TrendingDown, Users, Activity, Target, Zap } from 'lucide-react';
+import { realTimeService } from '@/lib/real-time-service';
 
 interface RealTimeData {
   tiktok: {
@@ -29,28 +30,87 @@ export default function RealTimeData() {
     telegram: { recentMessages: 0, activeChannels: 0, trendingKeywords: [] },
     patternAnalysis: { lastAnalysis: 'Never', correlations: 0, recommendations: 0 }
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [formattedLastAnalysis, setFormattedLastAnalysis] = useState<string>('Never');
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    fetchRealTimeData();
-    const interval = setInterval(fetchRealTimeData, 10000); // Refresh every 10 seconds
-    return () => clearInterval(interval);
+    // Mark that we're on the client side
+    setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
+    // Initial data fetch
+    fetchRealTimeData();
+    
+    // Subscribe to real-time updates
+    const unsubscribeTiktok = realTimeService.subscribe('tiktok_update', (newData) => {
+      setData(prev => ({
+        ...prev,
+        tiktok: {
+          ...prev.tiktok,
+          recentVideos: prev.tiktok.recentVideos + 1,
+          totalViews: prev.tiktok.totalViews + (newData.views || 0),
+          trendingTokens: [...new Set([...prev.tiktok.trendingTokens, ...(newData.mentions?.map((m: any) => m?.tokens?.symbol || 'Unknown') || [])])].slice(0, 5)
+        }
+      }));
+    });
+
+    const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
+      // Update trending coins data in real-time
+      console.log('New trending coin data:', newData);
+    });
+
+    // Cleanup subscriptions
+    return () => {
+      unsubscribeTiktok();
+      unsubscribeTrending();
+    };
+  }, [isClient]);
+
+  // Update formatted time whenever lastAnalysis changes
+  useEffect(() => {
+    if (data.patternAnalysis.lastAnalysis && data.patternAnalysis.lastAnalysis !== 'Never') {
+      const formatTimeAgo = (timestamp: string) => {
+        try {
+          const date = new Date(timestamp);
+          const now = new Date();
+          const diffMs = now.getTime() - date.getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMs / 3600000);
+          
+          if (diffMins < 60) return `${diffMins}m ago`;
+          if (diffHours < 24) return `${diffHours}h ago`;
+          return '1d+ ago';
+        } catch {
+          return timestamp;
+        }
+      };
+      
+      setFormattedLastAnalysis(formatTimeAgo(data.patternAnalysis.lastAnalysis));
+    } else {
+      setFormattedLastAnalysis('Never');
+    }
+  }, [data.patternAnalysis.lastAnalysis]);
 
   const fetchRealTimeData = async () => {
     try {
       // Fetch recent TikTok data
       const tiktokResponse = await fetch('/api/supabase/get-tiktoks?limit=5');
       if (tiktokResponse.ok) {
-        const tiktokData = await tiktokResponse.json();
+        const tiktokResponseData = await tiktokResponse.json();
+        const tiktokData = Array.isArray(tiktokResponseData.data) ? tiktokResponseData.data : [];
+        
         setData(prev => ({
           ...prev,
           tiktok: {
             recentVideos: tiktokData.length,
-            totalViews: tiktokData.reduce((sum: number, video: any) => sum + (video.views || 0), 0),
+            totalViews: tiktokData.reduce((sum: number, video: any) => sum + (video?.views || 0), 0),
             trendingTokens: tiktokData
-              .filter((video: any) => video.mentions && video.mentions.length > 0)
-              .flatMap((video: any) => video.mentions.map((m: any) => m.tokens?.symbol || 'Unknown'))
+              .filter((video: any) => video?.mentions && Array.isArray(video.mentions) && video.mentions.length > 0)
+              .flatMap((video: any) => video.mentions.map((m: any) => m?.tokens?.symbol || 'Unknown'))
               .slice(0, 5)
           }
         }));
@@ -63,9 +123,9 @@ export default function RealTimeData() {
         setData(prev => ({
           ...prev,
           telegram: {
-            recentMessages: telegramData.messages?.length || 0,
-            activeChannels: telegramData.channels?.length || 0,
-            trendingKeywords: telegramData.keywords?.slice(0, 5) || []
+            recentMessages: Array.isArray(telegramData.messages) ? telegramData.messages.length : 0,
+            activeChannels: Array.isArray(telegramData.channels) ? telegramData.channels.length : 0,
+            trendingKeywords: Array.isArray(telegramData.keywords) ? telegramData.keywords.slice(0, 5) : []
           }
         }));
       }
@@ -86,158 +146,129 @@ export default function RealTimeData() {
 
     } catch (error) {
       console.error('Error fetching real-time data:', error);
-    } finally {
-      setIsLoading(false);
+      // Set default values on error to prevent UI crashes
+      setData(prev => ({
+        ...prev,
+        tiktok: { recentVideos: 0, totalViews: 0, trendingTokens: [] },
+        telegram: { recentMessages: 0, activeChannels: 0, trendingKeywords: [] },
+        patternAnalysis: { lastAnalysis: 'Error', correlations: 0, recommendations: 0 }
+      }));
     }
   };
 
-  const formatTimeAgo = (timestamp: string) => {
-    if (timestamp === 'Never') return 'Never';
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return '1d+ ago';
-  };
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
-          <Card key={i}>
-            <CardHeader>
-              <div className="h-6 bg-muted rounded animate-pulse"></div>
-              <div className="h-4 bg-muted rounded animate-pulse"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="h-8 bg-muted rounded animate-pulse"></div>
-                <div className="h-4 bg-muted rounded animate-pulse"></div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* TikTok Real-time Data */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            📱 TikTok Live
-            <Badge variant="secondary">Live</Badge>
-          </CardTitle>
-          <CardDescription>Real-time TikTok scraping activity</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold">{data.tiktok.recentVideos}</p>
-              <p className="text-sm text-muted-foreground">Recent Videos</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{data.tiktok.totalViews.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">Total Views</p>
-            </div>
-          </div>
-          
-          {data.tiktok.trendingTokens.length > 0 && (
-            <div>
-              <p className="text-sm font-medium mb-2">Trending Tokens:</p>
-              <div className="flex flex-wrap gap-1">
-                {data.tiktok.trendingTokens.map((token, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {token}
-                  </Badge>
-                ))}
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-4">📊 Real-Time Data Overview</h2>
+        <p className="text-muted-foreground">
+          Live updates from TikTok, Telegram, and AI analysis - no refresh needed
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* TikTok Data */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              📱 TikTok Analytics
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Live video and engagement data
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Recent Videos</p>
+                <p className="text-2xl font-bold text-blue-600">{data.tiktok.recentVideos}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Total Views</p>
+                <p className="text-2xl font-bold text-green-600">{data.tiktok.totalViews.toLocaleString()}</p>
               </div>
             </div>
-          )}
-          
-          <Button onClick={fetchRealTimeData} variant="outline" size="sm" className="w-full">
-            🔄 Refresh
-          </Button>
-        </CardContent>
-      </Card>
+            
+            {data.tiktok.trendingTokens.length > 0 && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Trending Tokens</p>
+                <div className="flex flex-wrap gap-2">
+                  {data.tiktok.trendingTokens.map((token, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {token}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Telegram Real-time Data */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            📡 Telegram Live
-            <Badge variant="secondary">Live</Badge>
-          </CardTitle>
-          <CardDescription>Real-time Telegram scraping activity</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold">{data.telegram.recentMessages}</p>
-              <p className="text-sm text-muted-foreground">Recent Messages</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{data.telegram.activeChannels}</p>
-              <p className="text-sm text-muted-foreground">Active Channels</p>
-            </div>
-          </div>
-          
-          {data.telegram.trendingKeywords.length > 0 && (
-            <div>
-              <p className="text-sm font-medium mb-2">Trending Keywords:</p>
-              <div className="flex flex-wrap gap-1">
-                {data.telegram.trendingKeywords.map((keyword, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {keyword}
-                  </Badge>
-                ))}
+        {/* Telegram Data */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              📡 Telegram Analytics
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Channel and message monitoring
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Recent Messages</p>
+                <p className="text-2xl font-bold text-purple-600">{data.telegram.recentMessages}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Active Channels</p>
+                <p className="text-2xl font-bold text-indigo-600">{data.telegram.activeChannels}</p>
               </div>
             </div>
-          )}
-          
-          <Button onClick={fetchRealTimeData} variant="outline" size="sm" className="w-full">
-            🔄 Refresh
-          </Button>
-        </CardContent>
-      </Card>
+            
+            {data.telegram.trendingKeywords.length > 0 && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Trending Keywords</p>
+                <div className="flex flex-wrap gap-2">
+                  {data.telegram.trendingKeywords.map((keyword, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {keyword}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Pattern Analysis Real-time Data */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🧠 Analysis Live
-            <Badge variant="secondary">Live</Badge>
-          </CardTitle>
-          <CardDescription>Real-time pattern analysis activity</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold">{data.patternAnalysis.correlations}</p>
-              <p className="text-sm text-muted-foreground">Correlations</p>
+        {/* Pattern Analysis */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              🧠 AI Pattern Analysis
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Real-time insights and correlations
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Correlations</p>
+                <p className="text-2xl font-bold text-orange-600">{data.patternAnalysis.correlations}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Recommendations</p>
+                <p className="text-2xl font-bold text-red-600">{data.patternAnalysis.recommendations}</p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{data.patternAnalysis.recommendations}</p>
-              <p className="text-sm text-muted-foreground">Recommendations</p>
+            
+            <div>
+              <p className="text-sm text-muted-foreground">Last Analysis</p>
+              <p className="text-sm font-medium">{formattedLastAnalysis}</p>
             </div>
-          </div>
-          
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">Last Analysis</p>
-            <p className="font-medium">{formatTimeAgo(data.patternAnalysis.lastAnalysis)}</p>
-          </div>
-          
-          <Button onClick={fetchRealTimeData} variant="outline" size="sm" className="w-full">
-            🔄 Refresh
-          </Button>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

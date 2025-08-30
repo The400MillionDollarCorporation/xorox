@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { realTimeService } from '@/lib/real-time-service';
 
 interface SummaryMetrics {
   totalCoins: number;
@@ -28,13 +29,30 @@ interface SummaryMetrics {
 
 export default function TrendingCoinsSummary() {
   const [metrics, setMetrics] = useState<SummaryMetrics | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    fetchSummaryMetrics();
-    const interval = setInterval(fetchSummaryMetrics, 30000); // Refresh every 30 seconds
-    return () => clearInterval(interval);
+    // Mark that we're on the client side
+    setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
+    fetchSummaryMetrics();
+    
+    // Subscribe to real-time trending updates
+    const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
+      // Update metrics when new trending coin data arrives
+      fetchSummaryMetrics();
+    });
+
+    // Cleanup subscription
+    return () => {
+      unsubscribeTrending();
+    };
+  }, [isClient]);
 
   const fetchSummaryMetrics = async () => {
     try {
@@ -45,8 +63,6 @@ export default function TrendingCoinsSummary() {
       }
     } catch (error) {
       console.error('Error fetching summary metrics:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -124,28 +140,11 @@ export default function TrendingCoinsSummary() {
     return 'text-red-600';
   };
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <Card key={i}>
-            <CardHeader className="pb-2">
-              <div className="h-4 bg-muted rounded animate-pulse"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-8 bg-muted rounded animate-pulse"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (!metrics) {
+  if (!metrics || !isClient) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">No summary metrics available</p>
+          <p className="text-muted-foreground">Loading summary metrics...</p>
         </CardContent>
       </Card>
     );

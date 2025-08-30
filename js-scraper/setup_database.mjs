@@ -10,15 +10,15 @@ async function setupDatabase() {
     console.log('🗄️ Setting up Pattern Analysis Database Schema...');
     
     // Check if environment variables are set
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
       console.error('❌ Missing Supabase environment variables!');
-      console.log('Please set SUPABASE_URL and SUPABASE_ANON_KEY in your .env file');
+      console.log('Please set SUPABASE_URL and SUPABASE_KEY in your .env file');
       process.exit(1);
     }
     
     const supabase = createClient(
       process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY
+      process.env.SUPABASE_KEY
     );
     
     console.log('✅ Supabase client initialized');
