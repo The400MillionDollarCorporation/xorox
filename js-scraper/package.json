@@ -21,7 +21,8 @@
     "start-all": "node start_all_systems.mjs",
     "start-windows": "node start-windows.mjs",
     "scrape-windows": "node windows/index.mjs",
-    "fix-price-errors": "node fix-price-lookup-errors.mjs"
+    "fix-price-errors": "node fix-price-lookup-errors.mjs",
+    "add-token-columns": "node add-missing-token-columns.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

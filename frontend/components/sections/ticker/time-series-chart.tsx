@@ -250,6 +250,23 @@ export default function TimeSeriesChartWithPaywall({
 }: {
   tokenData: TokenData;
 }) {
+  // Add safety check for tokenData
+  if (!tokenData || !tokenData.symbol) {
+    return (
+      <Card className="w-full max-w-[100vw] overflow-hidden sen">
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Loading token data...</p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   // Lift all state to the parent component
   const [showPrice, setShowPrice] = useState<boolean>(true);
   const [showPopularity, setShowPopularity] = useState<boolean>(true);
@@ -285,6 +302,22 @@ export default function TimeSeriesChartWithPaywall({
     },
     [tokenData.prices, tokenData.tiktoks, tokenData.views, timeframe]
   );
+
+  // Additional safety check for data processing
+  if (!data || data.length === 0) {
+    return (
+      <Card className="w-full max-w-[100vw] overflow-hidden sen">
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">No chart data available</p>
+            <p className="text-xs text-muted-foreground">
+              {tokenData.symbol ? `No price data for ${tokenData.symbol}` : 'Token data is incomplete'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   const startingPrice = useMemo(() => data[0]?.price || 0, [data]);
   const priceChange = useMemo(() => {
     if (data.length < 2) return "0.000";
@@ -301,16 +334,49 @@ export default function TimeSeriesChartWithPaywall({
   const handleTimeframeChange = (newTimeframe: TimeframeType) => {
     setTimeframe(newTimeframe);
   };
+  // Final safety check before rendering
+  if (!tokenData.symbol || !tokenData.prices || !Array.isArray(tokenData.prices) || tokenData.prices.length === 0) {
+    return (
+      <Card className="w-full max-w-[100vw] overflow-hidden sen">
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Incomplete token data</p>
+            <p className="text-xs text-muted-foreground">
+              Missing required information to display chart
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="w-full max-w-[100vw] overflow-hidden sen">
+    <ClientOnly fallback={
+      <Card className="w-full max-w-[100vw] overflow-hidden sen">
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Loading chart...</p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    }>
+      <Card className="w-full max-w-[100vw] overflow-hidden sen">
       <CardHeader className="space-y-4 p-4 sm:p-6">
         {/* Token Header */}
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center">
             <img
-              src={tokenData.image}
-              alt={`${tokenData.symbol} token icon`}
+              src={tokenData.image || '/placeholder-token.png'}
+              alt={`${tokenData.symbol || 'Token'} token icon`}
               className="rounded-full mr-2 w-6 h-6 sm:w-8 sm:h-8"
+              onError={(e) => {
+                e.currentTarget.src = '/placeholder-token.png';
+              }}
             />
             <CardTitle className="text-lg sm:text-xl font-bold text-[#F8D12E] nouns tracking-widest">
               {tokenData.symbol.toLocaleUpperCase()}
@@ -325,19 +391,21 @@ export default function TimeSeriesChartWithPaywall({
             </CardTitle>
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              className="hidden sm:flex hover:bg-transparent hover:border-[1px] hover:border-secondary transform transition hover:scale-105"
-              onClick={() =>
-                window.open(
-                  `https://solscan.io/token/${tokenData.address}`,
-                  "_blank"
-                )
-              }
-            >
-              {tokenData.address.slice(0, 4)}...{tokenData.address.slice(-4)}
-              <ArrowUpRightFromSquare className="w-3 h-3 ml-1" />
-            </Button>
+            {tokenData.address && (
+              <Button
+                variant="ghost"
+                className="hidden sm:flex hover:bg-transparent hover:border-[1px] hover:border-secondary transform transition hover:scale-105"
+                onClick={() =>
+                  window.open(
+                    `https://solscan.io/token/${tokenData.address}`,
+                    "_blank"
+                  )
+                }
+              >
+                {tokenData.address.slice(0, 4)}...{tokenData.address.slice(-4)}
+                <ArrowUpRightFromSquare className="w-3 h-3 ml-1" />
+              </Button>
+            )}
             <Select value={timeframe} onValueChange={handleTimeframeChange}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Timeframe" />
@@ -438,8 +506,9 @@ export default function TimeSeriesChartWithPaywall({
             isPriceUp={isPriceUp}
           />
         </ClientOnly>
-        {!paid && <PaywallOverlay />}
+        {!paid && <UnlockNow />}
       </div>
     </Card>
+    </ClientOnly>
   );
 }

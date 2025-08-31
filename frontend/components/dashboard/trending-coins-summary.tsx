@@ -1,15 +1,15 @@
 'use client';
 
+
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { realTimeService } from '@/lib/real-time-service';
+import { tiktokViewsService, TikTokViewsData } from '@/lib/tiktok-views-service';
 
 interface SummaryMetrics {
   totalCoins: number;
   totalViews24h: number;
-  totalSupply: number;
-  avgCorrelation: number;
   topPerformer: {
     symbol: string;
     correlation: number;
@@ -35,49 +35,158 @@ interface SummaryMetrics {
 export default function TrendingCoinsSummary() {
   const [metrics, setMetrics] = useState<SummaryMetrics | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [isLoadingViews, setIsLoadingViews] = useState(false);
+  const [lastViewsUpdate, setLastViewsUpdate] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<{
+    isConnected: boolean;
+    isConnecting: boolean;
+    reconnectAttempts: number;
+  } | null>(null);
 
   useEffect(() => {
     // Mark that we're on the client side
     setIsClient(true);
   }, []);
 
-  const fetchSummaryMetrics = useCallback(async () => {
+  const fetchTotalTikTokViews = useCallback(async () => {
     try {
-      const response = await fetch('/api/dashboard/trending-coins?limit=50');
+      setIsLoadingViews(true);
+      const response = await fetch('/api/dashboard/total-tiktok-views?timeRange=24h');
       if (response.ok) {
         const data = await response.json();
-        calculateSummaryMetrics(data.coins);
+        setLastViewsUpdate(new Date().toLocaleTimeString());
+        return data.totalViews;
       }
     } catch (error) {
-      console.error('Error fetching summary metrics:', error);
+      console.error('Error fetching total TikTok views:', error);
+    } finally {
+      setIsLoadingViews(false);
     }
+    return 0;
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    // Fetch both trending coins and total TikTok views
+    const [trendingResponse, totalViews] = await Promise.all([
+      fetch('/api/dashboard/trending-coins?limit=50'),
+      fetchTotalTikTokViews()
+    ]);
+
+    if (trendingResponse.ok) {
+      const trendingData = await trendingResponse.json();
+      calculateSummaryMetrics(trendingData.coins, totalViews);
+    }
+  }, [fetchTotalTikTokViews]);
+
+  const refreshTikTokViews = useCallback(async () => {
+    console.log('🔄 Manually refreshing TikTok views...');
+    setIsLoadingViews(true);
+    
+    try {
+      const totalViews = await fetchTotalTikTokViews();
+      if (metrics) {
+        setMetrics(prev => prev ? { ...prev, totalViews24h: totalViews } : null);
+      }
+      setLastViewsUpdate(new Date().toLocaleTimeString());
+    } catch (error) {
+      console.error('❌ Error refreshing TikTok views:', error);
+    } finally {
+      setIsLoadingViews(false);
+    }
+  }, [fetchTotalTikTokViews, metrics]);
+
+  const reconnectTikTokViews = useCallback(() => {
+    console.log('🔄 Manually reconnecting TikTok views service...');
+    tiktokViewsService.disconnect();
+    tiktokViewsService.connect('24h');
   }, []);
 
   useEffect(() => {
     // Only fetch data after we're on the client side
     if (!isClient) return;
     
-    fetchSummaryMetrics();
+    fetchData();
+    
+    // Subscribe to real-time TikTok views updates
+    const unsubscribeTikTokViews = tiktokViewsService.subscribe((data: TikTokViewsData) => {
+      console.log('🔄 Real-time TikTok views update received:', data);
+      
+      // Update the metrics immediately with new TikTok views data
+      setMetrics(prev => {
+        if (prev) {
+          setLastViewsUpdate(new Date().toLocaleTimeString());
+          return { ...prev, totalViews24h: data.totalViews };
+        }
+        return null;
+      });
+      
+      // Also update loading state
+      setIsLoadingViews(false);
+    });
     
     // Subscribe to real-time trending updates only if service is available
     if (realTimeService) {
       const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
         // Update metrics when new trending coin data arrives
-        fetchSummaryMetrics();
+        fetchData();
       });
 
       // Cleanup subscription
       return () => {
         unsubscribeTrending();
+        unsubscribeTikTokViews();
       };
     }
-  }, [isClient, fetchSummaryMetrics]);
 
-  const calculateSummaryMetrics = (coins: any[]) => {
+    // Cleanup TikTok views subscription
+    return () => {
+      unsubscribeTikTokViews();
+    };
+  }, [isClient, fetchData]);
+
+  // Monitor connection status
+  useEffect(() => {
+    if (!isClient) return;
+
+    const updateConnectionStatus = () => {
+      setConnectionStatus(tiktokViewsService.getConnectionStatus());
+    };
+
+    // Update status immediately
+    updateConnectionStatus();
+
+    // Update status every second
+    const statusInterval = setInterval(updateConnectionStatus, 1000);
+
+    return () => clearInterval(statusInterval);
+  }, [isClient]);
+
+  // Initialize connection status
+  useEffect(() => {
+    if (isClient && connectionStatus === null) {
+      setConnectionStatus({ isConnected: false, isConnecting: false, reconnectAttempts: 0 });
+    }
+  }, [isClient, connectionStatus]);
+
+  // Error boundary for real-time service failures
+  useEffect(() => {
+    if (isClient && connectionStatus && connectionStatus.reconnectAttempts >= 5) {
+      console.warn('⚠️ Real-time service failed to connect after multiple attempts');
+      // Fallback to polling mode
+      const fallbackInterval = setInterval(() => {
+        fetchTotalTikTokViews().then(totalViews => {
+          if (metrics) {
+            setMetrics(prev => prev ? { ...prev, totalViews24h: totalViews } : null);
+          }
+        });
+      }, 30000); // Poll every 30 seconds as fallback
+
+      return () => clearInterval(fallbackInterval);
+    }
+  }, [isClient, connectionStatus, metrics, fetchTotalTikTokViews]);
+
+  const calculateSummaryMetrics = (coins: any[], totalViews: number) => {
     if (!coins.length) return;
-
-    const totalViews24h = coins.reduce((sum, coin) => sum + coin.tiktok_views_24h, 0);
-    const avgCorrelation = coins.reduce((sum, coin) => sum + coin.correlation_score, 0) / coins.length;
 
     // Find top performer by correlation
     const topPerformer = coins.reduce((best, coin) => 
@@ -96,9 +205,7 @@ export default function TrendingCoinsSummary() {
 
     setMetrics({
       totalCoins: coins.length,
-      totalViews24h,
-      totalSupply: coins.reduce((sum, coin) => sum + (coin.total_supply || 0), 0),
-      avgCorrelation,
+      totalViews24h: totalViews,
       topPerformer: {
         symbol: topPerformer.symbol,
         correlation: topPerformer.correlation_score,
@@ -151,17 +258,7 @@ export default function TrendingCoinsSummary() {
     return `${(score * 100).toFixed(1)}%`;
   };
 
-  const formatSupply = (supply: number | undefined | null): string => {
-    if (supply === undefined || supply === null || isNaN(supply)) {
-      return '0';
-    }
-    if (supply >= 1000000) {
-      return `${(supply / 1000000).toFixed(2)}M`;
-    } else if (supply >= 1000) {
-      return `${(supply / 1000).toFixed(2)}K`;
-    }
-    return supply.toString();
-  };
+
 
   const getCorrelationColor = (score: number | undefined | null): string => {
     if (score === undefined || score === null || isNaN(score)) {
@@ -173,11 +270,67 @@ export default function TrendingCoinsSummary() {
     return 'text-red-600';
   };
 
-  if (!metrics || !isClient) {
+  if (!isClient) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">Loading summary metrics...</p>
+          <p className="text-muted-foreground">Initializing...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Loading summary metrics...</p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Safety check to ensure all required metrics are available
+  if (!metrics.totalCoins || !metrics.topPerformer || !metrics.volumeLeader || !metrics.socialLeader || !metrics.marketCapLeader) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Preparing dashboard data...</p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Loading trending coins and market data...
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Additional safety check for real-time service initialization
+  if (!connectionStatus) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Initializing real-time service...</p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -185,7 +338,7 @@ export default function TrendingCoinsSummary() {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         {/* Total Coins */}
         <Card>
           <CardHeader className="pb-2">
@@ -194,7 +347,7 @@ export default function TrendingCoinsSummary() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalCoins}</div>
+            <div className="text-2xl font-bold">{metrics?.totalCoins || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Active tokens in last 24h
             </p>
@@ -208,53 +361,77 @@ export default function TrendingCoinsSummary() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total TikTok Views
+              <div className="flex items-center gap-2 mt-1">
+                {!connectionStatus ? (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-gray-500">Initializing...</span>
+                  </div>
+                ) : connectionStatus.isConnected ? (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-600">Live</span>
+                  </div>
+                ) : connectionStatus.isConnecting ? (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-yellow-600">Connecting...</span>
+                  </div>
+                ) : connectionStatus.reconnectAttempts >= 5 ? (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-xs text-orange-600">Fallback Mode</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-xs text-red-600">Offline</span>
+                  </div>
+                )}
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {formatViews(metrics.totalViews24h)}
+              {isLoadingViews ? (
+                <span className="animate-pulse">...</span>
+              ) : (
+                formatViews(metrics?.totalViews24h || 0)
+              )}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Combined social reach
+              {lastViewsUpdate && (
+                <span className="block text-xs text-blue-500">
+                  Updated: {lastViewsUpdate}
+                </span>
+              )}
+              {connectionStatus?.reconnectAttempts && connectionStatus.reconnectAttempts > 0 && (
+                <span className="block text-xs text-orange-500">
+                  Reconnect attempts: {connectionStatus.reconnectAttempts}
+                </span>
+              )}
+              {connectionStatus?.reconnectAttempts && connectionStatus.reconnectAttempts >= 5 && (
+                <span className="block text-xs text-orange-600">
+                  Using fallback polling mode
+                </span>
+              )}
+              <button 
+                onClick={refreshTikTokViews}
+                className="block text-xs text-blue-600 hover:text-blue-800 underline mt-1"
+                disabled={isLoadingViews}
+              >
+                {isLoadingViews ? 'Refreshing...' : 'Refresh manually'}
+              </button>
             </p>
           </CardContent>
         </Card>
 
-        {/* Average Correlation */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg Correlation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${getCorrelationColor(metrics.avgCorrelation)}`}>
-              {formatCorrelation(metrics.avgCorrelation)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Volume ↔ Social activity
-            </p>
-          </CardContent>
-        </Card>
 
 
 
-        {/* Total Supply */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Supply
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {formatSupply(metrics.totalSupply)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Combined token supply
-            </p>
-          </CardContent>
-        </Card>
+
+
       </div>
 
       {/* Performance Leaders */}
@@ -361,7 +538,7 @@ export default function TrendingCoinsSummary() {
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Supply: {formatSupply(metrics.marketCapLeader.supply)}
+                Supply: {metrics.marketCapLeader.supply?.toLocaleString() || '0'}
               </p>
             </CardContent>
           </Card>

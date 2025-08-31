@@ -13,6 +13,9 @@ interface TrendingCoin {
   price_change_24h: number;
   total_mentions: number;
   market_cap?: number;
+  total_supply?: number;
+  address?: string;
+  decimals?: number;
   last_updated: string;
 }
 
@@ -35,10 +38,12 @@ export async function GET(request: NextRequest) {
     const { data: tokens, error: tokensError } = await supabase
       .from('tokens')
       .select(`
+        id,
         uri,
         symbol,
         name,
         market_cap,
+        total_supply,
         last_updated
       `)
       .not('uri', 'is', null);
@@ -74,7 +79,7 @@ export async function GET(request: NextRequest) {
     const { data: tiktoks, error: tiktoksError } = await supabase
       .from('tiktoks')
       .select(`
-        mentions,
+        id,
         views,
         fetched_at
       `)
@@ -88,16 +93,37 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Fetch mentions data separately
+    const { data: mentions, error: mentionsError } = await supabase
+      .from('mentions')
+      .select(`
+        tiktok_id,
+        token_id,
+        count
+      `);
+
+    if (mentionsError) {
+      console.error('Error fetching mentions data:', mentionsError);
+      return NextResponse.json(
+        { error: 'Failed to fetch mentions data' },
+        { status: 500 }
+      );
+    }
+
     // Process and calculate metrics for each token
     const trendingCoins: TrendingCoin[] = tokens.map(token => {
       // Calculate 24-hour trading volume from price data
       const tokenPrices = prices.filter(p => p.token_uri === token.uri);
       const tradingVolume24h = calculateTradingVolume(tokenPrices);
       
-      // Calculate 24-hour TikTok views
-      const tokenTiktoks = tiktoks.filter(t => 
-        t.mentions && t.mentions.some((m: any) => m.tokens?.uri === token.uri)
-      );
+      // Calculate 24-hour TikTok views using mentions table
+      const tokenMentions = mentions.filter(m => {
+        // Find the token by URI to get its ID
+        return m.token_id && tokens.find(t => t.uri === token.uri)?.id === m.token_id;
+      });
+      
+      const tokenTiktokIds = tokenMentions.map(m => m.tiktok_id);
+      const tokenTiktoks = tiktoks.filter(t => tokenTiktokIds.includes(t.id));
       const tiktokViews24h = tokenTiktoks.reduce((sum, t) => sum + (t.views || 0), 0);
       
       // Calculate correlation score between volume and social activity
@@ -107,7 +133,7 @@ export async function GET(request: NextRequest) {
       const priceChange24h = calculatePriceChange(tokenPrices);
       
       // Count total mentions
-      const totalMentions = tokenTiktoks.length;
+      const totalMentions = tokenMentions.reduce((sum, m) => sum + (m.count || 1), 0);
 
       return {
         uri: token.uri,
@@ -119,6 +145,9 @@ export async function GET(request: NextRequest) {
         price_change_24h: priceChange24h,
         total_mentions: totalMentions,
         market_cap: token.market_cap,
+        total_supply: token.total_supply,
+        address: null, // Will be populated after database migration
+        decimals: 9, // Default for Solana tokens
         last_updated: token.last_updated || new Date().toISOString()
       };
     });
@@ -134,6 +163,9 @@ export async function GET(request: NextRequest) {
         break;
       case 'views':
         sortedCoins.sort((a, b) => b.tiktok_views_24h - a.tiktok_views_24h);
+        break;
+      case 'market_cap':
+        sortedCoins.sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
         break;
       default:
         sortedCoins.sort((a, b) => b.correlation_score - a.correlation_score);

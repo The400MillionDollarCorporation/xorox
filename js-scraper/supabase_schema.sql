@@ -11,6 +11,7 @@ CREATE TABLE tokens (
     mentions INTEGER DEFAULT 0,
     market_cap NUMERIC(20, 2) DEFAULT 0,
     total_supply NUMERIC(30, 0) DEFAULT 0,
+    decimals INTEGER DEFAULT 9,
     last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
