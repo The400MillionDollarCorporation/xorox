@@ -62,6 +62,13 @@ CREATE TABLE prices (
     is_latest BOOLEAN DEFAULT FALSE
 );
 
+-- Add index for token_uri lookups in prices table
+CREATE INDEX idx_prices_token_uri ON prices(token_uri);
+
+-- Add constraint to ensure token_uri references valid tokens
+ALTER TABLE prices ADD CONSTRAINT fk_prices_token_uri 
+    FOREIGN KEY (token_uri) REFERENCES tokens(uri) ON DELETE CASCADE;
+
 -- Create indexes for performance
 CREATE INDEX idx_mentions_tiktok_id ON mentions(tiktok_id);
 CREATE INDEX idx_mentions_token_id ON mentions(token_id);

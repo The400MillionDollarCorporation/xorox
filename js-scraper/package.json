@@ -20,7 +20,8 @@
     "ai-test": "node test_ai_tweets.mjs",
     "start-all": "node start_all_systems.mjs",
     "start-windows": "node start-windows.mjs",
-    "scrape-windows": "node windows/index.mjs"
+    "scrape-windows": "node windows/index.mjs",
+    "fix-price-errors": "node fix-price-lookup-errors.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
