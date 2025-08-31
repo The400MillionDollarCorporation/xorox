@@ -186,6 +186,12 @@ export const processTradeData = (
   views: number,
   timeframe: TimeframeType
 ): DataPoint[] => {
+  // Add null/undefined checking for trades parameter
+  if (!trades || !Array.isArray(trades) || trades.length === 0) {
+    console.warn('processTradeData: trades parameter is undefined, null, or empty array');
+    return [];
+  }
+
   const now = Date.now();
   const timeframeLimit = {
     "30m": 1000 * 60 * 30,
@@ -202,6 +208,12 @@ export const processTradeData = (
     .sort(
       (a, b) => new Date(a.trade_at).getTime() - new Date(b.trade_at).getTime()
     );
+
+  // Check if we have filtered trades before processing
+  if (filteredTrades.length === 0) {
+    console.warn('processTradeData: No trades found within the specified timeframe');
+    return [];
+  }
 
   const returnData = filteredTrades.map((trade, index) => {
     const tradeDate = new Date(trade.trade_at);

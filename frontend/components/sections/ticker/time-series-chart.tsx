@@ -75,17 +75,7 @@ function ChartContent({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Don't render chart until we're on the client side
-  if (!isClient) {
-    return (
-      <CardContent className="p-0 sm:p-6">
-        <div className="h-[300px] sm:h-[400px] w-full flex items-center justify-center">
-          <p className="text-muted-foreground">Loading chart...</p>
-        </div>
-      </CardContent>
-    );
-  }
-
+  // Calculate values that will be used in useMemo hooks
   const maxPrice = Math.max(...data.map((d) => d.price));
   const minPrice = Math.min(...data.map((d) => d.price));
   const priceMargin = (maxPrice - minPrice) * 1.5;
@@ -98,6 +88,17 @@ function ChartContent({
       Math.max(...data.map((d) => d.rawTimestamp)),
     ];
   }, [data]);
+
+  // Don't render chart until we're on the client side
+  if (!isClient) {
+    return (
+      <CardContent className="p-0 sm:p-6">
+        <div className="h-[300px] sm:h-[400px] w-full flex items-center justify-center">
+          <p className="text-muted-foreground">Loading chart...</p>
+        </div>
+      </CardContent>
+    );
+  }
 
   const getTickCount = (): number => {
     return 7;
@@ -256,25 +257,33 @@ export default function TimeSeriesChartWithPaywall({
   const [timeframe, setTimeframe] = useState<TimeframeType>("24h");
   const { paid } = useEnvironmentStore((store) => store);
   const data = useMemo(
-    () =>
-      processTradeData(
+    () => {
+      // Safety check: ensure prices data exists before processing
+      if (!tokenData.prices || !Array.isArray(tokenData.prices) || tokenData.prices.length === 0) {
+        console.warn('TimeSeriesChart: No prices data available for', tokenData.symbol);
+        return [];
+      }
+      
+      // Safety check for tiktoks data
+      const startMentions = tokenData.tiktoks && Array.isArray(tokenData.tiktoks) && tokenData.tiktoks.length > 1
+        ? tokenData.tiktoks[0].count || 0
+        : 0;
+      
+      const endMentions = tokenData.tiktoks && Array.isArray(tokenData.tiktoks) && tokenData.tiktoks.length > 2
+        ? tokenData.tiktoks[tokenData.tiktoks.length - 1].count || 0
+        : tokenData.tiktoks && Array.isArray(tokenData.tiktoks) && tokenData.tiktoks.length > 1
+        ? tokenData.tiktoks[0].count || 0
+        : 0;
+      
+      return processTradeData(
         tokenData.prices,
-        tokenData.tiktoks
-          ? tokenData.tiktoks.length > 1
-            ? tokenData.tiktoks[0].count
-            : 0
-          : 0,
-        tokenData.tiktoks
-          ? tokenData.tiktoks.length > 2
-            ? tokenData.tiktoks[tokenData.tiktoks.length - 1].count
-            : tokenData.tiktoks.length > 1
-            ? tokenData.tiktoks[0].count
-            : 0
-          : 0,
-        tokenData.views,
+        startMentions,
+        endMentions,
+        tokenData.views || 0,
         timeframe
-      ),
-    [tokenData.prices, timeframe]
+      );
+    },
+    [tokenData.prices, tokenData.tiktoks, tokenData.views, timeframe]
   );
   const startingPrice = useMemo(() => data[0]?.price || 0, [data]);
   const priceChange = useMemo(() => {
@@ -300,6 +309,7 @@ export default function TimeSeriesChartWithPaywall({
           <div className="flex items-center">
             <img
               src={tokenData.image}
+              alt={`${tokenData.symbol} token icon`}
               className="rounded-full mr-2 w-6 h-6 sm:w-8 sm:h-8"
             />
             <CardTitle className="text-lg sm:text-xl font-bold text-[#F8D12E] nouns tracking-widest">

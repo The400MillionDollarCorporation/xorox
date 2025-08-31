@@ -6,7 +6,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useEnvironmentStore } from "@/components/context";
-import { CommandMenu } from "./command-menu";
+import CommandMenu from "./command-menu";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { shortenAddress } from "@/lib/utils";

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { TokenData } from "@/lib/types";
+import { TokenData, Tweet } from "@/lib/types";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 

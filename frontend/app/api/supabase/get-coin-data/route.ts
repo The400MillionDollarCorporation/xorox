@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       name: data.name,
       symbol: data.symbol,
       uri: data.uri,
-      image: "" as any,
+      image: "",
       created_at: toZonedTime(
         new Date(data.created_at),
         timeZone
@@ -80,10 +80,10 @@ export async function GET(request: NextRequest) {
         data.prices.length == 0
           ? null
           : data.prices?.[data.prices.length - 1]?.price_usd * 1000000000,
-      tweets: data.tweets,
-      mentions: data.mentions.length,
-      tiktoks: data.mentions,
-      views: data.views,
+      tweets: data.tweets || [],
+      mentions: data.mentions?.length || 0,
+      tiktoks: data.mentions || [],
+      views: data.views || 0,
     };
 
     return NextResponse.json(tokenData);

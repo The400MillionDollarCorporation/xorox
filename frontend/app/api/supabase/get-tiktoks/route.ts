@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       limit: parseInt(request.nextUrl.searchParams.get("limit") || "50"),
       offset: parseInt(request.nextUrl.searchParams.get("offset") || "0"),
       error: "Internal server error",
-      details: error.message
+      details: error instanceof Error ? error.message : "Unknown error occurred"
     }, { status: 500 });
   }
 }

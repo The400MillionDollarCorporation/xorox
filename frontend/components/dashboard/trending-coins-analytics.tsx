@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,27 +30,7 @@ export default function TrendingCoinsAnalytics() {
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    // Only fetch data after we're on the client side
-    if (!isClient) return;
-    
-    fetchTrendingCoins();
-    
-    // Subscribe to real-time trending updates
-    const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
-      // Update data when new trending coin data arrives
-      fetchTrendingCoins();
-      // Update time on client side only
-      setLastUpdated(new Date().toLocaleTimeString());
-    });
-
-    // Cleanup subscription
-    return () => {
-      unsubscribeTrending();
-    };
-  }, [isClient, sortBy, limit]);
-
-  const fetchTrendingCoins = async () => {
+  const fetchTrendingCoins = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/dashboard/trending-coins?sortBy=${sortBy}&limit=${limit}`);
@@ -65,7 +45,29 @@ export default function TrendingCoinsAnalytics() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [sortBy, limit]);
+
+  useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
+    fetchTrendingCoins();
+    
+    // Subscribe to real-time trending updates only if service is available
+    if (realTimeService) {
+      const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
+        // Update data when new trending coin data arrives
+        fetchTrendingCoins();
+        // Update time on client side only
+        setLastUpdated(new Date().toLocaleTimeString());
+      });
+
+      // Cleanup subscription
+      return () => {
+        unsubscribeTrending();
+      };
+    }
+  }, [isClient, sortBy, limit, fetchTrendingCoins]);
 
   const formatCurrency = (amount: number): string => {
     if (amount >= 1000000) {
@@ -133,6 +135,17 @@ export default function TrendingCoinsAnalytics() {
     );
   }
 
+  const formatSupply = (supply: number): string => {
+    if (supply >= 1000000000) {
+      return `${(supply / 1000000000).toFixed(2)}B`;
+    } else if (supply >= 1000000) {
+      return `${(supply / 1000000).toFixed(2)}M`;
+    } else if (supply >= 1000) {
+      return `${(supply / 1000).toFixed(2)}K`;
+    }
+    return supply.toString();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -153,6 +166,7 @@ export default function TrendingCoinsAnalytics() {
                 <SelectItem value="volume">Volume</SelectItem>
                 <SelectItem value="views">Views</SelectItem>
                 <SelectItem value="mentions">Mentions</SelectItem>
+                <SelectItem value="market_cap">Market Cap</SelectItem>
               </SelectContent>
             </Select>
             <Select value={limit.toString()} onValueChange={(value) => setLimit(parseInt(value))}>
@@ -175,10 +189,11 @@ export default function TrendingCoinsAnalytics() {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="correlation">Correlation</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
+            <TabsTrigger value="market">Market Data</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -190,10 +205,15 @@ export default function TrendingCoinsAnalytics() {
                       {index + 1}
                     </div>
                     <div>
-                      <h3 className="font-semibold">{coin.symbol}</h3>
+                        <h3 className="font-semibold">{coin.symbol}</h3>
                       <p className="text-sm text-muted-foreground">
                         Volume: {formatCurrency(coin.trading_volume_24h)}
                       </p>
+                      {coin.market_cap && (
+                        <p className="text-xs text-muted-foreground">
+                          Market Cap: {formatCurrency(coin.market_cap)}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -226,11 +246,16 @@ export default function TrendingCoinsAnalytics() {
                       <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
                         {index + 1}
                       </div>
-                      <div>
-                        <h3 className="font-semibold">{coin.symbol}</h3>
+                        <div>
+                          <h3 className="font-semibold">{coin.symbol}</h3>
                         <p className="text-sm text-muted-foreground">
                           Volume: {formatCurrency(coin.trading_volume_24h)}
                         </p>
+                        {coin.market_cap && (
+                          <p className="text-xs text-muted-foreground">
+                            Market Cap: {formatCurrency(coin.market_cap)}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -260,13 +285,18 @@ export default function TrendingCoinsAnalytics() {
                       <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
                         {index + 1}
                       </div>
-                      <div>
-                        <h3 className="font-semibold">{coin.symbol}</h3>
+                        <div>
+                          <h3 className="font-semibold">{coin.symbol}</h3>
                         <p className="text-sm text-muted-foreground">
                           Correlation: {formatCorrelation(coin.correlation_score)}
                         </p>
+                        {coin.market_cap && (
+                          <p className="text-xs text-muted-foreground">
+                            Market Cap: {formatCurrency(coin.market_cap)}
+                          </p>
+                        )}
                       </div>
-                    </div>
+                        </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         <p className="text-sm font-medium">Views</p>
@@ -278,6 +308,59 @@ export default function TrendingCoinsAnalytics() {
                         <p className="text-sm font-medium">Mentions</p>
                         <p className="text-lg font-bold text-purple-600">
                           {coin.total_mentions || 0}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="market" className="space-y-4">
+            <div className="grid gap-4">
+              {data.coins
+                .filter(coin => coin.market_cap || coin.total_supply)
+                .sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0))
+                .slice(0, 10)
+                .map((coin, index) => (
+                  <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{coin.symbol}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {coin.name || 'Unknown Token'}
+                        </p>
+                        {coin.address && (
+                          <p className="text-xs text-muted-foreground font-mono">
+                            {coin.address.slice(0, 8)}...{coin.address.slice(-8)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {coin.market_cap && (
+                        <div className="text-right">
+                          <p className="text-sm font-medium">Market Cap</p>
+                          <p className="text-lg font-bold text-purple-600">
+                            {formatCurrency(coin.market_cap)}
+                          </p>
+                        </div>
+                      )}
+                      {coin.total_supply && (
+                        <div className="text-right">
+                          <p className="text-sm font-medium">Total Supply</p>
+                          <p className="text-lg font-bold text-orange-600">
+                            {formatSupply(coin.total_supply)}
+                          </p>
+                        </div>
+                      )}
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Last Updated</p>
+                        <p className="text-xs text-muted-foreground">
+                          {coin.last_updated ? new Date(coin.last_updated).toLocaleDateString() : 'Unknown'}
                         </p>
                       </div>
                     </div>

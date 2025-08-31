@@ -27,9 +27,32 @@ type TokenData = {
   latest_market_cap: number | null;
   views: number;
   mentions: number;
-  tweets: any[];
+  tweets: Tweet[];
   tiktoks: any[];
+  // New market data fields
+  market_cap?: number;
+  total_supply?: number;
+  last_updated?: string;
 };
+
+// New interface for trending coins with enhanced market data
+interface TrendingCoin {
+  uri: string;
+  symbol: string;
+  name: string;
+  trading_volume_24h: number;
+  tiktok_views_24h: number;
+  correlation_score: number;
+  price_change_24h: number;
+  total_mentions: number;
+  // Enhanced market data fields
+  market_cap?: number;
+  total_supply?: number;
+  last_updated: string;
+  // Additional metadata
+  address?: string;
+  decimals?: number;
+}
 
 type LeaderboardData = {
   id: number;
@@ -43,6 +66,9 @@ type LeaderboardData = {
   latest_price_sol: number | null;
   views: number;
   mentions: number;
+  // New market data fields
+  total_supply?: number;
+  last_updated?: string;
 };
 type SortKey = keyof TokenData;
 type SortDirection = "asc" | "desc";
@@ -79,6 +105,14 @@ interface DataPoint {
 }
 
 type TimeframeType = "30m" | "1h" | "3h" | "24h" | "7d";
+
+type Tweet = {
+  id: number;
+  created_at: string;
+  tweet: string;
+  tweet_id: string;
+};
+
 export type {
   TokenData,
   Price,
@@ -91,4 +125,5 @@ export type {
   TradeData,
   DataPoint,
   TimeframeType,
+  Tweet,
 };

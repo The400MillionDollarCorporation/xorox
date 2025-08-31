@@ -101,7 +101,7 @@ export default function Ticker({ params }: { params: { id: string } }) {
     };
 
     fetchCoinDataAndPrices();
-  }, [isClient, params.id]); // Add isClient to dependencies
+  }, [isClient, params.id, coinData, setToken, tokens, isUpdatingPrice]); // Add missing dependencies
 
   // Second useEffect for fetching image
   useEffect(() => {

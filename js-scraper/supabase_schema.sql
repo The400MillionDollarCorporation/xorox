@@ -8,7 +8,10 @@ CREATE TABLE tokens (
     created_at TIMESTAMP WITH TIME ZONE,
     create_tx TEXT,
     views BIGINT DEFAULT 0,
-    mentions INTEGER DEFAULT 0
+    mentions INTEGER DEFAULT 0,
+    market_cap NUMERIC(20, 2) DEFAULT 0,
+    total_supply NUMERIC(30, 0) DEFAULT 0,
+    last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create tiktoks table
@@ -36,13 +39,26 @@ CREATE TABLE mentions (
     message_id BIGINT -- For Telegram messages
 );
 
+-- Create tweets table
+CREATE TABLE tweets (
+    id SERIAL PRIMARY KEY,
+    token_id INTEGER REFERENCES tokens(id),
+    tweet TEXT NOT NULL,
+    tweet_id TEXT UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    tweet_type TEXT DEFAULT 'analysis', -- 'analysis', 'alert', 'discovery'
+    engagement_metrics JSONB DEFAULT '{}' -- likes, retweets, replies
+);
+
 -- Create prices table (if not already exists)
 CREATE TABLE prices (
     id SERIAL PRIMARY KEY,
     token_id INTEGER REFERENCES tokens(id),
+    token_uri TEXT, -- Add token_uri for direct reference
     price_usd NUMERIC(20, 10),
     price_sol NUMERIC(20, 10),
     trade_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Add timestamp for compatibility
     is_latest BOOLEAN DEFAULT FALSE
 );
 
@@ -52,6 +68,9 @@ CREATE INDEX idx_mentions_token_id ON mentions(token_id);
 CREATE INDEX idx_mentions_source ON mentions(source);
 CREATE INDEX idx_mentions_channel_id ON mentions(channel_id);
 CREATE INDEX idx_mentions_message_id ON mentions(message_id);
+CREATE INDEX idx_tweets_token_id ON tweets(token_id);
+CREATE INDEX idx_tweets_tweet_id ON tweets(tweet_id);
+CREATE INDEX idx_tweets_created_at ON tweets(created_at);
 CREATE INDEX idx_prices_token_id ON prices(token_id);
 CREATE INDEX idx_prices_is_latest ON prices(is_latest);
 CREATE INDEX idx_tokens_uri ON tokens(uri);
@@ -61,12 +80,14 @@ CREATE INDEX idx_tokens_symbol ON tokens(symbol);
 ALTER TABLE tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tiktoks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mentions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tweets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prices ENABLE ROW LEVEL SECURITY;
 
 -- Create a policy to allow insert and select operations
 CREATE POLICY "Allow all operations" ON tokens FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON tiktoks FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON mentions FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON tweets FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON prices FOR ALL USING (true);
 
 -- Create telegram_channels table

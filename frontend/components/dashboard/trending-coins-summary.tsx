@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { realTimeService } from '@/lib/real-time-service';
 
 interface SummaryMetrics {
   totalCoins: number;
-  totalVolume24h: number;
   totalViews24h: number;
+  totalSupply: number;
   avgCorrelation: number;
   topPerformer: {
     symbol: string;
@@ -25,6 +25,11 @@ interface SummaryMetrics {
     views: number;
     mentions: number;
   };
+  marketCapLeader: {
+    symbol: string;
+    marketCap: number;
+    supply: number;
+  };
 }
 
 export default function TrendingCoinsSummary() {
@@ -36,25 +41,7 @@ export default function TrendingCoinsSummary() {
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    // Only fetch data after we're on the client side
-    if (!isClient) return;
-    
-    fetchSummaryMetrics();
-    
-    // Subscribe to real-time trending updates
-    const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
-      // Update metrics when new trending coin data arrives
-      fetchSummaryMetrics();
-    });
-
-    // Cleanup subscription
-    return () => {
-      unsubscribeTrending();
-    };
-  }, [isClient]);
-
-  const fetchSummaryMetrics = async () => {
+  const fetchSummaryMetrics = useCallback(async () => {
     try {
       const response = await fetch('/api/dashboard/trending-coins?limit=50');
       if (response.ok) {
@@ -64,12 +51,31 @@ export default function TrendingCoinsSummary() {
     } catch (error) {
       console.error('Error fetching summary metrics:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Only fetch data after we're on the client side
+    if (!isClient) return;
+    
+    fetchSummaryMetrics();
+    
+    // Subscribe to real-time trending updates only if service is available
+    if (realTimeService) {
+      const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
+        // Update metrics when new trending coin data arrives
+        fetchSummaryMetrics();
+      });
+
+      // Cleanup subscription
+      return () => {
+        unsubscribeTrending();
+      };
+    }
+  }, [isClient, fetchSummaryMetrics]);
 
   const calculateSummaryMetrics = (coins: any[]) => {
     if (!coins.length) return;
 
-    const totalVolume24h = coins.reduce((sum, coin) => sum + coin.trading_volume_24h, 0);
     const totalViews24h = coins.reduce((sum, coin) => sum + coin.tiktok_views_24h, 0);
     const avgCorrelation = coins.reduce((sum, coin) => sum + coin.correlation_score, 0) / coins.length;
 
@@ -90,8 +96,8 @@ export default function TrendingCoinsSummary() {
 
     setMetrics({
       totalCoins: coins.length,
-      totalVolume24h,
       totalViews24h,
+      totalSupply: coins.reduce((sum, coin) => sum + (coin.total_supply || 0), 0),
       avgCorrelation,
       topPerformer: {
         symbol: topPerformer.symbol,
@@ -107,11 +113,17 @@ export default function TrendingCoinsSummary() {
         symbol: socialLeader.symbol,
         views: socialLeader.tiktok_views_24h,
         mentions: socialLeader.total_mentions
-      }
+      },
+      marketCapLeader: coins.reduce((best, coin) => 
+        (coin.market_cap || 0) > (best.market_cap || 0) ? coin : best
+      , { symbol: 'N/A', marketCap: 0, supply: 0 })
     });
   };
 
-  const formatCurrency = (amount: number): string => {
+  const formatCurrency = (amount: number | undefined | null): string => {
+    if (amount === undefined || amount === null || isNaN(amount)) {
+      return '$0.00';
+    }
     if (amount >= 1000000) {
       return `$${(amount / 1000000).toFixed(2)}M`;
     } else if (amount >= 1000) {
@@ -120,7 +132,10 @@ export default function TrendingCoinsSummary() {
     return `$${amount.toFixed(2)}`;
   };
 
-  const formatViews = (views: number): string => {
+  const formatViews = (views: number | undefined | null): string => {
+    if (views === undefined || views === null || isNaN(views)) {
+      return '0';
+    }
     if (views >= 1000000) {
       return `${(views / 1000000).toFixed(1)}M`;
     } else if (views >= 1000) {
@@ -129,11 +144,29 @@ export default function TrendingCoinsSummary() {
     return views.toString();
   };
 
-  const formatCorrelation = (score: number): string => {
+  const formatCorrelation = (score: number | undefined | null): string => {
+    if (score === undefined || score === null || isNaN(score)) {
+      return '0.0%';
+    }
     return `${(score * 100).toFixed(1)}%`;
   };
 
-  const getCorrelationColor = (score: number): string => {
+  const formatSupply = (supply: number | undefined | null): string => {
+    if (supply === undefined || supply === null || isNaN(supply)) {
+      return '0';
+    }
+    if (supply >= 1000000) {
+      return `${(supply / 1000000).toFixed(2)}M`;
+    } else if (supply >= 1000) {
+      return `${(supply / 1000).toFixed(2)}K`;
+    }
+    return supply.toString();
+  };
+
+  const getCorrelationColor = (score: number | undefined | null): string => {
+    if (score === undefined || score === null || isNaN(score)) {
+      return 'text-gray-500';
+    }
     if (score >= 0.8) return 'text-green-600';
     if (score >= 0.6) return 'text-yellow-600';
     if (score >= 0.4) return 'text-orange-600';
@@ -168,22 +201,7 @@ export default function TrendingCoinsSummary() {
           </CardContent>
         </Card>
 
-        {/* Total Volume */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total 24h Volume
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(metrics.totalVolume24h)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Combined trading volume
-            </p>
-          </CardContent>
-        </Card>
+
 
         {/* Total Views */}
         <Card>
@@ -218,84 +236,136 @@ export default function TrendingCoinsSummary() {
             </p>
           </CardContent>
         </Card>
+
+
+
+        {/* Total Supply */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Supply
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">
+              {formatSupply(metrics.totalSupply)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Combined token supply
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Performance Leaders */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
         {/* Top Performer */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              🏆 Top Performer
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-lg font-bold">{metrics.topPerformer.symbol}</div>
-                <div className={`text-sm ${getCorrelationColor(metrics.topPerformer.correlation)}`}>
-                  {formatCorrelation(metrics.topPerformer.correlation)} correlation
+        {metrics.topPerformer && metrics.topPerformer.symbol && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                🏆 Top Performer
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg font-bold">{metrics.topPerformer.symbol}</div>
+                  <div className={`text-sm ${getCorrelationColor(metrics.topPerformer.correlation)}`}>
+                    {formatCorrelation(metrics.topPerformer.correlation)} correlation
+                  </div>
                 </div>
+                <Badge variant="default" className="text-xs">
+                  Best Correlation
+                </Badge>
               </div>
-              <Badge variant="default" className="text-xs">
-                Best Correlation
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Volume: {formatCurrency(metrics.topPerformer.volume)}
-            </p>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-muted-foreground mt-2">
+                Volume: {formatCurrency(metrics.topPerformer.volume)}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Volume Leader */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              💰 Volume Leader
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-lg font-bold">{metrics.volumeLeader.symbol}</div>
-                <div className="text-sm text-green-600">
-                  {formatCurrency(metrics.volumeLeader.volume)}
+        {metrics.volumeLeader && metrics.volumeLeader.symbol && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                💰 Volume Leader
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg font-bold">{metrics.volumeLeader.symbol}</div>
+                  <div className="text-sm text-green-600">
+                    {formatCurrency(metrics.volumeLeader.volume)}
+                  </div>
                 </div>
+                <Badge variant="secondary" className="text-xs">
+                  Highest Volume
+                </Badge>
               </div>
-              <Badge variant="secondary" className="text-xs">
-                Highest Volume
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Views: {formatViews(metrics.volumeLeader.views)}
-            </p>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-muted-foreground mt-2">
+                Views: {formatViews(metrics.volumeLeader.views)}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Social Leader */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              📱 Social Leader
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-lg font-bold">{metrics.socialLeader.symbol}</div>
-                <div className="text-sm text-blue-600">
-                  {formatViews(metrics.socialLeader.views)} views
+        {metrics.socialLeader && metrics.socialLeader.symbol && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                📱 Social Leader
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg font-bold">{metrics.socialLeader.symbol}</div>
+                  <div className="text-sm text-blue-600">
+                    {formatViews(metrics.socialLeader.views)} views
+                  </div>
                 </div>
+                <Badge variant="outline" className="text-xs">
+                  Most Viral
+                </Badge>
               </div>
-              <Badge variant="outline" className="text-xs">
-                Most Viral
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Mentions: {metrics.socialLeader.mentions}
-            </p>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-muted-foreground mt-2">
+                Mentions: {metrics.socialLeader.mentions}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Market Cap Leader */}
+        {metrics.marketCapLeader && metrics.marketCapLeader.symbol !== 'N/A' && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                📊 Market Cap Leader
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg font-bold">{metrics.marketCapLeader.symbol}</div>
+                  <div className="text-sm text-purple-600">
+                    {formatCurrency(metrics.marketCapLeader.marketCap)}
+                  </div>
+                </div>
+                <Badge variant="destructive" className="text-xs">
+                  Highest Value
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Supply: {formatSupply(metrics.marketCapLeader.supply)}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );

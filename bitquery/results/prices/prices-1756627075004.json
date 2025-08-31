@@ -1,0 +1,23 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "message": "Cannot query field \"MarketCap\" on type \"Solana_DEXTrade_Fields_Trade_Buy_Currency\".",
+      "locations": [
+        {
+          "line": 28,
+          "column": 15
+        }
+      ]
+    },
+    {
+      "message": "Cannot query field \"TotalSupply\" on type \"Solana_DEXTrade_Fields_Trade_Buy_Currency\".",
+      "locations": [
+        {
+          "line": 29,
+          "column": 15
+        }
+      ]
+    }
+  ]
+}

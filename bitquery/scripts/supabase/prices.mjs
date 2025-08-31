@@ -48,6 +48,10 @@ export async function pushPrices(filePath, dataJson) {
         price_usd: priceData.Trade.Buy.PriceInUSD,
         created_at: sanitize(priceData.Block.Time),
         uri: priceData.Trade.Buy.Currency.Uri,
+        mint_address: priceData.Trade.Buy.Currency.MintAddress,
+        name: priceData.Trade.Buy.Currency.Name,
+        symbol: priceData.Trade.Buy.Currency.Symbol,
+        block_time: priceData.Block.Time
       });
     }
 
@@ -82,20 +86,40 @@ export async function pushPrices(filePath, dataJson) {
         if (tokenId) {
           updates.push({
             token_id: tokenId,
+            token_uri: item.uri,
             price_usd: item.price_usd,
             price_sol: item.price_sol,
             trade_at: item.created_at,
+            timestamp: item.block_time,
             is_latest: true,
           });
         } else {
           missingUris.push(item.uri);
         }
       });
-      if (missingUris.length > 0) {
-        console.warn(
-          "The following URIs were not found in the tokens table:",
-          missingUris.length
-        );
+      
+      // Update tokens table with market cap and last_updated if we have the data
+      if (updates.length > 0) {
+        for (const update of updates) {
+          const item = batch.find(b => b.uri === update.token_uri);
+          if (item && (item.name || item.symbol)) {
+            const tokenUpdate = {};
+            if (item.name) tokenUpdate.name = item.name;
+            if (item.symbol) tokenUpdate.symbol = item.symbol;
+            tokenUpdate.last_updated = item.block_time;
+            
+            // Update the token record
+            supabase
+              .from("tokens")
+              .update(tokenUpdate)
+              .eq("id", update.token_id)
+              .then(({ error }) => {
+                if (error) {
+                  console.warn(`Warning: Could not update token ${update.token_id}:`, error);
+                }
+              });
+          }
+        }
       }
       const { data, error } = await supabase
         .from("prices")

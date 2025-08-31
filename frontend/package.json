@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "setup-db": "node setup-database.mjs",
-    "populate-sample": "node populate-sample-data.mjs"
+    "populate-sample": "node populate-sample-data.mjs",
+    "test-tiktok": "node test-tiktok-api.mjs",
+    "add-tweets-table": "node add-tweets-table.mjs",
+    "add-missing-columns": "node add-missing-columns.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",

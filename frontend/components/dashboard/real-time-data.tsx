@@ -45,29 +45,31 @@ export default function RealTimeData() {
     // Initial data fetch
     fetchRealTimeData();
     
-    // Subscribe to real-time updates
-    const unsubscribeTiktok = realTimeService.subscribe('tiktok_update', (newData) => {
-      setData(prev => ({
-        ...prev,
-        tiktok: {
-          ...prev.tiktok,
-          recentVideos: prev.tiktok.recentVideos + 1,
-          totalViews: prev.tiktok.totalViews + (newData.views || 0),
-          trendingTokens: [...new Set([...prev.tiktok.trendingTokens, ...(newData.mentions?.map((m: any) => m?.tokens?.symbol || 'Unknown') || [])])].slice(0, 5)
-        }
-      }));
-    });
+    // Subscribe to real-time updates only if service is available
+    if (realTimeService) {
+      const unsubscribeTiktok = realTimeService.subscribe('tiktok_update', (newData) => {
+        setData(prev => ({
+          ...prev,
+          tiktok: {
+            ...prev.tiktok,
+            recentVideos: prev.tiktok.recentVideos + 1,
+            totalViews: prev.tiktok.totalViews + (newData.views || 0),
+            trendingTokens: Array.from(new Set([...prev.tiktok.trendingTokens, ...(newData.mentions?.map((m: { tokens?: { symbol?: string } }) => m?.tokens?.symbol || 'Unknown') || [])])).slice(0, 5)
+          }
+        }));
+      });
 
-    const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
-      // Update trending coins data in real-time
-      console.log('New trending coin data:', newData);
-    });
+      const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
+        // Update trending coins data in real-time
+        console.log('New trending coin data:', newData);
+      });
 
-    // Cleanup subscriptions
-    return () => {
-      unsubscribeTiktok();
-      unsubscribeTrending();
-    };
+      // Cleanup subscriptions
+      return () => {
+        unsubscribeTiktok();
+        unsubscribeTrending();
+      };
+    }
   }, [isClient]);
 
   // Update formatted time whenever lastAnalysis changes
@@ -107,10 +109,10 @@ export default function RealTimeData() {
           ...prev,
           tiktok: {
             recentVideos: tiktokData.length,
-            totalViews: tiktokData.reduce((sum: number, video: any) => sum + (video?.views || 0), 0),
+            totalViews: tiktokData.reduce((sum: number, video: { views?: number; mentions?: Array<{ tokens?: { symbol?: string } }> }) => sum + (video?.views || 0), 0),
             trendingTokens: tiktokData
-              .filter((video: any) => video?.mentions && Array.isArray(video.mentions) && video.mentions.length > 0)
-              .flatMap((video: any) => video.mentions.map((m: any) => m?.tokens?.symbol || 'Unknown'))
+              .filter((video: { mentions?: Array<{ tokens?: { symbol?: string } }> }) => video?.mentions && Array.isArray(video.mentions) && video.mentions.length > 0)
+              .flatMap((video: { mentions?: Array<{ tokens?: { symbol?: string } }> }) => video.mentions?.map((m: { tokens?: { symbol?: string } }) => m?.tokens?.symbol || 'Unknown') || [])
               .slice(0, 5)
           }
         }));

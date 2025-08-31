@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 export const InfiniteMovingCards = ({
   items,
@@ -20,20 +20,9 @@ export const InfiniteMovingCards = ({
   const scrollerRef = React.useRef<HTMLUListElement>(null);
   const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    // Mark that we're on the client side
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    // Only add animation after we're on the client side
-    if (!isClient) return;
-
-    addAnimation();
-  }, [isClient]);
-
   const [start, setStart] = useState(false);
-  function addAnimation() {
+  
+  const addAnimation = useCallback(() => {
     if (containerRef.current && scrollerRef.current) {
       const scrollerContent = Array.from(scrollerRef.current.children);
 
@@ -48,7 +37,19 @@ export const InfiniteMovingCards = ({
       getSpeed();
       setStart(true);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only add animation after we're on the client side
+    if (!isClient) return;
+
+    addAnimation();
+  }, [isClient, addAnimation]);
   const getDirection = () => {
     if (containerRef.current) {
       if (direction === "left") {
@@ -100,7 +101,7 @@ export const InfiniteMovingCards = ({
             }}
             key={idx}
           >
-            <img className="rounded-xl w-[250px] h-[300px]" src={item}></img>
+            <img className="rounded-xl w-[250px] h-[300px]" src={item} alt="Moving card item"></img>
           </li>
         ))}
       </ul>

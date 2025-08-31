@@ -10,7 +10,7 @@ class TwitterIntegration {
   constructor() {
     this.supabase = createClient(
       process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY
+      process.env.SUPABASE_KEY
     );
     
     // Initialize Twitter client
@@ -199,7 +199,7 @@ class TwitterIntegration {
       // Generate AI-powered message
       const message = await this.generateVolumeGrowthMessage(token, volumeGrowth, currentVolume, previousVolume);
       
-      await this.postTweet(message);
+      const tweet = await this.postTweet(message);
       console.log(`🚀 Posted AI-generated volume growth alert for ${token.symbol}`);
       
       // Store alert in database
@@ -209,7 +209,7 @@ class TwitterIntegration {
         previousVolume,
         message,
         aiGenerated: true
-      });
+      }, tweet.data.id);
       
     } catch (error) {
       console.error('Error posting volume growth alert:', error);
@@ -227,7 +227,7 @@ class TwitterIntegration {
       // Generate AI-powered message
       const message = await this.generateGrowthRateMessage(token, growthRate, currentVolume, previousVolume);
       
-      await this.postTweet(message);
+      const tweet = await this.postTweet(message);
       console.log(`📈 Posted AI-generated growth rate alert for ${token.symbol}`);
       
       // Store alert in database
@@ -237,7 +237,7 @@ class TwitterIntegration {
         previousVolume,
         message,
         aiGenerated: true
-      });
+      }, tweet.data.id);
       
     } catch (error) {
       console.error('Error posting growth rate alert:', error);
@@ -303,7 +303,7 @@ class TwitterIntegration {
       // Generate AI-powered message
       const message = await this.generateTrendingDiscoveryMessage(analysisResult, correlation);
       
-      await this.postTweet(message);
+      const tweet = await this.postTweet(message);
       console.log(`🎯 Posted AI-generated trending discovery alert for ${correlation.token_symbol}`);
       
       // Store alert in database
@@ -314,7 +314,7 @@ class TwitterIntegration {
         platform: analysisResult.platform,
         message,
         aiGenerated: true
-      });
+      }, tweet.data.id);
       
       this.postedAlerts.add(alertKey);
       
@@ -551,18 +551,38 @@ Format the response as a complete tweet ready to post.`;
   /**
    * Store alert in database
    */
-  async storeAlert(alertType, tokenUri, data) {
+  async storeAlert(alertType, tokenUri, data, tweetId = null) {
     try {
-      await this.supabase
+      const alertData = {
+        alert_type: alertType,
+        token_uri: tokenUri,
+        data: {
+          ...data,
+          alert_generated_at: new Date().toISOString(),
+          alert_version: '1.0.0'
+        },
+        posted_at: new Date().toISOString(),
+        tweet_id: tweetId,
+        status: tweetId ? 'posted' : 'generated',
+        created_at: new Date().toISOString()
+      };
+
+      const { data: storedAlert, error } = await this.supabase
         .from('twitter_alerts')
-        .insert({
-          alert_type: alertType,
-          token_uri: tokenUri,
-          data: data,
-          posted_at: new Date().toISOString()
-        });
+        .insert(alertData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error storing alert:', error);
+        return null;
+      }
+
+      console.log(`✅ Alert stored: ${alertType} for ${tokenUri || 'market'}`);
+      return storedAlert;
     } catch (error) {
       console.error('Error storing alert:', error);
+      return null;
     }
   }
 
@@ -738,7 +758,7 @@ Format the response as a complete tweet ready to post.`;
       const message = await this.generateMarketAnalysisTweet();
       
       if (message && message !== "📊 Market analysis tweet generation failed") {
-        await this.postTweet(message);
+        const tweet = await this.postTweet(message);
         console.log('✅ Posted market analysis tweet');
         
         // Store alert in database
@@ -746,7 +766,7 @@ Format the response as a complete tweet ready to post.`;
           message,
           aiGenerated: true,
           type: 'periodic_analysis'
-        });
+        }, tweet.data.id);
       } else {
         console.log('⚠️ Skipping market analysis tweet due to generation failure');
       }

@@ -2,6 +2,7 @@ export class RealTimeService {
   private eventSource: EventSource | null = null;
   private listeners: Map<string, Set<(data: any) => void>> = new Map();
   private isInitialized = false;
+  private isReconnecting = false;
 
   constructor() {
     // Don't initialize during SSR
@@ -43,7 +44,7 @@ export class RealTimeService {
 
   public subscribe(eventType: string, callback: (data: any) => void): () => void {
     // Ensure service is initialized on client side
-    if (typeof window !== 'undefined' && !this.isInitialized) {
+    if (typeof window !== 'undefined' && !this.isInitialized && !this.isReconnecting) {
       this.initializeEventSource();
     }
     
@@ -80,10 +81,19 @@ export class RealTimeService {
 
   public disconnect() {
     if (this.eventSource) {
-      this.eventSource.close();
+      try {
+        this.eventSource.close();
+      } catch (error) {
+        console.error('Error closing EventSource:', error);
+      }
       this.eventSource = null;
       this.isInitialized = false;
+      this.isReconnecting = false;
     }
+  }
+
+  public isConnected(): boolean {
+    return this.isInitialized && this.eventSource !== null;
   }
 }
 

@@ -11,6 +11,7 @@
     "test-db": "node test_database_storage.mjs",
     "test-connection": "node test_database_connection.mjs",
     "test-telegram": "node test_telegram_scraper.mjs",
+    "test-pattern-twitter": "node test_pattern_analysis_and_twitter.mjs",
     "setup-db": "node setup_database.mjs",
     "scrape-tiktok": "node index.mjs",
     "scrape-telegram": "node telegram_scraper.mjs",
