@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
               try {
                 controller.enqueue(encoder.encode(`data: {"type":"tiktok_update","payload":${JSON.stringify(latestVideo)}}\n\n`));
               } catch (enqueueError) {
-                if (enqueueError.code === 'ERR_INVALID_STATE') {
+                if (enqueueError instanceof Error && 'code' in enqueueError && enqueueError.code === 'ERR_INVALID_STATE') {
                   isStreamActive = false;
                   clearInterval(interval);
                   return;
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
               try {
                 controller.enqueue(encoder.encode(`data: {"type":"trending_update","payload":${JSON.stringify(trendingData.coins[0])}}\n\n`));
               } catch (enqueueError) {
-                if (enqueueError.code === 'ERR_INVALID_STATE') {
+                if (enqueueError instanceof Error && 'code' in enqueueError && enqueueError.code === 'ERR_INVALID_STATE') {
                   isStreamActive = false;
                   clearInterval(interval);
                   return;
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         } catch (error) {
           console.error('Error checking for updates:', error);
           // If there's an error, check if we should close the stream
-          if (error.code === 'ERR_INVALID_STATE') {
+          if (error instanceof Error && 'code' in error && error.code === 'ERR_INVALID_STATE') {
             isStreamActive = false;
             clearInterval(interval);
             try {

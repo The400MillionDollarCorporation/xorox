@@ -1,23 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { TrendingCoin } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
-
-interface TrendingCoin {
-  uri: string;
-  symbol: string;
-  name: string;
-  trading_volume_24h: number;
-  tiktok_views_24h: number;
-  correlation_score: number;
-  price_change_24h: number;
-  total_mentions: number;
-  market_cap?: number;
-  total_supply?: number;
-  address?: string;
-  decimals?: number;
-  last_updated: string;
-}
 
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://srsapzqvwxgrohisrwnm.supabase.co',
@@ -146,7 +131,7 @@ export async function GET(request: NextRequest) {
         total_mentions: totalMentions,
         market_cap: token.market_cap,
         total_supply: token.total_supply,
-        address: null, // Will be populated after database migration
+        address: undefined, // Will be populated after database migration
         decimals: 9, // Default for Solana tokens
         last_updated: token.last_updated || new Date().toISOString()
       };

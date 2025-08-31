@@ -13,28 +13,28 @@ export default function DashboardClient() {
     tiktok: {
       status: 'active',
       isRunning: false,
-      lastRun: null,
+      lastRun: null as Date | null,
       totalVideos: 1247,
       videosToday: 45
     },
     telegram: {
       status: 'active',
       isRunning: false,
-      lastRun: null,
+      lastRun: null as Date | null,
       totalMessages: 15420,
       messagesToday: 234
     },
     patternAnalysis: {
       status: 'active',
       isRunning: false,
-      lastRun: null,
+      lastRun: null as Date | null,
       totalAnalyses: 89,
       analysesToday: 12
     },
     twitter: {
       status: 'active',
       isRunning: false,
-      lastRun: null,
+      lastRun: null as Date | null,
       totalAlerts: 156,
       alertsToday: 8
     }

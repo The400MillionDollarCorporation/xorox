@@ -250,29 +250,14 @@ export default function TimeSeriesChartWithPaywall({
 }: {
   tokenData: TokenData;
 }) {
-  // Add safety check for tokenData
-  if (!tokenData || !tokenData.symbol) {
-    return (
-      <Card className="w-full max-w-[100vw] overflow-hidden sen">
-        <CardContent className="p-6 text-center">
-          <div className="space-y-2">
-            <p className="text-muted-foreground">Loading token data...</p>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  // Lift all state to the parent component
+  // All React hooks must be called before any early returns
   const [showPrice, setShowPrice] = useState<boolean>(true);
   const [showPopularity, setShowPopularity] = useState<boolean>(true);
   const [usdOrSolToggle, setUsdOrSolToggle] = useState<boolean>(true);
   const [timeframe, setTimeframe] = useState<TimeframeType>("24h");
   const { paid } = useEnvironmentStore((store) => store);
+
+  // All useMemo hooks must also be called before any early returns
   const data = useMemo(
     () => {
       // Safety check: ensure prices data exists before processing
@@ -303,21 +288,6 @@ export default function TimeSeriesChartWithPaywall({
     [tokenData.prices, tokenData.tiktoks, tokenData.views, timeframe]
   );
 
-  // Additional safety check for data processing
-  if (!data || data.length === 0) {
-    return (
-      <Card className="w-full max-w-[100vw] overflow-hidden sen">
-        <CardContent className="p-6 text-center">
-          <div className="space-y-2">
-            <p className="text-muted-foreground">No chart data available</p>
-            <p className="text-xs text-muted-foreground">
-              {tokenData.symbol ? `No price data for ${tokenData.symbol}` : 'Token data is incomplete'}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
   const startingPrice = useMemo(() => data[0]?.price || 0, [data]);
   const priceChange = useMemo(() => {
     if (data.length < 2) return "0.000";
@@ -334,6 +304,41 @@ export default function TimeSeriesChartWithPaywall({
   const handleTimeframeChange = (newTimeframe: TimeframeType) => {
     setTimeframe(newTimeframe);
   };
+
+  // Add safety check for tokenData
+  if (!tokenData || !tokenData.symbol) {
+    return (
+      <Card className="w-full max-w-[100vw] overflow-hidden sen">
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Loading token data...</p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Additional safety check for data processing
+  if (!data || data.length === 0) {
+    return (
+      <Card className="w-full max-w-[100vw] overflow-hidden sen">
+        <CardContent className="p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">No chart data available</p>
+            <p className="text-xs text-muted-foreground">
+              {tokenData.symbol ? `No price data for ${tokenData.symbol}` : 'Token data is incomplete'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Final safety check before rendering
   if (!tokenData.symbol || !tokenData.prices || !Array.isArray(tokenData.prices) || tokenData.prices.length === 0) {
     return (
@@ -506,7 +511,7 @@ export default function TimeSeriesChartWithPaywall({
             isPriceUp={isPriceUp}
           />
         </ClientOnly>
-        {!paid && <UnlockNow />}
+        {!paid && <UnlockNow text="Unlock the complete graph" />}
       </div>
     </Card>
     </ClientOnly>

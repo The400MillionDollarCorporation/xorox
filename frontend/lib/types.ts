@@ -115,6 +115,7 @@ type Tweet = {
 
 export type {
   TokenData,
+  TrendingCoin,
   Price,
   SortKey,
   SortDirection,

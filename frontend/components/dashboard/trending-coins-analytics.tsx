@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TrendingUp, TrendingDown, Activity, Target, Zap } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { TrendingUp, TrendingDown, Activity, Target, Zap, Search, Filter, X } from 'lucide-react';
 import { realTimeService } from '@/lib/real-time-service';
 
 interface TrendingCoinsData {
@@ -24,6 +25,12 @@ export default function TrendingCoinsAnalytics() {
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [lastUpdated, setLastUpdated] = useState<string>('--');
   const [isClient, setIsClient] = useState(false);
+  
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterMarketCap, setFilterMarketCap] = useState<string>('all');
+  const [filterCorrelation, setFilterCorrelation] = useState<string>('all');
+  const [filterViews, setFilterViews] = useState<string>('all');
 
   useEffect(() => {
     // Mark that we're on the client side
@@ -111,6 +118,87 @@ export default function TrendingCoinsAnalytics() {
     return 'destructive';
   };
 
+  // Filtered and searched data
+  const filteredCoins = useMemo(() => {
+    let filtered = [...data.coins];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(coin => 
+        coin.symbol?.toLowerCase().includes(query) ||
+        coin.name?.toLowerCase().includes(query) ||
+        coin.address?.toLowerCase().includes(query)
+      );
+    }
+
+    // Market cap filter
+    if (filterMarketCap !== 'all') {
+      switch (filterMarketCap) {
+        case 'high':
+          filtered = filtered.filter(coin => (coin.market_cap || 0) >= 1000000);
+          break;
+        case 'medium':
+          filtered = filtered.filter(coin => (coin.market_cap || 0) >= 100000 && (coin.market_cap || 0) < 1000000);
+          break;
+        case 'low':
+          filtered = filtered.filter(coin => (coin.market_cap || 0) < 100000);
+          break;
+      }
+    }
+
+    // Correlation filter
+    if (filterCorrelation !== 'all') {
+      switch (filterCorrelation) {
+        case 'high':
+          filtered = filtered.filter(coin => (coin.correlation_score || 0) >= 0.8);
+          break;
+        case 'medium':
+          filtered = filtered.filter(coin => (coin.correlation_score || 0) >= 0.6 && (coin.correlation_score || 0) < 0.8);
+          break;
+        case 'low':
+          filtered = filtered.filter(coin => (coin.correlation_score || 0) < 0.6);
+          break;
+      }
+    }
+
+    // Views filter
+    if (filterViews !== 'all') {
+      switch (filterViews) {
+        case 'high':
+          filtered = filtered.filter(coin => (coin.tiktok_views_24h || 0) >= 10000);
+          break;
+        case 'medium':
+          filtered = filtered.filter(coin => (coin.tiktok_views_24h || 0) >= 1000 && (coin.tiktok_views_24h || 0) < 10000);
+          break;
+        case 'low':
+          filtered = filtered.filter(coin => (coin.tiktok_views_24h || 0) < 1000);
+          break;
+      }
+    }
+
+    return filtered;
+  }, [data.coins, searchQuery, filterMarketCap, filterCorrelation, filterViews]);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilterMarketCap('all');
+    setFilterCorrelation('all');
+    setFilterViews('all');
+  };
+
+  const formatSupply = (supply: number): string => {
+    if (supply >= 1000000000) {
+      return `${(supply / 1000000000).toFixed(2)}B`;
+    } else if (supply >= 1000000) {
+      return `${(supply / 1000000000).toFixed(2)}M`;
+    } else if (supply >= 1000) {
+      return `${(supply / 1000).toFixed(2)}K`;
+    }
+    return supply.toString();
+  };
+
   if (isLoading || !isClient) {
     return (
       <Card>
@@ -134,17 +222,6 @@ export default function TrendingCoinsAnalytics() {
       </Card>
     );
   }
-
-  const formatSupply = (supply: number): string => {
-    if (supply >= 1000000000) {
-      return `${(supply / 1000000000).toFixed(2)}B`;
-    } else if (supply >= 1000000) {
-      return `${(supply / 1000000).toFixed(2)}M`;
-    } else if (supply >= 1000) {
-      return `${(supply / 1000).toFixed(2)}K`;
-    }
-    return supply.toString();
-  };
 
   return (
     <Card>
@@ -183,11 +260,149 @@ export default function TrendingCoinsAnalytics() {
           </div>
         </div>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Showing {data.coins.length} of {data.total} coins</span>
+          <span>Showing {filteredCoins.length} of {data.total} coins</span>
           <span>Last updated: {lastUpdated}</span>
         </div>
       </CardHeader>
       <CardContent>
+        {/* Search and Filters */}
+        <div className="space-y-4 mb-6">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search by symbol, name, or address..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                onClick={() => setSearchQuery('')}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+
+          {/* Filter Controls */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Filters:</span>
+            </div>
+            
+            <Select value={filterMarketCap} onValueChange={setFilterMarketCap}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Market Cap" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Market Caps</SelectItem>
+                <SelectItem value="high">High (≥$1M)</SelectItem>
+                <SelectItem value="medium">Medium ($100K-$1M)</SelectItem>
+                <SelectItem value="low">Low (&lt;$100K)</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterCorrelation} onValueChange={setFilterCorrelation}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Correlation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Correlations</SelectItem>
+                <SelectItem value="high">High (≥80%)</SelectItem>
+                <SelectItem value="medium">Medium (60-80%)</SelectItem>
+                <SelectItem value="low">Low (&lt;60%)</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterViews} onValueChange={setFilterViews}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Views" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Views</SelectItem>
+                <SelectItem value="high">High (≥10K)</SelectItem>
+                <SelectItem value="medium">Medium (1K-10K)</SelectItem>
+                <SelectItem value="low">Low (&lt;1K)</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {(searchQuery || filterMarketCap !== 'all' || filterCorrelation !== 'all' || filterViews !== 'all') && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            )}
+          </div>
+
+          {/* Active Filters Display */}
+          {(searchQuery || filterMarketCap !== 'all' || filterCorrelation !== 'all' || filterViews !== 'all') && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm text-muted-foreground">Active filters:</span>
+              {searchQuery && (
+                <Badge variant="secondary" className="text-xs">
+                  Search: &quot;{searchQuery}&quot;
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    <X className="w-2 h-2" />
+                  </Button>
+                </Badge>
+              )}
+              {filterMarketCap !== 'all' && (
+                <Badge variant="secondary" className="text-xs">
+                  Market Cap: {filterMarketCap}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
+                    onClick={() => setFilterMarketCap('all')}
+                  >
+                    <X className="w-2 h-2" />
+                  </Button>
+                </Badge>
+              )}
+              {filterCorrelation !== 'all' && (
+                <Badge variant="secondary" className="text-xs">
+                  Correlation: {filterCorrelation}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
+                    onClick={() => setFilterCorrelation('all')}
+                  >
+                    <X className="w-2 h-2" />
+                  </Button>
+                </Badge>
+              )}
+              {filterViews !== 'all' && (
+                <Badge variant="secondary" className="text-xs">
+                  Views: {filterViews}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
+                    onClick={() => setFilterViews('all')}
+                  >
+                    <X className="w-2 h-2" />
+                  </Button>
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -196,9 +411,21 @@ export default function TrendingCoinsAnalytics() {
             <TabsTrigger value="market">Market Data</TabsTrigger>
           </TabsList>
 
+          {/* No Results Message */}
+          {filteredCoins.length === 0 && (
+            <div className="text-center py-8">
+              <div className="text-muted-foreground mb-2">
+                {searchQuery ? `No coins found matching "${searchQuery}"` : 'No coins match the current filters'}
+              </div>
+              <Button variant="outline" onClick={clearFilters}>
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4">
-              {data.coins.slice(0, 10).map((coin, index) => (
+              {filteredCoins.slice(0, 10).map((coin, index) => (
                 <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
                     <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
@@ -237,7 +464,7 @@ export default function TrendingCoinsAnalytics() {
 
           <TabsContent value="correlation" className="space-y-4">
             <div className="grid gap-4">
-              {data.coins
+              {filteredCoins
                 .sort((a, b) => b.correlation_score - a.correlation_score)
                 .slice(0, 10)
                 .map((coin, index) => (
@@ -276,7 +503,7 @@ export default function TrendingCoinsAnalytics() {
 
           <TabsContent value="social" className="space-y-4">
             <div className="grid gap-4">
-              {data.coins
+              {filteredCoins
                 .sort((a, b) => b.tiktok_views_24h - a.tiktok_views_24h)
                 .slice(0, 10)
                 .map((coin, index) => (
@@ -318,7 +545,7 @@ export default function TrendingCoinsAnalytics() {
 
           <TabsContent value="market" className="space-y-4">
             <div className="grid gap-4">
-              {data.coins
+              {filteredCoins
                 .filter(coin => coin.market_cap || coin.total_supply)
                 .sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0))
                 .slice(0, 10)

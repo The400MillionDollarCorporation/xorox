@@ -95,12 +95,8 @@ class TikTokViewsService {
         this.handleReconnection();
       };
 
-      this.eventSource.onclose = () => {
-        console.log('🔌 TikTok views stream closed');
-        this.isConnected = false;
-        this.isConnecting = false;
-        this.handleReconnection();
-      };
+      // Note: EventSource doesn't have an 'onclose' event
+      // Connection closure is handled through 'onerror' and manual disconnection
 
     } catch (error) {
       console.error('❌ Error connecting to TikTok views stream:', error);
@@ -156,7 +152,7 @@ class TikTokViewsService {
     };
   }
 
-  isConnected(): boolean {
+  getIsConnected(): boolean {
     return this.isConnected;
   }
 
