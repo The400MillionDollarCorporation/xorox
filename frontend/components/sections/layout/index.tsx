@@ -78,7 +78,7 @@ export default function Layout({
         <CommandMenu />
 
         <div className="hidden md:flex space-y-4 sm:space-y-0 sm:space-x-4">
-          <Button
+          {/* <Button
             variant="ghost"
             className="hover:bg-transparent hover:border-[1px] hover:border-white transform transition hover:scale-105"
             onClick={async () => {
@@ -112,7 +112,7 @@ export default function Layout({
               height={20}
               className="rounded-full"
             />
-          </Button>
+          </Button> */}
 
           <Button
             variant="ghost"

@@ -123,7 +123,7 @@ export default function ScraperStatus() {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           <Activity className="h-5 w-5" />
-          TikTok Scraper Status
+          TikTok & Telegram Scraper Status
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
