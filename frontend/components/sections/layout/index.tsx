@@ -128,7 +128,7 @@ export default function Layout({
             variant="ghost"
             className="hidden lg:flex hover:bg-transparent hover:border-[1px] hover:border-white transform transition hover:scale-105"
             onClick={() => {
-              window.open("https://x.com/TokenHunterZoro", "_blank");
+              window.open("https://x.com/AlphaXorox", "_blank");
             }}
           >
             <p className="sen text-sm sm:text-md font-bold">Follow on</p>
