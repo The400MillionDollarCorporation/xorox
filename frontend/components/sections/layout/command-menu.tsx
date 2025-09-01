@@ -92,14 +92,32 @@ export default function CommandMenu({ ...props }: ButtonProps) {
   );
 
   useEffect(() => {
-    searchResults.forEach((result) => {
-      fetch(IPFS_GATEWAY_URL_4 + result.uri.split("/").at(-1))
-        .then((res) => res.json())
-        .then((data) => {
-          result.image = IPFS_GATEWAY_URL_4 + data.image.split("/").at(-1);
-        });
-    });
-  }, [searchResults]);
+    if (!searchResults.length) return;
+    
+    const fetchImages = async () => {
+      const updatedResults = await Promise.all(
+        searchResults.map(async (result) => {
+          try {
+            const metadataResponse = await fetch(
+              IPFS_GATEWAY_URL_4 + result.uri.split("/").at(-1)
+            );
+            const metadata = await metadataResponse.json();
+            return {
+              ...result,
+              image: IPFS_GATEWAY_URL_4 + metadata.image.split("/").at(-1)
+            };
+          } catch (error) {
+            console.error("Error fetching image for result:", error);
+            return result;
+          }
+        })
+      );
+      
+      setSearchResults(updatedResults);
+    };
+
+    fetchImages();
+  }, [searchResults.length]); // Only depend on length, not the array itself
   return (
     <>
       <Button
