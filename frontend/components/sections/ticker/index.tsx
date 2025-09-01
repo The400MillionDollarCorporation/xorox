@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useEnvironmentStore } from "@/components/context";
 import { IPFS_GATEWAY_URL } from "@/lib/constants";
 import ClientOnly from "@/components/ui/client-only";
+import { getRealTimeService } from "@/lib/real-time-service";
 
 export default function Ticker({ params }: { params: { id: string } }) {
   const [coinData, setCoinData] = useState<TokenData | null>(null);
@@ -104,6 +105,72 @@ export default function Ticker({ params }: { params: { id: string } }) {
     fetchCoinData();
     setIsInitialized(true);
   }, [isClient, isInitialized, fetchCoinData]);
+
+  // Real-time updates useEffect - subscribe to real-time events
+  useEffect(() => {
+    if (!isClient || !isInitialized) return;
+
+    const realTimeService = getRealTimeService();
+    if (!realTimeService) return;
+
+    // Subscribe to trending updates (which might include our token)
+    const unsubscribeTrending = realTimeService.subscribe('trending_update', (newData) => {
+      // Check if the update includes our token
+      if (newData && newData.tokenId === parseInt(params.id)) {
+        console.log('🔄 Real-time update received for token:', params.id);
+        // Refresh the data
+        fetchCoinData();
+      }
+    });
+
+    // Subscribe to TikTok updates (which might mention our token)
+    const unsubscribeTiktok = realTimeService.subscribe('tiktok_update', (newData) => {
+      // Check if the TikTok mentions our token
+      if (newData && newData.mentions && newData.mentions.some((mention: any) => 
+        mention.tokens && mention.tokens.some((token: any) => token.id === parseInt(params.id))
+      )) {
+        console.log('🔄 TikTok update mentions our token:', params.id);
+        // Refresh the data
+        fetchCoinData();
+      }
+    });
+
+    // Subscribe to individual token price updates
+    const unsubscribeTokenPrice = realTimeService.subscribe('token_price_update', (newData) => {
+      // Check if this is an update for our specific token
+      if (newData && newData.tokenId === parseInt(params.id)) {
+        console.log('🔄 Token price update received for:', params.id, newData.symbol);
+        // Update the price data immediately
+        setCoinData((prev) => {
+          if (prev && newData.latestPrice) {
+            return {
+              ...prev,
+              prices: [...(prev.prices || []), newData.latestPrice].sort(
+                (a, b) => new Date(a.trade_at).getTime() - new Date(b.trade_at).getTime()
+              ),
+              latest_price_usd: newData.latestPrice.price_usd,
+              latest_price_sol: newData.latestPrice.price_sol,
+            };
+          }
+          return prev;
+        });
+      }
+    });
+
+    // Set up interval for periodic updates (every 30 seconds) as fallback
+    const interval = setInterval(() => {
+      if (!isUpdatingPrice) {
+        fetchCoinData();
+      }
+    }, 30000); // 30 seconds
+
+    return () => {
+      unsubscribeTrending();
+      unsubscribeTiktok();
+      unsubscribeTokenPrice();
+      clearInterval(interval);
+    };
+  }, [isClient, isInitialized, fetchCoinData, isUpdatingPrice, params.id]);
 
   // Second useEffect for fetching image - only run when coinData changes and we have a URI
   useEffect(() => {

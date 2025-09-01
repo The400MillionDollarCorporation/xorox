@@ -64,6 +64,35 @@ export async function GET(request: NextRequest) {
             }
           }
 
+          // Check for individual token price updates (check a few recent tokens)
+          const recentTokensResponse = await fetch(`${baseUrl}/api/supabase/get-memecoins?start=0`);
+          if (recentTokensResponse.ok && isStreamActive) {
+            const recentTokens = await recentTokensResponse.json();
+            if (recentTokens && recentTokens.length > 0) {
+              // Check the first few tokens for price updates
+              for (const token of recentTokens.slice(0, 3)) {
+                try {
+                  const priceResponse = await fetch(`${baseUrl}/api/supabase/get-prices?tokenId=${token.id}`);
+                  if (priceResponse.ok) {
+                    const priceData = await priceResponse.json();
+                    if (priceData.data && priceData.data.length > 0) {
+                      const latestPrice = priceData.data[priceData.data.length - 1];
+                      const tokenUpdate = {
+                        tokenId: token.id,
+                        symbol: token.symbol,
+                        latestPrice: latestPrice,
+                        timestamp: new Date().toISOString()
+                      };
+                      controller.enqueue(encoder.encode(`data: {"type":"token_price_update","payload":${JSON.stringify(tokenUpdate)}}\n\n`));
+                    }
+                  }
+                } catch (error) {
+                  console.error('Error checking token price update:', error);
+                }
+              }
+            }
+          }
+
         } catch (error) {
           console.error('Error checking for updates:', error);
           // If there's an error, check if we should close the stream
