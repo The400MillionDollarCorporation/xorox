@@ -554,8 +554,8 @@ Format the response as a complete tweet ready to post.`;
   async storeAlert(alertType, tokenUri, data, tweetId = null) {
     try {
       const alertData = {
-        alert_type: alertType,
-        token_uri: tokenUri,
+          alert_type: alertType,
+          token_uri: tokenUri,
         data: {
           ...data,
           alert_generated_at: new Date().toISOString(),

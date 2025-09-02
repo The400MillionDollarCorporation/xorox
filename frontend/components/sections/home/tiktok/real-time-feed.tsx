@@ -49,7 +49,7 @@ export default function RealTimeTikTokFeed() {
       if (!tiktokResponse.ok) {
         throw new Error(`TikTok API error: ${tiktokResponse.status}`);
       }
-      const tiktokData = await tiktokResponse.json();
+        const tiktokData = await tiktokResponse.json();
       
       // Fetch mentions data
       const mentionsResponse = await fetch('/api/supabase/get-mentions?limit=1000');
@@ -76,7 +76,7 @@ export default function RealTimeTikTokFeed() {
         console.warn('⚠️ Mentions data is not an array:', mentionsData);
         setMentions([]);
       }
-      
+
       setLastUpdate(new Date());
       setLoading(false);
     } catch (error) {
@@ -192,101 +192,101 @@ export default function RealTimeTikTokFeed() {
         <div className="text-center py-12">
           <div className="w-16 h-16 border-4 border-[#F8D12E]/20 border-t-[#F8D12E] rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading TikTok data...</p>
-        </div>
+      </div>
       )}
 
       {/* TikTok Videos Grid */}
       {!loading && tiktoks.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {tiktoks.slice(0, 12).map((tiktok) => {
-            const tiktokMentions = getTokenMentions(tiktok.id);
-            
-            return (
+        {tiktoks.slice(0, 12).map((tiktok) => {
+          const tiktokMentions = getTokenMentions(tiktok.id);
+          
+          return (
               <Card
                 key={tiktok.id}
                 className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-[#F8D12E]/50 transition-all duration-300 hover:scale-105"
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-[#F8D12E] to-yellow-500 rounded-full flex items-center justify-center text-black font-bold text-sm">
                         {tiktok.username.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-white">@{tiktok.username}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatTimeAgo(tiktok.created_at)}
-                        </p>
-                      </div>
                     </div>
-                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="font-semibold text-white">@{tiktok.username}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatTimeAgo(tiktok.created_at)}
+                      </p>
+                    </div>
                   </div>
-                </CardHeader>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-3">
+                {/* Thumbnail */}
+                {tiktok.thumbnail && (
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                    <img
+                      src={tiktok.thumbnail}
+                      alt={`TikTok by ${tiktok.username}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
                 
-                <CardContent className="space-y-3">
-                  {/* Thumbnail */}
-                  {tiktok.thumbnail && (
-                    <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                      <img
-                        src={tiktok.thumbnail}
-                        alt={`TikTok by ${tiktok.username}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
+                {/* Stats */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1">
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-white">{formatViews(tiktok.views)}</span>
                     </div>
-                  )}
-                  
-                  {/* Stats */}
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1">
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-white">{formatViews(tiktok.views)}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MessageCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-white">{tiktok.comments}</span>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-white">{tiktok.comments}</span>
                     </div>
-                    <TrendingUp className="h-4 w-4 text-[#F8D12E]" />
                   </div>
-                  
-                  {/* Token Mentions */}
-                  {tiktokMentions.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">Mentioned Tokens:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {tiktokMentions.map((mention) => (
-                          <Badge
-                            key={mention.id}
-                            variant="secondary"
-                            className="bg-[#F8D12E]/20 text-[#F8D12E] border-[#F8D12E]/30"
-                          >
-                            {mention.token?.symbol || `Token ${mention.token_id}`}
-                            <span className="ml-1 text-xs">({mention.count})</span>
-                          </Badge>
-                        ))}
-                      </div>
+                  <TrendingUp className="h-4 w-4 text-[#F8D12E]" />
+                </div>
+                
+                {/* Token Mentions */}
+                {tiktokMentions.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Mentioned Tokens:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {tiktokMentions.map((mention) => (
+                        <Badge
+                          key={mention.id}
+                          variant="secondary"
+                          className="bg-[#F8D12E]/20 text-[#F8D12E] border-[#F8D12E]/30"
+                        >
+                          {mention.token?.symbol || `Token ${mention.token_id}`}
+                          <span className="ml-1 text-xs">({mention.count})</span>
+                        </Badge>
+                      ))}
                     </div>
-                  )}
-                  
-                  {/* View Button */}
-                  <Button
-                    asChild
-                    className="w-full bg-[#F8D12E] hover:bg-[#F8D12E]/80 text-black"
-                    size="sm"
-                  >
-                    <a href={tiktok.url} target="_blank" rel="noopener noreferrer">
-                      View on TikTok
-                    </a>
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  </div>
+                )}
+                
+                {/* View Button */}
+                <Button
+                  asChild
+                  className="w-full bg-[#F8D12E] hover:bg-[#F8D12E]/80 text-black"
+                  size="sm"
+                >
+                  <a href={tiktok.url} target="_blank" rel="noopener noreferrer">
+                    View on TikTok
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
       )}
 
       {/* Load More */}

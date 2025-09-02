@@ -22,7 +22,10 @@
     "start-windows": "node start-windows.mjs",
     "scrape-windows": "node windows/index.mjs",
     "fix-price-errors": "node fix-price-lookup-errors.mjs",
-    "add-token-columns": "node add-missing-token-columns.mjs"
+    "add-token-columns": "node add-missing-token-columns.mjs",
+    "scrape-outlight": "node run-outlight-scraper.mjs",
+    "test-outlight": "node test-outlight-scraper.mjs",
+    "test-telegram": "node test-telegram-scraping.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

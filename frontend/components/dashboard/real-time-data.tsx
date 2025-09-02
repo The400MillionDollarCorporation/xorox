@@ -169,16 +169,16 @@ export default function RealTimeData() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* TikTok Data */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
               📱 TikTok Analytics
-            </CardTitle>
+          </CardTitle>
             <p className="text-sm text-muted-foreground">
               Live video and engagement data
             </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        </CardHeader>
+        <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Recent Videos</p>
@@ -187,35 +187,35 @@ export default function RealTimeData() {
               <div>
                 <p className="text-muted-foreground">Total Views</p>
                 <p className="text-2xl font-bold text-green-600">{data.tiktok.totalViews.toLocaleString()}</p>
-              </div>
             </div>
-            
-            {data.tiktok.trendingTokens.length > 0 && (
-              <div>
+          </div>
+          
+          {data.tiktok.trendingTokens.length > 0 && (
+            <div>
                 <p className="text-sm text-muted-foreground mb-2">Trending Tokens</p>
                 <div className="flex flex-wrap gap-2">
-                  {data.tiktok.trendingTokens.map((token, index) => (
+                {data.tiktok.trendingTokens.map((token, index) => (
                     <Badge key={index} variant="secondary" className="text-xs">
-                      {token}
-                    </Badge>
-                  ))}
-                </div>
+                    {token}
+                  </Badge>
+                ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
         {/* Telegram Data */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
               📡 Telegram Analytics
-            </CardTitle>
+          </CardTitle>
             <p className="text-sm text-muted-foreground">
               Channel and message monitoring
             </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        </CardHeader>
+        <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Recent Messages</p>
@@ -224,35 +224,35 @@ export default function RealTimeData() {
               <div>
                 <p className="text-muted-foreground">Active Channels</p>
                 <p className="text-2xl font-bold text-indigo-600">{data.telegram.activeChannels}</p>
-              </div>
             </div>
-            
-            {data.telegram.trendingKeywords.length > 0 && (
-              <div>
+          </div>
+          
+          {data.telegram.trendingKeywords.length > 0 && (
+            <div>
                 <p className="text-sm text-muted-foreground mb-2">Trending Keywords</p>
                 <div className="flex flex-wrap gap-2">
-                  {data.telegram.trendingKeywords.map((keyword, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {keyword}
-                    </Badge>
-                  ))}
-                </div>
+                {data.telegram.trendingKeywords.map((keyword, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {keyword}
+                  </Badge>
+                ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
         {/* Pattern Analysis */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
               🧠 AI Pattern Analysis
-            </CardTitle>
+          </CardTitle>
             <p className="text-sm text-muted-foreground">
               Real-time insights and correlations
             </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        </CardHeader>
+        <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Correlations</p>
@@ -261,15 +261,15 @@ export default function RealTimeData() {
               <div>
                 <p className="text-muted-foreground">Recommendations</p>
                 <p className="text-2xl font-bold text-red-600">{data.patternAnalysis.recommendations}</p>
-              </div>
             </div>
-            
+          </div>
+          
             <div>
-              <p className="text-sm text-muted-foreground">Last Analysis</p>
+            <p className="text-sm text-muted-foreground">Last Analysis</p>
               <p className="text-sm font-medium">{formattedLastAnalysis}</p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
       </div>
     </div>
   );

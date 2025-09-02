@@ -341,7 +341,7 @@ export default function TimeSeriesChartWithPaywall({
 
   // Final safety check before rendering
   if (!tokenData.symbol || !tokenData.prices || !Array.isArray(tokenData.prices) || tokenData.prices.length === 0) {
-    return (
+  return (
       <Card className="w-full max-w-[100vw] overflow-hidden sen">
         <CardContent className="p-6 text-center">
           <div className="space-y-2">
@@ -370,7 +370,7 @@ export default function TimeSeriesChartWithPaywall({
         </CardContent>
       </Card>
     }>
-      <Card className="w-full max-w-[100vw] overflow-hidden sen">
+    <Card className="w-full max-w-[100vw] overflow-hidden sen">
       <CardHeader className="space-y-4 p-4 sm:p-6">
         {/* Token Header */}
         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -397,19 +397,19 @@ export default function TimeSeriesChartWithPaywall({
           </div>
           <div className="flex items-center space-x-2">
             {tokenData.address && (
-              <Button
-                variant="ghost"
-                className="hidden sm:flex hover:bg-transparent hover:border-[1px] hover:border-secondary transform transition hover:scale-105"
-                onClick={() =>
-                  window.open(
-                    `https://solscan.io/token/${tokenData.address}`,
-                    "_blank"
-                  )
-                }
-              >
-                {tokenData.address.slice(0, 4)}...{tokenData.address.slice(-4)}
-                <ArrowUpRightFromSquare className="w-3 h-3 ml-1" />
-              </Button>
+            <Button
+              variant="ghost"
+              className="hidden sm:flex hover:bg-transparent hover:border-[1px] hover:border-secondary transform transition hover:scale-105"
+              onClick={() =>
+                window.open(
+                  `https://solscan.io/token/${tokenData.address}`,
+                  "_blank"
+                )
+              }
+            >
+              {tokenData.address.slice(0, 4)}...{tokenData.address.slice(-4)}
+              <ArrowUpRightFromSquare className="w-3 h-3 ml-1" />
+            </Button>
             )}
             <Select value={timeframe} onValueChange={handleTimeframeChange}>
               <SelectTrigger className="w-32">
@@ -502,14 +502,14 @@ export default function TimeSeriesChartWithPaywall({
 
       <div className="relative">
         <ClientOnly>
-          <ChartContent
-            data={data}
-            showPrice={showPrice}
-            showPopularity={showPopularity}
-            timeframe={timeframe}
-            startingPrice={startingPrice}
-            isPriceUp={isPriceUp}
-          />
+        <ChartContent
+          data={data}
+          showPrice={showPrice}
+          showPopularity={showPopularity}
+          timeframe={timeframe}
+          startingPrice={startingPrice}
+          isPriceUp={isPriceUp}
+        />
         </ClientOnly>
         {!paid && <UnlockNow text="Unlock the complete graph" />}
       </div>

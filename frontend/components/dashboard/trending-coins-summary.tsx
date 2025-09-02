@@ -275,8 +275,8 @@ export default function TrendingCoinsSummary() {
       <Card>
         <CardContent className="p-6 text-center">
           <p className="text-muted-foreground">Initializing...</p>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
     );
   }
 
@@ -438,83 +438,83 @@ export default function TrendingCoinsSummary() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
         {/* Top Performer */}
         {metrics.topPerformer && metrics.topPerformer.symbol && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                🏆 Top Performer
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-lg font-bold">{metrics.topPerformer.symbol}</div>
-                  <div className={`text-sm ${getCorrelationColor(metrics.topPerformer.correlation)}`}>
-                    {formatCorrelation(metrics.topPerformer.correlation)} correlation
-                  </div>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              🏆 Top Performer
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-lg font-bold">{metrics.topPerformer.symbol}</div>
+                <div className={`text-sm ${getCorrelationColor(metrics.topPerformer.correlation)}`}>
+                  {formatCorrelation(metrics.topPerformer.correlation)} correlation
                 </div>
-                <Badge variant="default" className="text-xs">
-                  Best Correlation
-                </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Volume: {formatCurrency(metrics.topPerformer.volume)}
-              </p>
-            </CardContent>
-          </Card>
+              <Badge variant="default" className="text-xs">
+                Best Correlation
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Volume: {formatCurrency(metrics.topPerformer.volume)}
+            </p>
+          </CardContent>
+        </Card>
         )}
 
         {/* Volume Leader */}
         {metrics.volumeLeader && metrics.volumeLeader.symbol && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                💰 Volume Leader
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-lg font-bold">{metrics.volumeLeader.symbol}</div>
-                  <div className="text-sm text-green-600">
-                    {formatCurrency(metrics.volumeLeader.volume)}
-                  </div>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              💰 Volume Leader
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-lg font-bold">{metrics.volumeLeader.symbol}</div>
+                <div className="text-sm text-green-600">
+                  {formatCurrency(metrics.volumeLeader.volume)}
                 </div>
-                <Badge variant="secondary" className="text-xs">
-                  Highest Volume
-                </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Views: {formatViews(metrics.volumeLeader.views)}
-              </p>
-            </CardContent>
-          </Card>
+              <Badge variant="secondary" className="text-xs">
+                Highest Volume
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Views: {formatViews(metrics.volumeLeader.views)}
+            </p>
+          </CardContent>
+        </Card>
         )}
 
         {/* Social Leader */}
         {metrics.socialLeader && metrics.socialLeader.symbol && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                📱 Social Leader
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-lg font-bold">{metrics.socialLeader.symbol}</div>
-                  <div className="text-sm text-blue-600">
-                    {formatViews(metrics.socialLeader.views)} views
-                  </div>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              📱 Social Leader
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-lg font-bold">{metrics.socialLeader.symbol}</div>
+                <div className="text-sm text-blue-600">
+                  {formatViews(metrics.socialLeader.views)} views
                 </div>
-                <Badge variant="outline" className="text-xs">
-                  Most Viral
-                </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Mentions: {metrics.socialLeader.mentions}
-              </p>
-            </CardContent>
-          </Card>
+              <Badge variant="outline" className="text-xs">
+                Most Viral
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Mentions: {metrics.socialLeader.mentions}
+            </p>
+          </CardContent>
+        </Card>
         )}
 
         {/* Market Cap Leader */}
