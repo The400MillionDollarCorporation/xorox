@@ -7,6 +7,7 @@ import TimeSeriesChart from "../ticker/time-series-chart";
 import TiktokSection from "./tiktok";
 import GraphPreview from "./graph-preview";
 import ScraperStatus from "./tiktok/scraper-status";
+import TelegramChannels from "@/components/dashboard/telegram-channels";
 
 export default function Home() {
   const { paid } = useEnvironmentStore((store) => store);
@@ -23,6 +24,11 @@ export default function Home() {
       {/* Scraper Status */}
       <div className="max-w-[1200px] mx-auto mt-8">
         <ScraperStatus />
+      </div>
+      
+      {/* Telegram Channels */}
+      <div className="max-w-[1200px] mx-auto mt-8 px-4">
+        <TelegramChannels />
       </div>
       
       <div className="max-w-[1200px] mx-auto">
