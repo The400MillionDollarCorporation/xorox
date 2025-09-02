@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Users, Activity, Target, Zap } from 'lucide-react';
 import { realTimeService } from '@/lib/real-time-service';
+import { telegramViewsService } from '@/lib/telegram-views-service';
 
 interface RealTimeData {
   tiktok: {
@@ -32,6 +33,15 @@ export default function RealTimeData() {
   });
   const [formattedLastAnalysis, setFormattedLastAnalysis] = useState<string>('Never');
   const [isClient, setIsClient] = useState(false);
+  const [telegramConnectionStatus, setTelegramConnectionStatus] = useState<{
+    isConnected: boolean;
+    isConnecting: boolean;
+    reconnectAttempts: number;
+  }>({
+    isConnected: false,
+    isConnecting: false,
+    reconnectAttempts: 0
+  });
 
   useEffect(() => {
     // Mark that we're on the client side
@@ -70,6 +80,37 @@ export default function RealTimeData() {
         unsubscribeTrending();
       };
     }
+  }, [isClient]);
+
+  // Telegram real-time subscription
+  useEffect(() => {
+    if (!isClient) return;
+
+    // Subscribe to Telegram real-time updates
+    const unsubscribeTelegram = telegramViewsService.subscribe((telegramData) => {
+      setData(prev => ({
+        ...prev,
+        telegram: {
+          recentMessages: telegramData.totalMessages,
+          activeChannels: telegramData.activeChannels,
+          trendingKeywords: telegramData.keywords.slice(0, 5)
+        }
+      }));
+    });
+
+    // Update connection status
+    const updateConnectionStatus = () => {
+      setTelegramConnectionStatus(telegramViewsService.getConnectionStatus());
+    };
+
+    // Check connection status periodically
+    const statusInterval = setInterval(updateConnectionStatus, 5000);
+    updateConnectionStatus(); // Initial check
+
+    return () => {
+      unsubscribeTelegram();
+      clearInterval(statusInterval);
+    };
   }, [isClient]);
 
   // Update formatted time whenever lastAnalysis changes
@@ -183,7 +224,7 @@ export default function RealTimeData() {
               <div>
                 <p className="text-muted-foreground">Recent Videos</p>
                 <p className="text-2xl font-bold text-blue-600">{data.tiktok.recentVideos}</p>
-              </div>
+            </div>
               <div>
                 <p className="text-muted-foreground">Total Views</p>
                 <p className="text-2xl font-bold text-green-600">{data.tiktok.totalViews.toLocaleString()}</p>
@@ -210,9 +251,19 @@ export default function RealTimeData() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
               📡 Telegram Analytics
+              <div className={`w-2 h-2 rounded-full ${
+                telegramConnectionStatus.isConnected 
+                  ? 'bg-green-500' 
+                  : telegramConnectionStatus.isConnecting 
+                    ? 'bg-yellow-500' 
+                    : 'bg-red-500'
+              }`}></div>
           </CardTitle>
             <p className="text-sm text-muted-foreground">
               Channel and message monitoring
+              {telegramConnectionStatus.isConnected && (
+                <span className="text-green-500 ml-2">● Live</span>
+              )}
             </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -220,7 +271,7 @@ export default function RealTimeData() {
               <div>
                 <p className="text-muted-foreground">Recent Messages</p>
                 <p className="text-2xl font-bold text-purple-600">{data.telegram.recentMessages}</p>
-              </div>
+            </div>
               <div>
                 <p className="text-muted-foreground">Active Channels</p>
                 <p className="text-2xl font-bold text-indigo-600">{data.telegram.activeChannels}</p>
@@ -257,7 +308,7 @@ export default function RealTimeData() {
               <div>
                 <p className="text-muted-foreground">Correlations</p>
                 <p className="text-2xl font-bold text-orange-600">{data.patternAnalysis.correlations}</p>
-              </div>
+            </div>
               <div>
                 <p className="text-muted-foreground">Recommendations</p>
                 <p className="text-2xl font-bold text-red-600">{data.patternAnalysis.recommendations}</p>
