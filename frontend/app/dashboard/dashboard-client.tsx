@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import RealTimeData from '@/components/dashboard/real-time-data';
 import TrendingCoinsSummary from '@/components/dashboard/trending-coins-summary';
 import TrendingCoinsAnalytics from '@/components/dashboard/trending-coins-analytics';
+import TelegramChannels from '@/components/dashboard/telegram-channels';
 import ErrorBoundary from '@/components/dashboard/error-boundary';
 
 export default function DashboardClient() {
@@ -104,6 +105,19 @@ export default function DashboardClient() {
       <ErrorBoundary>
         <RealTimeData />
       </ErrorBoundary>
+
+      {/* Telegram Channels Management */}
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-4">💬 Telegram Channels</h2>
+          <p className="text-muted-foreground">
+            Monitor and manage Telegram channels for memecoin data collection
+          </p>
+        </div>
+        <ErrorBoundary>
+          <TelegramChannels />
+        </ErrorBoundary>
+      </div>
 
       {/* Trending Coins Analytics */}
       <div className="space-y-6">
