@@ -6,12 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Users, Activity, Target, Zap } from 'lucide-react';
 import { realTimeService } from '@/lib/real-time-service';
 import { telegramViewsService } from '@/lib/telegram-views-service';
+import { tiktokHashtagsService } from '@/lib/tiktok-hashtags-service';
 
 interface RealTimeData {
   tiktok: {
     recentVideos: number;
     totalViews: number;
     trendingTokens: string[];
+    trendingHashtags: Array<{
+      hashtag: string;
+      count: number;
+      totalViews: number;
+      avgViews: number;
+    }>;
   };
   telegram: {
     recentMessages: number;
@@ -27,13 +34,22 @@ interface RealTimeData {
 
 export default function RealTimeData() {
   const [data, setData] = useState<RealTimeData>({
-    tiktok: { recentVideos: 0, totalViews: 0, trendingTokens: [] },
+    tiktok: { recentVideos: 0, totalViews: 0, trendingTokens: [], trendingHashtags: [] },
     telegram: { recentMessages: 0, activeChannels: 0, trendingKeywords: [] },
     patternAnalysis: { lastAnalysis: 'Never', correlations: 0, recommendations: 0 }
   });
   const [formattedLastAnalysis, setFormattedLastAnalysis] = useState<string>('Never');
   const [isClient, setIsClient] = useState(false);
   const [telegramConnectionStatus, setTelegramConnectionStatus] = useState<{
+    isConnected: boolean;
+    isConnecting: boolean;
+    reconnectAttempts: number;
+  }>({
+    isConnected: false,
+    isConnecting: false,
+    reconnectAttempts: 0
+  });
+  const [tiktokHashtagsConnectionStatus, setTiktokHashtagsConnectionStatus] = useState<{
     isConnected: boolean;
     isConnecting: boolean;
     reconnectAttempts: number;
@@ -113,6 +129,36 @@ export default function RealTimeData() {
     };
   }, [isClient]);
 
+  // TikTok hashtags real-time subscription
+  useEffect(() => {
+    if (!isClient) return;
+
+    // Subscribe to TikTok hashtags real-time updates
+    const unsubscribeTiktokHashtags = tiktokHashtagsService.subscribe((hashtagsData) => {
+      setData(prev => ({
+        ...prev,
+        tiktok: {
+          ...prev.tiktok,
+          trendingHashtags: hashtagsData.hashtags.slice(0, 10) // Top 10 hashtags
+        }
+      }));
+    });
+
+    // Update connection status
+    const updateHashtagsConnectionStatus = () => {
+      setTiktokHashtagsConnectionStatus(tiktokHashtagsService.getConnectionStatus());
+    };
+
+    // Check connection status periodically
+    const hashtagsStatusInterval = setInterval(updateHashtagsConnectionStatus, 5000);
+    updateHashtagsConnectionStatus(); // Initial check
+
+    return () => {
+      unsubscribeTiktokHashtags();
+      clearInterval(hashtagsStatusInterval);
+    };
+  }, [isClient]);
+
   // Update formatted time whenever lastAnalysis changes
   useEffect(() => {
     if (data.patternAnalysis.lastAnalysis && data.patternAnalysis.lastAnalysis !== 'Never') {
@@ -154,7 +200,8 @@ export default function RealTimeData() {
             trendingTokens: tiktokData
               .filter((video: { mentions?: Array<{ tokens?: { symbol?: string } }> }) => video?.mentions && Array.isArray(video.mentions) && video.mentions.length > 0)
               .flatMap((video: { mentions?: Array<{ tokens?: { symbol?: string } }> }) => video.mentions?.map((m: { tokens?: { symbol?: string } }) => m?.tokens?.symbol || 'Unknown') || [])
-              .slice(0, 5)
+              .slice(0, 5),
+            trendingHashtags: prev.tiktok.trendingHashtags // Keep existing hashtags, will be updated by real-time service
           }
         }));
       }
@@ -192,7 +239,7 @@ export default function RealTimeData() {
       // Set default values on error to prevent UI crashes
       setData(prev => ({
         ...prev,
-        tiktok: { recentVideos: 0, totalViews: 0, trendingTokens: [] },
+        tiktok: { recentVideos: 0, totalViews: 0, trendingTokens: [], trendingHashtags: [] },
         telegram: { recentMessages: 0, activeChannels: 0, trendingKeywords: [] },
         patternAnalysis: { lastAnalysis: 'Error', correlations: 0, recommendations: 0 }
       }));
@@ -214,9 +261,19 @@ export default function RealTimeData() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
               📱 TikTok Analytics
+              <div className={`w-2 h-2 rounded-full ${
+                tiktokHashtagsConnectionStatus.isConnected 
+                  ? 'bg-green-500' 
+                  : tiktokHashtagsConnectionStatus.isConnecting 
+                    ? 'bg-yellow-500' 
+                    : 'bg-red-500'
+              }`}></div>
           </CardTitle>
             <p className="text-sm text-muted-foreground">
               Live video and engagement data
+              {tiktokHashtagsConnectionStatus.isConnected && (
+                <span className="text-green-500 ml-2">● Live</span>
+              )}
             </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -238,6 +295,19 @@ export default function RealTimeData() {
                 {data.tiktok.trendingTokens.map((token, index) => (
                     <Badge key={index} variant="secondary" className="text-xs">
                     {token}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {data.tiktok.trendingHashtags.length > 0 && (
+            <div>
+                <p className="text-sm text-muted-foreground mb-2">Trending Hashtags</p>
+                <div className="flex flex-wrap gap-2">
+                {data.tiktok.trendingHashtags.map((hashtag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                    {hashtag.hashtag} ({hashtag.count})
                   </Badge>
                 ))}
               </div>
