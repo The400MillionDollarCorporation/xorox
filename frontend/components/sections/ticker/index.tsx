@@ -136,7 +136,7 @@ export default function Ticker({ params }: { params: { id: string } }) {
 
   if (coinData === null) {
     return (
-      <div className="w-full xl:w-[1250px] mx-auto mt-12 px-4">
+      <div className="w-full max-w-7xl mx-auto mt-8 sm:mt-12 px-3 sm:px-4">
         <div className="flex items-center justify-center">
           <div className="w-12 h-12 border-4 border-gray-800 border-t-yellow-500 rounded-full animate-spin"></div>
         </div>
@@ -145,7 +145,7 @@ export default function Ticker({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="w-full xl:w-[1250px] mx-auto mt-12 px-4">
+    <div className="w-full max-w-7xl mx-auto mt-8 sm:mt-12 px-3 sm:px-4 space-y-6 sm:space-y-8">
       <TimeSeriesChart tokenData={coinData} />
       <Tweets
         symbol={coinData.symbol}
