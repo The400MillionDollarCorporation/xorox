@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import RealTimeData from '@/components/dashboard/real-time-data';
 import TrendingCoinsSummary from '@/components/dashboard/trending-coins-summary';
 import TrendingCoinsAnalytics from '@/components/dashboard/trending-coins-analytics';
@@ -12,28 +11,24 @@ export default function DashboardClient() {
   const [scraperStatus, setScraperStatus] = useState({
     tiktok: {
       status: 'active',
-      isRunning: false,
       lastRun: null as Date | null,
       totalVideos: 1247,
       videosToday: 45
     },
     telegram: {
       status: 'active',
-      isRunning: false,
       lastRun: null as Date | null,
       totalMessages: 15420,
       messagesToday: 234
     },
     patternAnalysis: {
       status: 'active',
-      isRunning: false,
       lastRun: null as Date | null,
       totalAnalyses: 89,
       analysesToday: 12
     },
     twitter: {
       status: 'active',
-      isRunning: false,
       lastRun: null as Date | null,
       totalAlerts: 156,
       alertsToday: 8
@@ -76,20 +71,7 @@ export default function DashboardClient() {
     return `${diffDays}d ago`;
   };
 
-  const startScraper = (type: string) => {
-    console.log(`Starting ${type} scraper...`);
-    // TODO: Implement actual scraper start logic
-  };
 
-  const stopScraper = (type: string) => {
-    console.log(`Stopping ${type} scraper...`);
-    // TODO: Implement actual scraper stop logic
-  };
-
-  const runAnalysis = () => {
-    console.log('Running pattern analysis...');
-    // TODO: Implement actual analysis logic
-  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -154,17 +136,6 @@ export default function DashboardClient() {
               <p className="text-sm text-muted-foreground">
                 Last Run: {formatTimeAgo(scraperStatus.tiktok.lastRun)}
               </p>
-              <div className="flex gap-2">
-                {scraperStatus.tiktok.isRunning ? (
-                  <Button onClick={() => stopScraper('tiktok')} variant="destructive" size="sm">
-                    Stop
-                  </Button>
-                ) : (
-                  <Button onClick={() => startScraper('tiktok')} size="sm">
-                    Start
-                  </Button>
-                )}
-              </div>
             </CardContent>
           </Card>
 
@@ -193,17 +164,6 @@ export default function DashboardClient() {
               <p className="text-sm text-muted-foreground">
                 Last Run: {formatTimeAgo(scraperStatus.telegram.lastRun)}
               </p>
-              <div className="flex gap-2">
-                {scraperStatus.telegram.isRunning ? (
-                  <Button onClick={() => stopScraper('telegram')} variant="destructive" size="sm">
-                    Stop
-                  </Button>
-                ) : (
-                  <Button onClick={() => startScraper('telegram')} size="sm">
-                    Start
-                  </Button>
-                )}
-              </div>
             </CardContent>
           </Card>
 
@@ -232,17 +192,6 @@ export default function DashboardClient() {
               <p className="text-sm text-muted-foreground">
                 Last Run: {formatTimeAgo(scraperStatus.patternAnalysis.lastRun)}
               </p>
-              <div className="flex gap-2">
-                {scraperStatus.patternAnalysis.isRunning ? (
-                  <Button onClick={() => stopScraper('pattern')} variant="destructive" size="sm">
-                    Stop
-                  </Button>
-                ) : (
-                  <Button onClick={() => startScraper('pattern')} size="sm">
-                    Start
-                  </Button>
-                )}
-              </div>
             </CardContent>
           </Card>
 
@@ -271,143 +220,12 @@ export default function DashboardClient() {
               <p className="text-sm text-muted-foreground">
                 Last Run: {formatTimeAgo(scraperStatus.twitter.lastRun)}
               </p>
-              <div className="flex gap-2">
-                {scraperStatus.twitter.isRunning ? (
-                  <Button onClick={() => stopScraper('twitter')} variant="destructive" size="sm">
-                    Stop
-                  </Button>
-                ) : (
-                  <Button onClick={() => startScraper('twitter')} size="sm">
-                    Start
-                  </Button>
-                )}
-              </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* System Control */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold">System Control</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Bulk Operations */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Bulk Operations</CardTitle>
-              <CardDescription>Control multiple scrapers at once</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Button onClick={() => {
-                  startScraper('tiktok');
-                  startScraper('telegram');
-                }} className="flex-1">
-                  🚀 Start All Scrapers
-                </Button>
-                <Button onClick={() => {
-                  stopScraper('tiktok');
-                  stopScraper('telegram');
-                }} variant="destructive" className="flex-1">
-                  🛑 Stop All Scrapers
-                </Button>
-              </div>
-              <Button onClick={runAnalysis} className="w-full">
-                🧠 Run Pattern Analysis
-              </Button>
-            </CardContent>
-          </Card>
 
-          {/* System Health */}
-          <Card>
-            <CardHeader>
-              <CardTitle>System Health</CardTitle>
-              <CardDescription>Monitor system performance and status</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Overall Status</span>
-                  <span className="font-medium">
-                    {Object.values(scraperStatus).every(s => s.status === 'active') ? 'Healthy' : 
-                     Object.values(scraperStatus).some(s => s.status === 'error') ? 'Error' : 'Running'}
-                  </span>
-                </div>
-                <div className="w-full bg-secondary rounded-full h-4">
-                  <div 
-                    className="bg-primary h-4 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${(Object.values(scraperStatus).filter(s => s.isRunning).length / 4) * 100}%` 
-                    }}
-                  ></div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div className="text-center">
-                  <p className="text-muted-foreground">Active Scrapers</p>
-                  <p className="text-2xl font-bold">
-                    {Object.values(scraperStatus).filter(s => s.isRunning).length}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-muted-foreground">Total Data</p>
-                  <p className="text-2xl font-bold">
-                    {(scraperStatus.tiktok.totalVideos + scraperStatus.telegram.totalMessages).toLocaleString()}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-muted-foreground">Analyses</p>
-                  <p className="text-2xl font-bold">
-                    {scraperStatus.patternAnalysis.totalAnalyses.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Database Setup</CardTitle>
-              <CardDescription>
-                Set up required database tables for the application
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button 
-                onClick={() => window.open('/api/setup-database', '_blank')}
-                className="w-full"
-              >
-                🗄️ Setup Database
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>View Raw Data</CardTitle>
-              <CardDescription>
-                Access raw data from TikTok and other sources
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button 
-                onClick={() => window.open('/api/supabase/get-tiktoks?limit=10', '_blank')}
-                variant="outline"
-                className="w-full"
-              >
-                📊 View TikTok Data
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
     </div>
   );
 }
