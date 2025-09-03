@@ -139,19 +139,19 @@ export default function RealTimeTikTokFeed() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2 meme-title">📱 Real-Time TikTok Feed</h2>
-          <p className="text-muted-foreground meme-body">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
+        <div className="flex-1">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 meme-title">📱 Real-Time TikTok Feed</h2>
+          <p className="text-sm sm:text-base text-muted-foreground meme-body">
             Live memecoin mentions and trending videos from TikTok
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           {lastUpdate && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Last updated: {formatTimeAgo(lastUpdate.toISOString())}
             </p>
           )}
@@ -160,10 +160,13 @@ export default function RealTimeTikTokFeed() {
             onClick={fetchTikTokData}
             disabled={refreshing}
             variant="outline"
-            className="border-[#F8D12E]/30 text-[#F8D12E] hover:bg-[#F8D12E]/10"
+            size="sm"
+            className="border-[#F8D12E]/30 text-[#F8D12E] hover:bg-[#F8D12E]/10 w-full sm:w-auto"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Refreshing...' : 'Refresh'}
+            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="text-xs sm:text-sm">
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </span>
           </Button>
         </div>
       </div>
@@ -197,7 +200,7 @@ export default function RealTimeTikTokFeed() {
 
       {/* TikTok Videos Grid */}
       {!loading && tiktoks.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {tiktoks.slice(0, 12).map((tiktok) => {
           const tiktokMentions = getTokenMentions(tiktok.id);
           

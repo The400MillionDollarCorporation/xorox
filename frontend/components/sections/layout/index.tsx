@@ -55,10 +55,10 @@ export default function Layout({
     }
   }, [walletAddress, isClient, setPaid, setBalances]);
   return (
-    <div className="w-full py-4 sm:py-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center px-4 sm:px-6 space-y-4 sm:space-y-0">
+    <div className="w-full py-3 sm:py-4 md:py-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center px-3 sm:px-4 md:px-6 space-y-3 sm:space-y-0">
         <div
-          className="flex items-center space-x-3 sm:space-x-4 select-none cursor-pointer"
+          className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 select-none cursor-pointer"
           onClick={() => {
             router.push("/");
           }}
@@ -66,18 +66,42 @@ export default function Layout({
           <Image
             src="/logo.jpg"
             alt="logo"
-            width={40}
-            height={40}
-            className="rounded-full"
+            width={32}
+            height={32}
+            className="rounded-full sm:w-10 sm:h-10"
           />
-          <p className="font-bold text-lg sm:text-2xl crypto-futuristic tracking-widest text-[#F8D12E]">
+          <p className="font-bold text-base sm:text-lg md:text-2xl crypto-futuristic tracking-widest text-[#F8D12E]">
             ZoroX
           </p>
         </div>
 
-        <CommandMenu />
+        <div className="flex items-center gap-2 sm:gap-4">
+          <CommandMenu />
+          
+          {/* Mobile wallet connection */}
+          <div className="flex sm:hidden">
+            {!isClient ? (
+              <div className="w-8 h-8 bg-muted rounded-full animate-pulse"></div>
+            ) : connected ? (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-muted-foreground">
+                  {shortenAddress(walletAddress)}
+                </span>
+              </div>
+            ) : (
+              <Button
+                onClick={() => setVisible(true)}
+                size="sm"
+                className="text-xs px-3 py-1 h-8"
+              >
+                Connect
+              </Button>
+            )}
+          </div>
+        </div>
 
-        <div className="hidden md:flex space-y-4 sm:space-y-0 sm:space-x-4">
+        <div className="hidden sm:flex space-y-4 sm:space-y-0 sm:space-x-4">
           {/* <Button
             variant="ghost"
             className="hover:bg-transparent hover:border-[1px] hover:border-white transform transition hover:scale-105"

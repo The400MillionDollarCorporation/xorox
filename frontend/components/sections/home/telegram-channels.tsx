@@ -205,24 +205,24 @@ export default function TelegramChannelsHome() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2 meme-title">
-            💬 Telegram Channels
-            <span className={`text-sm font-normal ${getConnectionStatusColor()}`}>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
+        <div className="flex-1">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 meme-title">
+            <span>💬 Telegram Channels</span>
+            <span className={`text-xs sm:text-sm font-normal ${getConnectionStatusColor()}`}>
               {getConnectionStatusText()}
             </span>
           </h2>
-          <p className="text-muted-foreground meme-body">
+          <p className="text-sm sm:text-base text-muted-foreground meme-body">
             Monitor and manage Telegram channels for memecoin data collection
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           {lastUpdate && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Last updated: {formatLastMessage(lastUpdate.toISOString())}
             </p>
           )}
@@ -231,57 +231,60 @@ export default function TelegramChannelsHome() {
             onClick={fetchTelegramData}
             disabled={refreshing}
             variant="outline"
-            className="border-[#F8D12E]/30 text-[#F8D12E] hover:bg-[#F8D12E]/10"
+            size="sm"
+            className="border-[#F8D12E]/30 text-[#F8D12E] hover:bg-[#F8D12E]/10 w-full sm:w-auto"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Refreshing...' : 'Refresh'}
+            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="text-xs sm:text-sm">
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </span>
           </Button>
         </div>
       </div>
 
       {/* Summary Stats */}
       {data && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-[#F8D12E]">{data.summary.totalChannels}</div>
-              <div className="text-sm text-muted-foreground">Total Channels</div>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-[#F8D12E] crypto-bold">{data.summary.totalChannels}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground meme-body">Total Channels</div>
             </CardContent>
           </Card>
           <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-500">{data.summary.enabledChannels}</div>
-              <div className="text-sm text-muted-foreground">Active</div>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-green-500 crypto-bold">{data.summary.enabledChannels}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground meme-body">Active</div>
             </CardContent>
           </Card>
           <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-500">{formatMessages(data.summary.totalMessages)}</div>
-              <div className="text-sm text-muted-foreground">Total Messages</div>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-blue-500 crypto-bold">{formatMessages(data.summary.totalMessages)}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground meme-body">Total Messages</div>
             </CardContent>
           </Card>
           <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-500">{formatMessages(data.summary.recentMessages)}</div>
-              <div className="text-sm text-muted-foreground">Recent (24h)</div>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-purple-500 crypto-bold">{formatMessages(data.summary.recentMessages)}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground meme-body">Recent (24h)</div>
             </CardContent>
           </Card>
         </div>
       )}
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           <Input
             placeholder="Search channels..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-card/50 backdrop-blur-sm border-border/50"
+            className="pl-8 sm:pl-10 h-9 sm:h-10 text-sm bg-card/50 backdrop-blur-sm border-border/50"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-40 bg-card/50 backdrop-blur-sm border-border/50">
+          <SelectTrigger className="w-full sm:w-40 h-9 sm:h-10 text-sm bg-card/50 backdrop-blur-sm border-border/50">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -321,7 +324,7 @@ export default function TelegramChannelsHome() {
 
       {/* Channels Grid */}
       {!loading && filteredChannels.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {filteredChannels.slice(0, 12).map((channel) => (
             <Card
               key={channel.id}

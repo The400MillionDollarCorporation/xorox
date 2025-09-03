@@ -105,7 +105,7 @@ export default function CommandMenu({ ...props }: ButtonProps) {
       <Button
         variant="outline"
         className={cn(
-          "sen relative h-10 flex w-full sm:w-80 bg-muted/50 text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-56 xl:w-80"
+          "sen relative h-8 sm:h-10 flex w-full sm:w-80 bg-muted/50 text-xs sm:text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-56 xl:w-80"
         )}
         onClick={() => setOpen(true)}
         {...props}
