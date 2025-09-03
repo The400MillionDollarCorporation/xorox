@@ -108,10 +108,10 @@ export default function ScraperStatus() {
   if (loading) {
     return (
       <Card className="bg-black/20 border-[#F8D12E]/20">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#F8D12E]"></div>
-            <span className="ml-2 text-muted-foreground">Checking status...</span>
+            <span className="ml-2 text-muted-foreground text-sm sm:text-base">Checking status...</span>
           </div>
         </CardContent>
       </Card>
@@ -120,13 +120,13 @@ export default function ScraperStatus() {
 
   return (
     <Card className="bg-black/20 border-[#F8D12E]/20">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <Activity className="h-5 w-5" />
+      <CardHeader className="pb-3 sm:pb-6">
+        <CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl meme-title">
+          <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
           TikTok & Telegram Scraper Status
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         {/* Status Indicator */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Current Status:</span>
@@ -175,23 +175,23 @@ export default function ScraperStatus() {
         )}
 
         {/* Statistics */}
-        <div className="grid grid-cols-2 gap-4 pt-2">
-          <div className="text-center p-3 bg-black/10 rounded-lg">
-            <p className="text-2xl font-bold text-[#F8D12E]">{status.totalVideos}</p>
-            <p className="text-xs text-muted-foreground">Total Videos</p>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2">
+          <div className="text-center p-2 sm:p-3 bg-black/10 rounded-lg">
+            <p className="text-xl sm:text-2xl font-bold text-[#F8D12E] crypto-bold">{status.totalVideos}</p>
+            <p className="text-xs text-muted-foreground meme-body">Total Videos</p>
           </div>
-          <div className="text-center p-3 bg-black/10 rounded-lg">
-            <p className="text-2xl font-bold text-[#F8D12E]">{status.videosToday}</p>
-            <p className="text-xs text-muted-foreground">Today</p>
+          <div className="text-center p-2 sm:p-3 bg-black/10 rounded-lg">
+            <p className="text-xl sm:text-2xl font-bold text-[#F8D12E] crypto-bold">{status.videosToday}</p>
+            <p className="text-xs text-muted-foreground meme-body">Today</p>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-col sm:flex-row gap-2 pt-2">
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 border-[#F8D12E]/30 text-[#F8D12E]"
+            className="flex-1 border-[#F8D12E]/30 text-[#F8D12E] meme-playful"
             onClick={fetchStatus}
           >
             <Activity className="h-4 w-4 mr-2" />

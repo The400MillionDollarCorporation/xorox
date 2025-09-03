@@ -153,14 +153,15 @@ export default function HeroTable() {
   return (
     <>
       {leaderboard.length == 0 ? (
-        <div className="w-[1000px] mx-auto mt-12 mb-24">
+        <div className="w-full max-w-7xl mx-auto mt-8 sm:mt-12 mb-12 sm:mb-24 px-3 sm:px-4">
           <div className="flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-gray-800 border-t-yellow-500 rounded-full animate-spin"></div>
           </div>
         </div>
       ) : (
         <TableWrapper showWrapper={!paid}>
-          <Table className="w-full border mt-8">
+          <div className="overflow-x-auto">
+            <Table className="w-full border mt-4 sm:mt-8 min-w-[800px]">
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <SortableTableHeader
@@ -345,20 +346,22 @@ export default function HeroTable() {
               ))}
             </TableBody>
           </Table>
+          </div>
         </TableWrapper>
       )}
 
       {paid && (
-        <div className="flex justify-between items-center mt-4 px-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-4 px-3 sm:px-4 gap-4">
           <Button
             variant="outline"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
+            className="w-full sm:w-auto"
           >
             Previous
           </Button>
 
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 meme-body">
             Page {currentPage} of {totalPages}
           </span>
 
@@ -366,6 +369,7 @@ export default function HeroTable() {
             variant="outline"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
+            className="w-full sm:w-auto"
           >
             Next
           </Button>
