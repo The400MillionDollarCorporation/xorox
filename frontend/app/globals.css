@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Sen:wght@400..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Sen:wght@400..800&family=Fredoka:wght@300..600&family=Comic+Neue:wght@300;400;700&family=Quicksand:wght@300..700&family=Space+Grotesk:wght@300..700&family=Orbitron:wght@400..900&family=Rajdhani:wght@300..700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,6 +20,51 @@ body {
     font-family: "Sen", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
+  }
+
+  /* Memecoin Font Styles */
+  .meme-title {
+    font-family: "Fredoka", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .meme-subtitle {
+    font-family: "Comic Neue", cursive;
+    font-weight: 400;
+  }
+
+  .meme-body {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 500;
+  }
+
+  .crypto-tech {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .crypto-futuristic {
+    font-family: "Orbitron", monospace;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .crypto-bold {
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .meme-playful {
+    font-family: "Fredoka", sans-serif;
+    font-weight: 500;
+  }
+
+  .meme-comic {
+    font-family: "Comic Neue", cursive;
+    font-weight: 700;
   }
 }
 

@@ -13,11 +13,11 @@ export default function Home() {
   const { paid } = useEnvironmentStore((store) => store);
   return (
     <div className="w-full">
-      <p className="text-center nouns tracking-widest font-bold  text-2xl md:text-3xl text-[#F8D12E] mt-6 md:mt-16">
-        The Ultimate TikTok & TelegramMemecoin Hunter
+      <p className="text-center meme-title tracking-widest font-bold text-2xl md:text-3xl text-[#F8D12E] mt-6 md:mt-16">
+        The Ultimate TikTok & Telegram Memecoin Hunter
       </p>
-      <p className="sen text-muted-foreground font-semibold  mt-2 text-center text-xs sm:text-sm md:text-base">
-        Realtime tiktok & telegramanalytics for memecoins. <br />
+      <p className="meme-subtitle text-muted-foreground font-semibold mt-2 text-center text-xs sm:text-sm md:text-base">
+        Realtime tiktok & telegram analytics for memecoins. <br />
         Hunt the next moonshot 🚀
       </p>
       

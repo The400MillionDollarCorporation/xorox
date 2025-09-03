@@ -143,8 +143,8 @@ export default function RealTimeTikTokFeed() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-white mb-2">📱 Real-Time TikTok Feed</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-3xl font-bold text-white mb-2 meme-title">📱 Real-Time TikTok Feed</h2>
+          <p className="text-muted-foreground meme-body">
             Live memecoin mentions and trending videos from TikTok
           </p>
         </div>
@@ -304,8 +304,8 @@ export default function RealTimeTikTokFeed() {
           <div className="w-16 h-16 bg-[#F8D12E]/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <TrendingUp className="h-8 w-8 text-[#F8D12E]" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">No TikTok Data Yet</h3>
-          <p className="text-muted-foreground mb-4">
+          <h3 className="text-lg font-semibold text-white mb-2 meme-comic">No TikTok Data Yet</h3>
+          <p className="text-muted-foreground mb-4 meme-body">
             Start your automated scraping to see real-time memecoin mentions here!
           </p>
           <div className="space-y-2 text-sm text-muted-foreground">

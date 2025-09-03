@@ -209,13 +209,13 @@ export default function TelegramChannelsHome() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
+          <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2 meme-title">
             💬 Telegram Channels
             <span className={`text-sm font-normal ${getConnectionStatusColor()}`}>
               {getConnectionStatusText()}
             </span>
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground meme-body">
             Monitor and manage Telegram channels for memecoin data collection
           </p>
         </div>
@@ -440,8 +440,8 @@ export default function TelegramChannelsHome() {
           <div className="w-16 h-16 bg-[#F8D12E]/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <MessageSquare className="h-8 w-8 text-[#F8D12E]" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">No Telegram Channels Found</h3>
-          <p className="text-muted-foreground mb-4">
+          <h3 className="text-lg font-semibold text-white mb-2 meme-comic">No Telegram Channels Found</h3>
+          <p className="text-muted-foreground mb-4 meme-body">
             {searchTerm ? 'Try adjusting your search terms' : 'Start adding Telegram channels to monitor memecoin activity!'}
           </p>
           {!searchTerm && (

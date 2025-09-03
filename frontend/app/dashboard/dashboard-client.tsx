@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import RealTimeData from '@/components/dashboard/real-time-data';
 import TrendingCoinsSummary from '@/components/dashboard/trending-coins-summary';
 import TrendingCoinsAnalytics from '@/components/dashboard/trending-coins-analytics';
-import AIAnalysis from '@/components/dashboard/ai-analysis';
 import ErrorBoundary from '@/components/dashboard/error-boundary';
 
 export default function DashboardClient() {
@@ -105,19 +104,6 @@ export default function DashboardClient() {
       <ErrorBoundary>
         <RealTimeData />
       </ErrorBoundary>
-
-      {/* AI Memecoin Analysis */}
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold mb-4">🤖 AI Memecoin Analysis</h2>
-          <p className="text-muted-foreground">
-            OpenAI-powered analysis of TikTok trends, social sentiment, and token data for memecoin predictions
-          </p>
-        </div>
-        <ErrorBoundary>
-          <AIAnalysis />
-        </ErrorBoundary>
-      </div>
 
       {/* Trending Coins Analytics */}
       <div className="space-y-6">

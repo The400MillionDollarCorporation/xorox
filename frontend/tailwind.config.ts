@@ -22,6 +22,18 @@ const config: Config = {
       "2xl": "1536px",
     },
     extend: {
+      fontFamily: {
+        'nouns': ['Londrina Solid', 'serif'],
+        'sen': ['Sen', 'sans-serif'],
+        'meme-title': ['Fredoka', 'sans-serif'],
+        'meme-subtitle': ['Comic Neue', 'cursive'],
+        'meme-body': ['Quicksand', 'sans-serif'],
+        'crypto-tech': ['Space Grotesk', 'sans-serif'],
+        'crypto-futuristic': ['Orbitron', 'monospace'],
+        'crypto-bold': ['Rajdhani', 'sans-serif'],
+        'meme-playful': ['Fredoka', 'sans-serif'],
+        'meme-comic': ['Comic Neue', 'cursive'],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

@@ -70,7 +70,7 @@ export default function Layout({
             height={40}
             className="rounded-full"
           />
-          <p className="font-bold text-lg sm:text-2xl nouns tracking-widest text-[#F8D12E]">
+          <p className="font-bold text-lg sm:text-2xl crypto-futuristic tracking-widest text-[#F8D12E]">
             ZoroX
           </p>
         </div>
@@ -102,7 +102,7 @@ export default function Layout({
               });
             }}
           >
-            <p className="sen text-sm sm:text-md font-bold">
+            <p className="meme-playful text-sm sm:text-md font-bold">
               Mint free Test Bonks
             </p>
             <Image
