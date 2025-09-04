@@ -12,7 +12,6 @@ import { useEffect, useState } from "react";
 import { shortenAddress } from "@/lib/utils";
 // import getSub from "@/lib/supabase/getSub";
 import fetchBalances from "@/lib/fetchBalances";
-import mintFreeTestBonks from "@/lib/mintFreeTestBonks";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Layout({
@@ -78,41 +77,6 @@ export default function Layout({
         <CommandMenu />
 
         <div className="hidden md:flex space-y-4 sm:space-y-0 sm:space-x-4">
-          {/* <Button
-            variant="ghost"
-            className="hover:bg-transparent hover:border-[1px] hover:border-white transform transition hover:scale-105"
-            onClick={async () => {
-              if (!connected) {
-                toast({
-                  title: "Please connect your wallet first",
-                  description:
-                    "You need to connect your wallet to mint free Test Bonks",
-                });
-                return;
-              }
-              console.log("Minting free Test Bonks");
-              toast({
-                title: "Minting free Test Bonks",
-                description: "Please wait for transaction confirmation...",
-              });
-              await mintFreeTestBonks(walletAddress);
-              toast({
-                title: "Transaction Successful",
-                description: "Minted 500,000 Test Bonks",
-              });
-            }}
-          >
-            <p className="meme-playful text-sm sm:text-md font-bold">
-              Mint free Test Bonks
-            </p>
-            <Image
-              src="/bonk.png"
-              alt="logo"
-              width={20}
-              height={20}
-              className="rounded-full"
-            />
-          </Button> */}
 
           <Button
             variant="ghost"
@@ -164,41 +128,6 @@ export default function Layout({
         </div>
       </div>
       <div className="flex md:hidden mt-4 justify-center md:justify-start ">
-        <Button
-          variant="ghost"
-          className="hover:bg-transparent hover:border-[1px] hover:border-white transform transition hover:scale-105"
-          onClick={async () => {
-            if (!connected) {
-              toast({
-                title: "Please connect your wallet first",
-                description:
-                  "You need to connect your wallet to mint free Test Bonks",
-              });
-              return;
-            }
-            console.log("Minting free Test Bonks");
-            toast({
-              title: "Minting free Test Bonks",
-              description: "Please wait for transaction confirmation...",
-            });
-            await mintFreeTestBonks(walletAddress);
-            toast({
-              title: "Transaction Successful",
-              description: "Minted 500,000 Test Bonks",
-            });
-          }}
-        >
-          <p className="sen text-sm sm:text-md font-bold">
-            Mint free Test Bonks
-          </p>
-          <Image
-            src="/bonk.png"
-            alt="logo"
-            width={20}
-            height={20}
-            className="rounded-full"
-          />
-        </Button>
 
         <Button
           variant="ghost"
