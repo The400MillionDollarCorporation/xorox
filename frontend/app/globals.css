@@ -123,73 +123,73 @@ body {
 
 @layer base {
   :root {
-    /* Iris Brand Colors */
-    --iris-primary: 270 85% 65%;        /* Deep Purple - Primary brand color */
-    --iris-secondary: 240 100% 85%;     /* Light Blue - Secondary accent */
-    --iris-accent: 300 75% 70%;         /* Magenta - Accent color */
-    --iris-light: 270 50% 95%;          /* Very Light Purple - Backgrounds */
-    --iris-dark: 270 90% 25%;           /* Dark Purple - Text/contrast */
+    /* Black & White Brand Colors */
+    --iris-primary: 0 0% 0%;            /* Pure Black - Primary brand color */
+    --iris-secondary: 0 0% 50%;         /* Medium Gray - Secondary accent */
+    --iris-accent: 0 0% 20%;            /* Dark Gray - Accent color */
+    --iris-light: 0 0% 95%;             /* Very Light Gray - Backgrounds */
+    --iris-dark: 0 0% 10%;              /* Very Dark Gray - Text/contrast */
     
     /* System Colors */
     --background: 0 0% 100%;
-    --foreground: 270 90% 25%;
+    --foreground: 0 0% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 270 90% 25%;
+    --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 270 90% 25%;
-    --primary: 270 85% 65%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 270 50% 95%;
-    --secondary-foreground: 270 90% 25%;
-    --muted: 270 30% 90%;
-    --muted-foreground: 270 20% 50%;
-    --accent: 300 75% 70%;
-    --accent-foreground: 0 0% 98%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 50%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 270 30% 85%;
-    --input: 270 30% 90%;
-    --ring: 270 85% 65%;
-    --chart-1: 270 85% 65%;
-    --chart-2: 240 100% 85%;
-    --chart-3: 300 75% 70%;
-    --chart-4: 270 60% 75%;
-    --chart-5: 240 80% 80%;
+    --border: 0 0% 85%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 0%;
+    --chart-1: 0 0% 0%;
+    --chart-2: 0 0% 50%;
+    --chart-3: 0 0% 20%;
+    --chart-4: 0 0% 30%;
+    --chart-5: 0 0% 70%;
     --radius: 0.5rem;
   }
   .dark {
-    /* Iris Brand Colors - Dark Mode */
-    --iris-primary: 270 85% 65%;        /* Deep Purple - Primary brand color */
-    --iris-secondary: 240 100% 85%;     /* Light Blue - Secondary accent */
-    --iris-accent: 300 75% 70%;         /* Magenta - Accent color */
-    --iris-light: 270 20% 15%;          /* Dark Purple - Dark backgrounds */
-    --iris-dark: 270 30% 90%;           /* Light Purple - Text/contrast */
+    /* Black & White Brand Colors - Dark Mode */
+    --iris-primary: 0 0% 100%;          /* Pure White - Primary brand color */
+    --iris-secondary: 0 0% 50%;         /* Medium Gray - Secondary accent */
+    --iris-accent: 0 0% 80%;            /* Light Gray - Accent color */
+    --iris-light: 0 0% 5%;              /* Very Dark Gray - Dark backgrounds */
+    --iris-dark: 0 0% 90%;              /* Light Gray - Text/contrast */
     
     /* System Colors - Dark Mode */
-    --background: 270 20% 8%;
-    --foreground: 270 30% 90%;
-    --card: 270 20% 10%;
-    --card-foreground: 270 30% 90%;
-    --popover: 270 20% 10%;
-    --popover-foreground: 270 30% 90%;
-    --primary: 270 85% 65%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 270 20% 15%;
-    --secondary-foreground: 270 30% 90%;
-    --muted: 270 15% 20%;
-    --muted-foreground: 270 20% 60%;
-    --accent: 300 75% 70%;
-    --accent-foreground: 0 0% 98%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 90%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 90%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 90%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 80%;
+    --accent-foreground: 0 0% 5%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 270 15% 20%;
-    --input: 270 15% 20%;
-    --ring: 270 85% 65%;
-    --chart-1: 270 85% 65%;
-    --chart-2: 240 100% 85%;
-    --chart-3: 300 75% 70%;
-    --chart-4: 270 60% 75%;
-    --chart-5: 240 80% 80%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 100%;
+    --chart-1: 0 0% 100%;
+    --chart-2: 0 0% 50%;
+    --chart-3: 0 0% 80%;
+    --chart-4: 0 0% 70%;
+    --chart-5: 0 0% 30%;
   }
 }
 

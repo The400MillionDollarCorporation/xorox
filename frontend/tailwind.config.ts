@@ -75,7 +75,7 @@ const config: Config = {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
-        // Iris Brand Colors
+        // Black & White Brand Colors
         iris: {
           primary: "hsl(var(--iris-primary))",
           secondary: "hsl(var(--iris-secondary))",
