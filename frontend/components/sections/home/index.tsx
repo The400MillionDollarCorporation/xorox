@@ -12,35 +12,58 @@ import TelegramChannelsHome from "./telegram-channels";
 export default function Home() {
   const { paid } = useEnvironmentStore((store) => store);
   return (
-    <div className="w-full">
-      <p className="text-center meme-title tracking-widest font-bold text-2xl md:text-3xl text-iris-primary mt-6 md:mt-16">
-        The Ultimate TikTok & Telegram Memecoin Hunter
-      </p>
-      <p className="meme-subtitle text-muted-foreground font-semibold mt-2 text-center text-xs sm:text-sm md:text-base">
-        Realtime tiktok & telegram analytics for memecoins. <br />
-        Hunt the next moonshot 🚀
-      </p>
+    <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Hero Section */}
+      <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+        <p className="meme-title tracking-widest font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl text-iris-primary mt-4 sm:mt-6 md:mt-12 lg:mt-16">
+          The Ultimate TikTok & Telegram Memecoin Hunter
+        </p>
+        <p className="meme-subtitle text-muted-foreground font-semibold mt-2 sm:mt-4 text-center text-xs sm:text-sm md:text-base lg:text-lg max-w-4xl mx-auto">
+          Realtime tiktok & telegram analytics for memecoins. <br className="hidden sm:block" />
+          <span className="sm:hidden"> </span>Hunt the next moonshot 🚀
+        </p>
+      </div>
       
       {/* Scraper Status */}
-      <div className="max-w-[1200px] mx-auto mt-8">
+      <div className="mb-8 sm:mb-12 lg:mb-16">
         <ScraperStatus />
       </div>
       
       {/* Telegram Channels */}
-      <div className="mt-16">
+      <div className="mb-8 sm:mb-12 lg:mb-16">
         <TelegramChannelsHome />
       </div>
       
-      <div className="max-w-[1200px] mx-auto">
+      {/* Hero Table */}
+      <div className="mb-8 sm:mb-12 lg:mb-16">
         <HeroTable />
       </div>
-      {!paid && <UnlockNow text="View the realtime dashboard" />}
-      {/* <TimeSeriesChart /> */}
-      <TiktokSection />
-      <GraphPreview />
-      <Separator className="my-8" />
-      {!paid && <UnlockNow text="Unlock All Iris features now" />}
-      <div className="my-12" />
+      
+      {!paid && (
+        <div className="mb-8 sm:mb-12 lg:mb-16">
+          <UnlockNow text="View the realtime dashboard" />
+        </div>
+      )}
+      
+      {/* TikTok Section */}
+      <div className="mb-8 sm:mb-12 lg:mb-16">
+        <TiktokSection />
+      </div>
+      
+      {/* Graph Preview */}
+      <div className="mb-8 sm:mb-12 lg:mb-16">
+        <GraphPreview />
+      </div>
+      
+      <Separator className="my-8 sm:my-12 lg:my-16" />
+      
+      {!paid && (
+        <div className="mb-8 sm:mb-12 lg:mb-16">
+          <UnlockNow text="Unlock All Iris features now" />
+        </div>
+      )}
+      
+      <div className="my-8 sm:my-12 lg:my-16" />
     </div>
   );
 }

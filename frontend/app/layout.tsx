@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "player",
-    site: "https://x.com/TokenHunterZoro",
+    site: "https://x.com/iris_internet",
     title: "Iris | World's Best Memecoin Hunter",
     images: ["https://zorox-ai.vercel.app/iris.jpg"],
     description:

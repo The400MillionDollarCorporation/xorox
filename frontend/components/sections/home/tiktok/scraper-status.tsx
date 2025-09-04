@@ -120,13 +120,14 @@ export default function ScraperStatus() {
 
   return (
     <Card className="bg-black/20 border-iris-primary/20">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <Activity className="h-5 w-5" />
-          TikTok & Telegram Scraper Status
+      <CardHeader className="pb-3 sm:pb-4">
+        <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+          <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="hidden sm:inline">TikTok & Telegram Scraper Status</span>
+          <span className="sm:hidden">Scraper Status</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         {/* Status Indicator */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Current Status:</span>
@@ -175,36 +176,38 @@ export default function ScraperStatus() {
         )}
 
         {/* Statistics */}
-        <div className="grid grid-cols-2 gap-4 pt-2">
-          <div className="text-center p-3 bg-black/10 rounded-lg">
-            <p className="text-2xl font-bold text-iris-primary">{status.totalVideos}</p>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2">
+          <div className="text-center p-2 sm:p-3 bg-black/10 rounded-lg">
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-iris-primary">{status.totalVideos}</p>
             <p className="text-xs text-muted-foreground">Total Videos</p>
           </div>
-          <div className="text-center p-3 bg-black/10 rounded-lg">
-            <p className="text-2xl font-bold text-iris-primary">{status.videosToday}</p>
+          <div className="text-center p-2 sm:p-3 bg-black/10 rounded-lg">
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-iris-primary">{status.videosToday}</p>
             <p className="text-xs text-muted-foreground">Today</p>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 border-iris-primary/30 text-iris-primary"
+            className="flex-1 border-iris-primary/30 text-iris-primary h-9 sm:h-10"
             onClick={fetchStatus}
           >
             <Activity className="h-4 w-4 mr-2" />
-            Refresh Status
+            <span className="hidden sm:inline">Refresh Status</span>
+            <span className="sm:hidden">Refresh</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 border-iris-primary/30 text-iris-primary"
+            className="flex-1 border-iris-primary/30 text-iris-primary h-9 sm:h-10"
             onClick={() => window.open('/dashboard', '_blank')}
           >
             <Play className="h-4 w-4 mr-2" />
-            View Dashboard
+            <span className="hidden sm:inline">View Dashboard</span>
+            <span className="sm:hidden">Dashboard</span>
           </Button>
         </div>
       </CardContent>
