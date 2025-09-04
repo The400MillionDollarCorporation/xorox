@@ -102,10 +102,10 @@ export default function Tweets({
       <div className="flex justify-between sen my-12 items-center">
         <div className="flex flex-col w-full">
           <p className="text-xl md:text-2xl text-center mx-auto md:mx-0 md:text-start font-bold nouns tracking-widest text-iris-primary">
-            ZoroX Tweets
+            Iris Tweets
           </p>
           <p className="text-xs md:text-sm text-center mx-auto md:mx-0 md:text-start lg:text-md text-muted-foreground font-semibold">
-            View all tweets made by ZoroX about ${symbol.toUpperCase()}
+            View all tweets made by Iris about ${symbol.toUpperCase()}
           </p>
         </div>
         <p className="hidden md:block font-semibold text-right">
@@ -142,12 +142,12 @@ export default function Tweets({
                       src={"/iris.jpg"}
                       width={28}
                       height={28}
-                      alt="ZoroX Logo"
+                      alt="Iris Logo"
                       className="rounded-full"
                     />
                     <div className="flex flex-col justify-center">
                       <p className="text-md font-bold text-white leading-tight">
-                        ZoroX
+                        Iris
                       </p>
                       <p className="text-xs font-medium text-muted-foreground">
                         @TokenHunterZoro

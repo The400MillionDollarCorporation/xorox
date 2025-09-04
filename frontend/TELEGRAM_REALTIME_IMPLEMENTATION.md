@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-Successfully implemented real-time Telegram analytics for the ZoroX dashboard, matching the functionality of the existing TikTok real-time system. The Telegram analytics now update automatically without requiring page refreshes.
+Successfully implemented real-time Telegram analytics for the Iris dashboard, matching the functionality of the existing TikTok real-time system. The Telegram analytics now update automatically without requiring page refreshes.
 
 ## ✅ What's Been Implemented
 
@@ -185,6 +185,6 @@ The implementation successfully provides:
 
 ## 🎉 Result
 
-The Telegram analytics in the ZoroX dashboard are now fully real-time, providing users with live updates of Telegram channel activity, message counts, and trending keywords without requiring manual page refreshes. The implementation matches the quality and functionality of the existing TikTok real-time system while providing Telegram-specific features and data.
+The Telegram analytics in the Iris dashboard are now fully real-time, providing users with live updates of Telegram channel activity, message counts, and trending keywords without requiring manual page refreshes. The implementation matches the quality and functionality of the existing TikTok real-time system while providing Telegram-specific features and data.
 
 The system is production-ready and provides a smooth, responsive user experience for monitoring Telegram activity in real-time.

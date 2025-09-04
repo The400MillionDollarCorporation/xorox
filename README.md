@@ -1,9 +1,9 @@
-# ZoroX - The TikTok Memecoin Hunter
+# Iris - The TikTok Memecoin Hunter
 
 **Description:**  
-ZoroX is an autonomous AI-powered agent that hunts for the hottest memecoins trending on TikTok and provides real-time analytics on their performance. Designed for crypto enthusiasts and memecoin hunters, ZoroX bridges the gap between TikTok meme culture and emerging cryptocurrency trends.
+Iris is an autonomous AI-powered agent that hunts for the hottest memecoins trending on TikTok and provides real-time analytics on their performance. Designed for crypto enthusiasts and memecoin hunters, Iris bridges the gap between TikTok meme culture and emerging cryptocurrency trends.
 
-By leveraging TikTok's trending data and Pump.fun's database of launched tokens, ZoroX offers users insights into memecoin popularity, trading volume, and market movements. It also integrates BONK tokens to incentivize premium features for advanced users.
+By leveraging TikTok's trending data and Pump.fun's database of launched tokens, Iris offers users insights into memecoin popularity, trading volume, and market movements. It also integrates BONK tokens to incentivize premium features for advanced users.
 
 ---
 
@@ -27,7 +27,7 @@ By leveraging TikTok's trending data and Pump.fun's database of launched tokens,
 
 4. **Automated Social Media Updates:**
 
-   - Posts tweets from the ZoroX Twitter account about trending memecoins when:
+   - Posts tweets from the Iris Twitter account about trending memecoins when:
      - Volume growth surpasses $10K within an hour.
      - Growth rate is at least 100% ($5K → $10K+).
 
@@ -54,7 +54,7 @@ By leveraging TikTok's trending data and Pump.fun's database of launched tokens,
 
 1. **Data Collection:**
 
-   - ZoroX scrapes TikTok for relevant hashtags, descriptions, and comments.
+   - Iris scrapes TikTok for relevant hashtags, descriptions, and comments.
    - Patterns are matched with Pump.fun's database to identify associated tokens.
 
 2. **Trend Analysis:**
@@ -72,9 +72,9 @@ By leveraging TikTok's trending data and Pump.fun's database of launched tokens,
 
 ---
 
-## Why ZoroX?
+## Why Iris?
 
-In the fast-paced world of memecoins, ZoroX provides a cutting-edge advantage for traders and enthusiasts. By combining TikTok's viral potential with on-chain data from Pump.fun, ZoroX delivers actionable insights and real-time updates, empowering users to capitalize on emerging trends.
+In the fast-paced world of memecoins, Iris provides a cutting-edge advantage for traders and enthusiasts. By combining TikTok's viral potential with on-chain data from Pump.fun, Iris delivers actionable insights and real-time updates, empowering users to capitalize on emerging trends.
 
 ---
 

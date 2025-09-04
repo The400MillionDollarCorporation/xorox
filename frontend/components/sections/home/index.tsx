@@ -39,7 +39,7 @@ export default function Home() {
       <TiktokSection />
       <GraphPreview />
       <Separator className="my-8" />
-      {!paid && <UnlockNow text="Unlock All ZoroX features now" />}
+      {!paid && <UnlockNow text="Unlock All Iris features now" />}
       <div className="my-12" />
     </div>
   );

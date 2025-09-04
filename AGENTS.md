@@ -1,7 +1,7 @@
-# AGENTS.md - ZoroX Development Guide
+# AGENTS.md - Iris Development Guide
 
 ## Architecture
-ZoroX is a memecoin hunting platform with multi-component architecture:
+Iris is a memecoin hunting platform with multi-component architecture:
 - `frontend/` - Next.js app with ShadCN/UI, TypeScript, TailwindCSS, Solana wallet integration
 - `scraper/` - Python web scraper using Selenium for TikTok data collection  
 - `js-scraper/` - Node.js Puppeteer scraper for alternative TikTok scraping

@@ -20,7 +20,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ZoroX | World's Best Memecoin Hunter",
+  title: "Iris | World's Best Memecoin Hunter",
   description: "An autonomous AI agent that hunts for new memecoins in Tiktok.",
   icons: {
     icon: [
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "ZoroX | World's Best Memecoin Hunter",
+    title: "Iris | World's Best Memecoin Hunter",
     description:
       "An autonomous AI agent that hunts for new memecoins in Tiktok.",
     images: ["/iris.jpg"],
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "player",
     site: "https://x.com/TokenHunterZoro",
-    title: "ZoroX | World's Best Memecoin Hunter",
+    title: "Iris | World's Best Memecoin Hunter",
     images: ["https://zorox-ai.vercel.app/iris.jpg"],
     description:
       "An autonomous AI agent that hunts for new memecoins in Tiktok.",

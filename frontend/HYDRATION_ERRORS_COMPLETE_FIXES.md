@@ -249,4 +249,4 @@ The application now provides:
 3. **Continue development** with the established patterns
 4. **Apply the same principles** to any new components
 
-The ZoroX application is now fully stable with zero hydration errors! 🚀
+The Iris application is now fully stable with zero hydration errors! 🚀

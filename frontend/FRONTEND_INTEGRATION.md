@@ -2,7 +2,7 @@
 
 ## Overview
 
-The ZoroX frontend provides a comprehensive dashboard that integrates with all backend systems:
+The Iris frontend provides a comprehensive dashboard that integrates with all backend systems:
 - **TikTok Scraper**: Real-time video scraping and analysis
 - **Telegram Scraper**: Channel message monitoring and keyword tracking
 - **Pattern Analysis**: AI-powered correlation analysis and trading recommendations
@@ -82,4 +82,4 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 3. **Launch Frontend**: Start the Next.js development server
 4. **Access Dashboard**: Navigate to `/dashboard`
 
-The frontend provides a **comprehensive, real-time interface** for monitoring and controlling all ZoroX systems! 🚀
+The frontend provides a **comprehensive, real-time interface** for monitoring and controlling all Iris systems! 🚀

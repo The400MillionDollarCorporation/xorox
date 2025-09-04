@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-Successfully implemented comprehensive Telegram channels management functionality for the ZoroX dashboard. The system provides real-time monitoring, management, and analytics for Telegram channels used in memecoin data collection.
+Successfully implemented comprehensive Telegram channels management functionality for the Iris dashboard. The system provides real-time monitoring, management, and analytics for Telegram channels used in memecoin data collection.
 
 ## ✅ What's Been Implemented
 
@@ -236,9 +236,9 @@ The implementation successfully provides:
 
 ## 🎉 Result
 
-The ZoroX dashboard now includes comprehensive Telegram channels management functionality, providing users with real-time insights into channel status, message statistics, and the ability to manage channel settings directly from the dashboard. The system intelligently monitors channel activity and provides live updates without requiring manual page refreshes.
+The Iris dashboard now includes comprehensive Telegram channels management functionality, providing users with real-time insights into channel status, message statistics, and the ability to manage channel settings directly from the dashboard. The system intelligently monitors channel activity and provides live updates without requiring manual page refreshes.
 
-The implementation is production-ready and provides a smooth, responsive user experience for monitoring and managing Telegram channels in real-time, enhancing the memecoin data collection capabilities of the ZoroX platform! 🚀
+The implementation is production-ready and provides a smooth, responsive user experience for monitoring and managing Telegram channels in real-time, enhancing the memecoin data collection capabilities of the Iris platform! 🚀
 
 ## 📋 Example Output
 

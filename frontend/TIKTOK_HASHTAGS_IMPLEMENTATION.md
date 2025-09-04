@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-Successfully implemented trending hashtags functionality for TikTok analytics in the ZoroX dashboard. The system extracts hashtags from TikTok data, analyzes their popularity, and displays real-time trending hashtags with engagement metrics.
+Successfully implemented trending hashtags functionality for TikTok analytics in the Iris dashboard. The system extracts hashtags from TikTok data, analyzes their popularity, and displays real-time trending hashtags with engagement metrics.
 
 ## ✅ What's Been Implemented
 
@@ -185,9 +185,9 @@ The implementation successfully provides:
 
 ## 🎉 Result
 
-The TikTok analytics in the ZoroX dashboard now include comprehensive trending hashtag functionality, providing users with real-time insights into popular hashtags, their usage counts, and engagement metrics. The system intelligently extracts hashtags from TikTok data and provides live updates without requiring manual page refreshes.
+The TikTok analytics in the Iris dashboard now include comprehensive trending hashtag functionality, providing users with real-time insights into popular hashtags, their usage counts, and engagement metrics. The system intelligently extracts hashtags from TikTok data and provides live updates without requiring manual page refreshes.
 
-The implementation is production-ready and provides a smooth, responsive user experience for monitoring TikTok hashtag trends in real-time, enhancing the memecoin hunting capabilities of the ZoroX platform! 🚀
+The implementation is production-ready and provides a smooth, responsive user experience for monitoring TikTok hashtag trends in real-time, enhancing the memecoin hunting capabilities of the Iris platform! 🚀
 
 ## 📋 Example Output
 

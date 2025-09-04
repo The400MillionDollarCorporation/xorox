@@ -1,8 +1,8 @@
-# 🎨 Memecoin Fonts Guide - ZoroX
+# 🎨 Memecoin Fonts Guide - Iris
 
 ## 🚀 **New Font System Overview**
 
-We've upgraded ZoroX with a comprehensive set of memecoin-appropriate fonts that give the platform a fun, playful, and crypto-native feel while maintaining professionalism.
+We've upgraded Iris with a comprehensive set of memecoin-appropriate fonts that give the platform a fun, playful, and crypto-native feel while maintaining professionalism.
 
 ## 📝 **Available Font Classes**
 
@@ -75,7 +75,7 @@ We've upgraded ZoroX with a comprehensive set of memecoin-appropriate fonts that
 ```tsx
 // Brand/logo
 <span className="crypto-futuristic text-xl font-bold">
-  ZoroX
+  Iris
 </span>
 
 // Error messages
@@ -149,7 +149,7 @@ All fonts are available as Tailwind classes:
 
 ```tsx
 // Primary brand
-<span className="meme-title text-iris-primary">ZoroX</span>
+<span className="meme-title text-iris-primary">Iris</span>
 
 // Success states
 <div className="crypto-bold text-green-500">+25.6%</div>
@@ -215,7 +215,7 @@ All fonts are loaded via Google Fonts in `globals.css`:
 
 ## 🎉 **Result**
 
-The new font system gives ZoroX a distinctive memecoin personality that's:
+The new font system gives Iris a distinctive memecoin personality that's:
 - **Fun & Playful** - Appeals to the memecoin community
 - **Professional** - Maintains credibility for trading
 - **Readable** - Ensures good UX across all devices

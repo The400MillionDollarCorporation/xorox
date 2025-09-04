@@ -65,13 +65,13 @@ export default function Layout({
         >
           <Image
             src="/iris.jpg"
-            alt="ZoroX Logo"
+            alt="Iris Logo"
             width={40}
             height={40}
             className="rounded-full"
           />
           <p className="font-bold text-lg sm:text-2xl crypto-futuristic tracking-widest text-iris-primary">
-            ZoroX
+            Iris
           </p>
         </div>
 

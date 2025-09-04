@@ -1,8 +1,8 @@
-# 🌸 Iris Brand Colors Guide - ZoroX
+# 🌸 Iris Brand Colors Guide - Iris
 
 ## 🎨 **Brand Color System Overview**
 
-ZoroX now features a beautiful iris-inspired color palette that reflects the natural elegance and vibrancy of the iris flower. The color system is designed to be both visually appealing and highly functional across all components.
+Iris now features a beautiful iris-inspired color palette that reflects the natural elegance and vibrancy of the iris flower. The color system is designed to be both visually appealing and highly functional across all components.
 
 ## 🌈 **Iris Brand Color Palette**
 
@@ -234,7 +234,7 @@ The iris color system automatically adapts to dark mode:
 <nav className="bg-background border-b border-iris-primary/20">
   <div className="flex items-center space-x-4">
     <img src="/iris.jpg" alt="Logo" className="w-8 h-8" />
-    <span className="text-iris-primary font-bold">ZoroX</span>
+    <span className="text-iris-primary font-bold">Iris</span>
   </div>
 </nav>
 ```
@@ -244,7 +244,7 @@ The iris color system automatically adapts to dark mode:
 ```tsx
 <section className="bg-gradient-to-br from-iris-light to-background">
   <h1 className="text-iris-primary text-4xl font-bold">
-    Welcome to ZoroX
+    Welcome to Iris
   </h1>
   <p className="text-iris-dark text-lg">
     The ultimate memecoin hunter
@@ -280,4 +280,4 @@ The new iris brand color system provides:
 - **🎨 Visual Hierarchy**: Clear distinction between different element types
 - **🚀 Modern Appeal**: Contemporary color choices that appeal to the crypto community
 
-The iris color system creates a distinctive, professional, and visually appealing brand identity that sets ZoroX apart in the memecoin space! 🌸✨
+The iris color system creates a distinctive, professional, and visually appealing brand identity that sets Iris apart in the memecoin space! 🌸✨
