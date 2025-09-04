@@ -15,18 +15,18 @@ export default function TrendingCoinsPage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
 
   return (
-    <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold meme-title">🚀 Trending Coins Analytics</h1>
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground mt-2 meme-body">
+          <h1 className="text-3xl font-bold">🚀 Trending Coins Analytics</h1>
+          <p className="text-xl text-muted-foreground mt-2">
             Comprehensive analysis of trending memecoins with social and trading metrics
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex gap-2">
           <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
-            <SelectTrigger className="w-full sm:w-32">
+            <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -36,7 +36,7 @@ export default function TrendingCoinsPage() {
               <SelectItem value="7d">7 Days</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="w-full sm:w-auto">
+          <Button variant="outline">
             📊 Export Data
           </Button>
         </div>
@@ -51,7 +51,7 @@ export default function TrendingCoinsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex gap-4">
             <div className="flex-1">
               <Input
                 placeholder="Search by coin symbol, name, or keyword..."
@@ -60,7 +60,7 @@ export default function TrendingCoinsPage() {
                 className="w-full"
               />
             </div>
-            <Button variant="outline" className="w-full sm:w-auto">
+            <Button variant="outline">
               🔄 Refresh
             </Button>
           </div>
@@ -69,18 +69,18 @@ export default function TrendingCoinsPage() {
 
       {/* Summary Metrics */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4 meme-title">📊 Market Overview</h2>
+        <h2 className="text-2xl font-bold mb-4">📊 Market Overview</h2>
         <TrendingCoinsSummary />
       </div>
 
       {/* Detailed Analytics */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4 meme-title">📈 Detailed Analytics</h2>
+        <h2 className="text-2xl font-bold mb-4">📈 Detailed Analytics</h2>
         <TrendingCoinsAnalytics />
       </div>
 
       {/* Additional Insights */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Correlation Insights */}
         <Card>
           <CardHeader>
@@ -157,7 +157,7 @@ export default function TrendingCoinsPage() {
             </TabsList>
 
             <TabsContent value="trends" className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">🚀 Momentum Coins</h4>
                   <p className="text-sm text-muted-foreground">
@@ -182,7 +182,7 @@ export default function TrendingCoinsPage() {
             </TabsContent>
 
             <TabsContent value="sectors" className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 border rounded-lg text-center">
                   <h4 className="font-semibold mb-2">🐕 Memecoins</h4>
                   <p className="text-sm text-muted-foreground">Highest social engagement</p>
@@ -202,7 +202,7 @@ export default function TrendingCoinsPage() {
             </TabsContent>
 
             <TabsContent value="timing" className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">⏰ Best Entry Points</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">

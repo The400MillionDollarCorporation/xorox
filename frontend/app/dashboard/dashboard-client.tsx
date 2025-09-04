@@ -74,10 +74,10 @@ export default function DashboardClient() {
 
 
   return (
-    <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold meme-title">ZoroX Dashboard</h1>
-        <p className="text-sm sm:text-base text-muted-foreground meme-body">
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">ZoroX Dashboard</h1>
+        <p className="text-muted-foreground">
           Real-time memecoin analytics and TikTok trend monitoring
         </p>
       </div>
@@ -88,10 +88,10 @@ export default function DashboardClient() {
       </ErrorBoundary>
 
       {/* Trending Coins Analytics */}
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4 meme-title">🚀 Trending Coins Analytics</h2>
-          <p className="text-sm sm:text-base text-muted-foreground meme-body">
+          <h2 className="text-2xl font-bold mb-4">🚀 Trending Coins Analytics</h2>
+          <p className="text-muted-foreground">
             Monitor top trending coins with 24-hour trading volume, TikTok view counts, and volume/social correlation metrics
           </p>
         </div>
@@ -108,9 +108,9 @@ export default function DashboardClient() {
       </div>
 
       {/* System Status Overview */}
-      <div className="space-y-4 sm:space-y-6">
-        <h2 className="text-xl sm:text-2xl font-bold meme-title">System Status</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold">System Status</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* TikTok Status */}
           <Card>
             <CardHeader>

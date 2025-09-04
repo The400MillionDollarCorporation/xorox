@@ -32,7 +32,7 @@ export default function UnlockNow({ text }: { text: string }) {
         </div>
       </p>
       <Button
-        className="flex bg-[#F8D12E] hover:bg-[#F8D12E] transform transition hover:scale-105"
+        className="flex bg-iris-primary hover:bg-iris-primary/80 transform transition hover:scale-105"
         onClick={async () => {
           if (walletAddress == "") {
             toast({

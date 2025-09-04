@@ -38,7 +38,7 @@ We've upgraded ZoroX with a comprehensive set of memecoin-appropriate fonts that
 #### **🏠 Homepage & Landing Pages**
 ```tsx
 // Main hero title
-<h1 className="meme-title text-4xl font-bold text-[#F8D12E]">
+<h1 className="meme-title text-4xl font-bold text-iris-primary">
   The Ultimate Memecoin Hunter
 </h1>
 
@@ -149,7 +149,7 @@ All fonts are available as Tailwind classes:
 
 ```tsx
 // Primary brand
-<span className="meme-title text-[#F8D12E]">ZoroX</span>
+<span className="meme-title text-iris-primary">ZoroX</span>
 
 // Success states
 <div className="crypto-bold text-green-500">+25.6%</div>
@@ -179,7 +179,7 @@ All fonts are available as Tailwind classes:
 ```tsx
 <div className="grid grid-cols-3 gap-4">
   <div className="text-center">
-    <div className="crypto-bold text-2xl font-bold text-[#F8D12E]">
+    <div className="crypto-bold text-2xl font-bold text-iris-primary">
       1,234
     </div>
     <div className="crypto-tech text-xs text-muted-foreground">
@@ -191,7 +191,7 @@ All fonts are available as Tailwind classes:
 
 ### **Button Styles:**
 ```tsx
-<Button className="meme-playful font-semibold bg-[#F8D12E] text-black">
+<Button className="meme-playful font-semibold bg-iris-primary text-black">
   🚀 Hunt Memecoins
 </Button>
 ```

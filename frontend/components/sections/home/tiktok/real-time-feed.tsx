@@ -131,7 +131,7 @@ export default function RealTimeTikTokFeed() {
     return (
       <div className="w-full max-w-7xl mx-auto px-4 py-8">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#F8D12E]/20 border-t-[#F8D12E] rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-iris-primary/20 border-t-iris-primary rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading TikTok feed...</p>
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function RealTimeTikTokFeed() {
             onClick={fetchTikTokData}
             disabled={refreshing}
             variant="outline"
-            className="border-[#F8D12E]/30 text-[#F8D12E] hover:bg-[#F8D12E]/10"
+            className="border-iris-primary/30 text-iris-primary hover:bg-iris-primary/10"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -190,7 +190,7 @@ export default function RealTimeTikTokFeed() {
       {/* Loading State */}
       {loading && (
         <div className="text-center py-12">
-          <div className="w-16 h-16 border-4 border-[#F8D12E]/20 border-t-[#F8D12E] rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-iris-primary/20 border-t-iris-primary rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading TikTok data...</p>
       </div>
       )}
@@ -204,12 +204,12 @@ export default function RealTimeTikTokFeed() {
           return (
               <Card
                 key={tiktok.id}
-                className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-[#F8D12E]/50 transition-all duration-300 hover:scale-105"
+                className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-iris-primary/50 transition-all duration-300 hover:scale-105"
               >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-[#F8D12E] to-yellow-500 rounded-full flex items-center justify-center text-black font-bold text-sm">
+                      <div className="w-10 h-10 bg-gradient-to-br from-iris-primary to-iris-secondary rounded-full flex items-center justify-center text-black font-bold text-sm">
                         {tiktok.username.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -250,7 +250,7 @@ export default function RealTimeTikTokFeed() {
                       <span className="text-white">{tiktok.comments}</span>
                     </div>
                   </div>
-                  <TrendingUp className="h-4 w-4 text-[#F8D12E]" />
+                  <TrendingUp className="h-4 w-4 text-iris-primary" />
                 </div>
                 
                 {/* Token Mentions */}
@@ -262,7 +262,7 @@ export default function RealTimeTikTokFeed() {
                         <Badge
                           key={mention.id}
                           variant="secondary"
-                          className="bg-[#F8D12E]/20 text-[#F8D12E] border-[#F8D12E]/30"
+                          className="bg-iris-primary/20 text-iris-primary border-iris-primary/30"
                         >
                           {mention.token?.symbol || `Token ${mention.token_id}`}
                           <span className="ml-1 text-xs">({mention.count})</span>
@@ -275,7 +275,7 @@ export default function RealTimeTikTokFeed() {
                 {/* View Button */}
                 <Button
                   asChild
-                  className="w-full bg-[#F8D12E] hover:bg-[#F8D12E]/80 text-black"
+                  className="w-full bg-iris-primary hover:bg-iris-primary/80 text-black"
                   size="sm"
                 >
                   <a href={tiktok.url} target="_blank" rel="noopener noreferrer">
@@ -292,7 +292,7 @@ export default function RealTimeTikTokFeed() {
       {/* Load More */}
       {!loading && tiktoks.length > 12 && (
         <div className="text-center mt-8">
-          <Button variant="outline" className="border-[#F8D12E]/30 text-[#F8D12E]">
+          <Button variant="outline" className="border-iris-primary/30 text-iris-primary">
             Load More Videos
           </Button>
         </div>
@@ -301,8 +301,8 @@ export default function RealTimeTikTokFeed() {
       {/* Empty State */}
       {!loading && tiktoks.length === 0 && !error && (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-[#F8D12E]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <TrendingUp className="h-8 w-8 text-[#F8D12E]" />
+          <div className="w-16 h-16 bg-iris-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <TrendingUp className="h-8 w-8 text-iris-primary" />
           </div>
           <h3 className="text-lg font-semibold text-white mb-2 meme-comic">No TikTok Data Yet</h3>
           <p className="text-muted-foreground mb-4 meme-body">
@@ -315,7 +315,7 @@ export default function RealTimeTikTokFeed() {
           </div>
           <Button
             onClick={fetchTikTokData}
-            className="mt-4 bg-[#F8D12E] hover:bg-[#F8D12E]/80 text-black"
+            className="mt-4 bg-iris-primary hover:bg-iris-primary/80 text-black"
           >
             Try Again
           </Button>

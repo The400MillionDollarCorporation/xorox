@@ -64,13 +64,13 @@ export default function Layout({
           }}
         >
           <Image
-            src="/logo.jpg"
-            alt="logo"
+            src="/iris.jpg"
+            alt="ZoroX Logo"
             width={40}
             height={40}
             className="rounded-full"
           />
-          <p className="font-bold text-lg sm:text-2xl crypto-futuristic tracking-widest text-[#F8D12E]">
+          <p className="font-bold text-lg sm:text-2xl crypto-futuristic tracking-widest text-iris-primary">
             ZoroX
           </p>
         </div>
@@ -142,7 +142,7 @@ export default function Layout({
           </Button>
 
           <Button
-            className="bg-[#F8D12E] hover:bg-[#F8D12E] transform transition hover:scale-105"
+            className="bg-iris-primary hover:bg-iris-primary/80 transform transition hover:scale-105"
             onClick={() => {
               if (!connected) setVisible(true);
               else disconnect();
@@ -210,7 +210,7 @@ export default function Layout({
           <p className="sen text-sm sm:text-md font-bold">
             Live Dashboard
           </p>
-          <div className="w-2 h-2 bg-[#F8D12E] rounded-full animate-pulse ml-2"></div>
+          <div className="w-2 h-2 bg-iris-primary rounded-full animate-pulse ml-2"></div>
         </Button>
 
         <Button
@@ -241,7 +241,7 @@ export default function Layout({
         </Button>
 
         <Button
-          className="bg-[#F8D12E] hover:bg-[#F8D12E] transform transition hover:scale-105"
+          className="bg-iris-primary hover:bg-iris-primary/80 transform transition hover:scale-105"
           onClick={() => {
             if (!connected) setVisible(true);
             else disconnect();

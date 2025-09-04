@@ -383,7 +383,7 @@ export default function TimeSeriesChartWithPaywall({
                 e.currentTarget.src = '/placeholder-token.png';
               }}
             />
-            <CardTitle className="text-lg sm:text-xl font-bold text-[#F8D12E] nouns tracking-widest">
+            <CardTitle className="text-lg sm:text-xl font-bold text-iris-primary nouns tracking-widest">
               {tokenData.symbol.toLocaleUpperCase()}
               <span
                 className="text-muted-foreground text-xs sm:text-sm font-medium sen tracking-normal cursor-pointer"
@@ -455,7 +455,7 @@ export default function TimeSeriesChartWithPaywall({
               checked={showPrice}
               onCheckedChange={setShowPrice}
               id="price-toggle"
-              className="bg-[#F8D12E] data-[state=checked]:bg-[#F8D12E]"
+              className="bg-iris-primary data-[state=checked]:bg-iris-primary"
             />
             <div
               className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full ${
@@ -475,7 +475,7 @@ export default function TimeSeriesChartWithPaywall({
               checked={showPopularity}
               onCheckedChange={setShowPopularity}
               id="views-toggle"
-              className="bg-[#F8D12E] data-[state=checked]:bg-[#F8D12E]"
+              className="bg-iris-primary data-[state=checked]:bg-iris-primary"
             />
             <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#800080]" />
             <Label

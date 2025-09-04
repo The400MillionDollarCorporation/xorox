@@ -124,7 +124,7 @@ export default function AnalyticsDashboard() {
   if (loading || !isClient) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F8D12E]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-iris-primary"></div>
         <span className="ml-2 text-muted-foreground">Loading analytics...</span>
       </div>
     );
@@ -150,7 +150,7 @@ export default function AnalyticsDashboard() {
         </div>
         <div className="flex items-center gap-4">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32 bg-black/20 border-[#F8D12E]/20">
+            <SelectTrigger className="w-32 bg-black/20 border-iris-primary/20">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -164,7 +164,7 @@ export default function AnalyticsDashboard() {
             onClick={fetchAnalytics}
             variant="outline"
             size="sm"
-            className="border-[#F8D12E]/30 text-[#F8D12E]"
+            className="border-iris-primary/30 text-iris-primary"
           >
             <Activity className="h-4 w-4 mr-2" />
             Refresh
@@ -174,7 +174,7 @@ export default function AnalyticsDashboard() {
 
       {/* Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-black/20 border-[#F8D12E]/20">
+        <Card className="bg-black/20 border-iris-primary/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -182,14 +182,14 @@ export default function AnalyticsDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-[#F8D12E]">{analytics.totalVideos}</p>
+            <p className="text-2xl font-bold text-iris-primary">{analytics.totalVideos}</p>
             <p className="text-xs text-muted-foreground mt-1">
               Scraped and stored
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-black/20 border-[#F8D12E]/20">
+        <Card className="bg-black/20 border-iris-primary/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -197,14 +197,14 @@ export default function AnalyticsDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-[#F8D12E]">{formatNumber(analytics.totalViews)}</p>
+            <p className="text-2xl font-bold text-iris-primary">{formatNumber(analytics.totalViews)}</p>
             <p className="text-xs text-muted-foreground mt-1">
               Combined reach
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-black/20 border-[#F8D12E]/20">
+        <Card className="bg-black/20 border-iris-primary/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
               <Zap className="h-4 w-4" />
@@ -212,14 +212,14 @@ export default function AnalyticsDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-[#F8D12E]">{analytics.totalMentions}</p>
+            <p className="text-2xl font-bold text-iris-primary">{analytics.totalMentions}</p>
             <p className="text-xs text-muted-foreground mt-1">
               Token references
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-black/20 border-[#F8D12E]/20">
+        <Card className="bg-black/20 border-iris-primary/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
               <Activity className="h-4 w-4" />
@@ -227,7 +227,7 @@ export default function AnalyticsDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-[#F8D12E]">{formatNumber(analytics.totalComments)}</p>
+            <p className="text-2xl font-bold text-iris-primary">{formatNumber(analytics.totalComments)}</p>
             <p className="text-xs text-muted-foreground mt-1">
               User engagement
             </p>
@@ -236,7 +236,7 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Top Tokens */}
-      <Card className="bg-black/20 border-[#F8D12E]/20">
+      <Card className="bg-black/20 border-iris-primary/20">
         <CardHeader>
           <CardTitle className="text-white">Top Mentioned Tokens</CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -248,7 +248,7 @@ export default function AnalyticsDashboard() {
             {analytics.topTokens.map((token, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-black/10 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="border-[#F8D12E]/30 text-[#F8D12E]">
+                  <Badge variant="outline" className="border-iris-primary/30 text-iris-primary">
                     {token.symbol}
                   </Badge>
                   <span className="text-sm text-white">{token.mentionCount} mentions</span>
@@ -270,7 +270,7 @@ export default function AnalyticsDashboard() {
       </Card>
 
       {/* Recent Activity */}
-      <Card className="bg-black/20 border-[#F8D12E]/20">
+      <Card className="bg-black/20 border-iris-primary/20">
         <CardHeader>
           <CardTitle className="text-white">Recent Activity</CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -281,7 +281,7 @@ export default function AnalyticsDashboard() {
           <div className="space-y-3">
             {analytics.recentActivity.map((activity, index) => (
               <div key={index} className="flex items-center gap-3 p-3 bg-black/10 rounded-lg">
-                <div className="w-2 h-2 bg-[#F8D12E] rounded-full"></div>
+                <div className="w-2 h-2 bg-iris-primary rounded-full"></div>
                 <div className="flex-1">
                   <p className="text-sm text-white">{activity.action}</p>
                   <p className="text-xs text-muted-foreground">{activity.details}</p>
@@ -294,7 +294,7 @@ export default function AnalyticsDashboard() {
       </Card>
 
       {/* Search and Filter */}
-      <Card className="bg-black/20 border-[#F8D12E]/20">
+      <Card className="bg-black/20 border-iris-primary/20">
         <CardHeader>
           <CardTitle className="text-white">Search & Filter</CardTitle>
         </CardHeader>
@@ -305,12 +305,12 @@ export default function AnalyticsDashboard() {
                 placeholder="Search videos, usernames, or tokens..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-black/20 border-[#F8D12E]/20 text-white placeholder:text-muted-foreground"
+                className="bg-black/20 border-iris-primary/20 text-white placeholder:text-muted-foreground"
               />
             </div>
             <Button
               variant="outline"
-              className="border-[#F8D12E]/30 text-[#F8D12E]"
+              className="border-iris-primary/30 text-iris-primary"
             >
               Search
             </Button>

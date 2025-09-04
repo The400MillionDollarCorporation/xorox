@@ -75,6 +75,14 @@ const config: Config = {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        // Iris Brand Colors
+        iris: {
+          primary: "hsl(var(--iris-primary))",
+          secondary: "hsl(var(--iris-secondary))",
+          accent: "hsl(var(--iris-accent))",
+          light: "hsl(var(--iris-light))",
+          dark: "hsl(var(--iris-dark))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

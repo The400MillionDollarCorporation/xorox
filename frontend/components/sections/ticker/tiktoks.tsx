@@ -18,7 +18,7 @@ export default function Tiktoks({
     <>
       <div className="flex justify-between sen my-12 items-center">
         <div className="flex flex-col w-full">
-          <p className="text-xl md:text-2xl text-center mx-auto md:mx-0 md:text-start font-bold nouns tracking-widest text-[#F8D12E]">
+          <p className="text-xl md:text-2xl text-center mx-auto md:mx-0 md:text-start font-bold nouns tracking-widest text-iris-primary">
             Curated Tiktoks
           </p>
           <p className="text-xs md:text-sm text-center mx-auto md:mx-0 md:text-start lg:text-md text-muted-foreground font-semibold mb-6">

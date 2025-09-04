@@ -12,64 +12,35 @@ import TelegramChannelsHome from "./telegram-channels";
 export default function Home() {
   const { paid } = useEnvironmentStore((store) => store);
   return (
-    <div className="w-full px-3 sm:px-4 md:px-6">
-      {/* Hero Section */}
-      <div className="text-center py-4 sm:py-6 md:py-8">
-        <p className="meme-title tracking-widest font-bold text-xl sm:text-2xl md:text-3xl text-[#F8D12E] mb-2 sm:mb-4">
-          The Ultimate TikTok & Telegram Memecoin Hunter
-        </p>
-        <p className="meme-subtitle text-muted-foreground font-semibold text-xs sm:text-sm md:text-base max-w-4xl mx-auto">
-          Realtime tiktok & telegram analytics for memecoins. <br className="hidden sm:block" />
-          Hunt the next moonshot 🚀
-        </p>
-      </div>
+    <div className="w-full">
+      <p className="text-center meme-title tracking-widest font-bold text-2xl md:text-3xl text-iris-primary mt-6 md:mt-16">
+        The Ultimate TikTok & Telegram Memecoin Hunter
+      </p>
+      <p className="meme-subtitle text-muted-foreground font-semibold mt-2 text-center text-xs sm:text-sm md:text-base">
+        Realtime tiktok & telegram analytics for memecoins. <br />
+        Hunt the next moonshot 🚀
+      </p>
       
       {/* Scraper Status */}
-      <div className="max-w-7xl mx-auto mb-6 sm:mb-8 md:mb-12">
+      <div className="max-w-[1200px] mx-auto mt-8">
         <ScraperStatus />
       </div>
       
       {/* Telegram Channels */}
-      <div className="mb-6 sm:mb-8 md:mb-12">
+      <div className="mt-16">
         <TelegramChannelsHome />
       </div>
       
-      {/* Hero Table */}
-      <div className="max-w-7xl mx-auto mb-6 sm:mb-8 md:mb-12">
+      <div className="max-w-[1200px] mx-auto">
         <HeroTable />
       </div>
-      
-      {/* Unlock Now - Dashboard */}
-      {!paid && (
-        <div className="mb-6 sm:mb-8 md:mb-12">
-          <UnlockNow text="View the realtime dashboard" />
-        </div>
-      )}
-      
-      {/* TikTok Section */}
-      <div className="mb-6 sm:mb-8 md:mb-12">
-        <TiktokSection />
-      </div>
-      
-      {/* Graph Preview */}
-      <div className="mb-6 sm:mb-8 md:mb-12">
-        <GraphPreview />
-      </div>
-      
-      {/* Separator */}
-      <div className="my-6 sm:my-8 md:my-12">
-        <Separator />
-      </div>
-      
-      {/* Unlock Now - All Features */}
-      {!paid && (
-        <div className="mb-6 sm:mb-8 md:mb-12">
-          <UnlockNow text="Unlock All ZoroX features now" />
-        </div>
-      )}
-      
-      {/* Bottom Spacing */}
-      <div className="h-6 sm:h-8 md:h-12" />
+      {!paid && <UnlockNow text="View the realtime dashboard" />}
+      {/* <TimeSeriesChart /> */}
+      <TiktokSection />
+      <GraphPreview />
+      <Separator className="my-8" />
+      {!paid && <UnlockNow text="Unlock All ZoroX features now" />}
+      <div className="my-12" />
     </div>
   );
 }

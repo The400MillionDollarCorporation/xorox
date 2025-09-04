@@ -157,29 +157,29 @@ export default function TestingPage() {
   }, [timeRange, isClient]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 sm:px-4">
+    <div className="w-full max-w-[1200px] mx-auto px-4">
       <Card className="w-full bg-background text-foreground">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="text-lg sm:text-xl meme-title">DOGE/USD Price Chart</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>DOGE/USD Price Chart</CardTitle>
           <Tabs
             defaultValue={timeRange}
             onValueChange={(value) => setTimeRange(value as TimeRange)}
           >
-            <TabsList className="grid grid-cols-4 sm:grid-cols-7 w-full sm:w-auto">
-              <TabsTrigger value="1H" className="text-xs sm:text-sm">1H</TabsTrigger>
-              <TabsTrigger value="12H" className="text-xs sm:text-sm">12H</TabsTrigger>
-              <TabsTrigger value="1D" className="text-xs sm:text-sm">1D</TabsTrigger>
-              <TabsTrigger value="7D" className="text-xs sm:text-sm">7D</TabsTrigger>
-              <TabsTrigger value="1M" className="text-xs sm:text-sm">1M</TabsTrigger>
-              <TabsTrigger value="1Y" className="text-xs sm:text-sm">1Y</TabsTrigger>
-              <TabsTrigger value="ALL" className="text-xs sm:text-sm">ALL</TabsTrigger>
+            <TabsList>
+              <TabsTrigger value="1H">1H</TabsTrigger>
+              <TabsTrigger value="12H">12H</TabsTrigger>
+              <TabsTrigger value="1D">1D</TabsTrigger>
+              <TabsTrigger value="7D">7D</TabsTrigger>
+              <TabsTrigger value="1M">1M</TabsTrigger>
+              <TabsTrigger value="1Y">1Y</TabsTrigger>
+              <TabsTrigger value="ALL">ALL</TabsTrigger>
             </TabsList>
           </Tabs>
         </CardHeader>
         <CardContent>
           <div
             ref={chartContainerRef}
-            className="w-full h-[300px] sm:h-[400px] rounded-lg overflow-hidden"
+            className="w-full h-[400px] rounded-lg overflow-hidden"
           />
         </CardContent>
       </Card>

@@ -247,15 +247,15 @@ export default function RealTimeData() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4 meme-title">📊 Real-Time Data Overview</h2>
-        <p className="text-sm sm:text-base text-muted-foreground meme-body">
+        <h2 className="text-2xl font-bold mb-4">📊 Real-Time Data Overview</h2>
+        <p className="text-muted-foreground">
           Live updates from TikTok, Telegram, and AI analysis - no refresh needed
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* TikTok Data */}
       <Card>
         <CardHeader>
