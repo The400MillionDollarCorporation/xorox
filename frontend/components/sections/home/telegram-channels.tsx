@@ -205,7 +205,7 @@ export default function TelegramChannelsHome() {
   }
 
   return (
-    <div className="w-full py-4 sm:py-6 lg:py-8">
+    <div className="w-full py-4 sm:py-6 lg:py-8 overflow-hidden">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 sm:mb-8 gap-4">
         <div className="w-full lg:w-auto">
@@ -322,28 +322,28 @@ export default function TelegramChannelsHome() {
 
       {/* Channels Grid */}
       {!loading && filteredChannels.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 w-full">
           {filteredChannels.slice(0, 12).map((channel) => (
             <Card
               key={channel.id}
-              className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-iris-primary/50 transition-all duration-300 hover:scale-105"
+              className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-iris-primary/50 transition-all duration-300 hover:scale-105 w-full min-w-0"
             >
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {channel.username.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                      <p className="font-semibold text-white">@{channel.username}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-white truncate">@{channel.username}</p>
                       {channel.display_name && (
-                        <p className="text-xs text-muted-foreground truncate max-w-24">
+                        <p className="text-xs text-muted-foreground truncate">
                           {channel.display_name}
                         </p>
                       )}
                     </div>
                   </div>
-                  <Badge variant={channel.enabled ? "default" : "secondary"} className="text-xs">
+                  <Badge variant={channel.enabled ? "default" : "secondary"} className="text-xs flex-shrink-0">
                     {channel.enabled ? (
                       <>
                         <Play className="h-3 w-3 mr-1" />
@@ -362,42 +362,43 @@ export default function TelegramChannelsHome() {
               <CardContent className="space-y-3">
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-white font-medium">{formatMessages(channel.stats.totalMessages)}</p>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-white font-medium truncate">{formatMessages(channel.stats.totalMessages)}</p>
                       <p className="text-xs text-muted-foreground">messages</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-white font-medium">{formatLastMessage(channel.stats.lastMessageAt)}</p>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-white font-medium truncate">{formatLastMessage(channel.stats.lastMessageAt)}</p>
                       <p className="text-xs text-muted-foreground">last activity</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Settings */}
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Settings className="h-3 w-3" />
-                    Every {channel.scrape_interval_minutes}m
+                <div className="flex items-center justify-between text-xs text-muted-foreground gap-2">
+                  <div className="flex items-center gap-1 min-w-0">
+                    <Settings className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">Every {channel.scrape_interval_minutes}m</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 min-w-0">
                     {channel.scrape_media ? (
-                      <Eye className="h-3 w-3" />
+                      <Eye className="h-3 w-3 flex-shrink-0" />
                     ) : (
-                      <EyeOff className="h-3 w-3" />
+                      <EyeOff className="h-3 w-3 flex-shrink-0" />
                     )}
-                    {channel.scrape_media ? 'Media' : 'Text only'}
+                    <span className="truncate">{channel.scrape_media ? 'Media' : 'Text only'}</span>
                   </div>
                 </div>
 
                 {/* Last Message Preview */}
                 {channel.stats.lastMessagePreview && (
                   <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded">
-                    <strong>Last message:</strong> {channel.stats.lastMessagePreview}
+                    <strong>Last message:</strong> 
+                    <div className="truncate mt-1">{channel.stats.lastMessagePreview}</div>
                   </div>
                 )}
 
@@ -406,17 +407,17 @@ export default function TelegramChannelsHome() {
                   <Switch
                     checked={channel.enabled}
                     onCheckedChange={() => handleToggleChannel(channel)}
-                    className="data-[state=checked]:bg-iris-primary"
+                    className="data-[state=checked]:bg-iris-primary flex-shrink-0"
                   />
                   <Button
                     asChild
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-iris-primary/30 text-iris-primary hover:bg-iris-primary/10"
+                    className="flex-1 border-iris-primary/30 text-iris-primary hover:bg-iris-primary/10 min-w-0"
                   >
-                    <a href={`https://t.me/${channel.username}`} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      View Channel
+                    <a href={`https://t.me/${channel.username}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1">
+                      <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">View Channel</span>
                     </a>
                   </Button>
                 </div>
