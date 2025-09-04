@@ -90,7 +90,7 @@ _"An Autonomous AI Agent that browses TikTok to help you find the hottest memeco
 
 **Github** | https://github.com/gabrielantonyxaviour/zorox
 
-**Twitter** | https://x.com/TokenHunterZoro
+**Twitter** | https://x.com/iris_internet
 
 **Dexscreener** | https://dexscreener.com/solana/a9wxjtzgkvz12xtqex4jufhmermi7tfwrp1nujkh8lyq
 
