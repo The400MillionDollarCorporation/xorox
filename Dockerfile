@@ -51,7 +51,7 @@ COPY --from=deps /app/node_modules ./node_modules
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application with Yarn
-COPY frontend/package.json frontend/yarn.lock /app
+COPY frontend/package.json frontend/yarn.lock frontend/ /app
 RUN yarn build
 
 # Production image, copy all the files and run next
