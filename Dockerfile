@@ -11,7 +11,7 @@ WORKDIR /app
 COPY frontend/package.json frontend/yarn.lock ./
 
 # Install dependencies with Yarn
-RUN yarn --frozen-lockfile --network-timeout 300000
+RUN yarn install
 
 # Build the source code
 FROM base AS builder
