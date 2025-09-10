@@ -32,8 +32,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: /root/iris/frontend
-          file: ./iris/frontend/Dockerfile
+          context: /xorox/frontend
+          file: /xorox/Dockerfile
           push: true
           tags: |
             ${{ env.DOCKER_USERNAME }}/iris-frontend:latest
