@@ -37,8 +37,8 @@ jobs:
           push: true
           tags: |
             ${{ env.DOCKER_USERNAME }}/iris-frontend:latest
-          cache-from: type=registry,ref=${{ env.DOCKER_USERNAME }}/iris-frontend:buildcache
-          cache-to: type=registry,ref=${{ env.DOCKER_USERNAME }}/iris-frontend:buildcache,mode=max
+   #       cache-from: type=registry,ref=${{ env.DOCKER_USERNAME }}/iris-frontend:buildcache
+      #    cache-to: type=registry,ref=${{ env.DOCKER_USERNAME }}/iris-frontend:buildcache,mode=max
 
       - name: Deploy to Ubuntu server
         uses: appleboy/ssh-action@master
