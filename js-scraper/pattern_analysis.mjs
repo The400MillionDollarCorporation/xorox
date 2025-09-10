@@ -319,7 +319,7 @@ class MemecoinPatternAnalyzer {
       const { data, error } = await this.supabase
         .from('prices')
         .select('*')
-        .eq('token_id', tokenUri)
+        .eq('token_uri', tokenUri)
         .order('trade_at', { ascending: false })
         .limit(100);
 
