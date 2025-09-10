@@ -28,7 +28,6 @@ export default function TrendingCoinsAnalytics() {
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterMarketCap, setFilterMarketCap] = useState<string>('all');
   const [filterCorrelation, setFilterCorrelation] = useState<string>('all');
   const [filterViews, setFilterViews] = useState<string>('all');
 
@@ -132,20 +131,6 @@ export default function TrendingCoinsAnalytics() {
       );
     }
 
-    // Market cap filter
-    if (filterMarketCap !== 'all') {
-      switch (filterMarketCap) {
-        case 'high':
-          filtered = filtered.filter(coin => (coin.market_cap || 0) >= 1000000);
-          break;
-        case 'medium':
-          filtered = filtered.filter(coin => (coin.market_cap || 0) >= 100000 && (coin.market_cap || 0) < 1000000);
-          break;
-        case 'low':
-          filtered = filtered.filter(coin => (coin.market_cap || 0) < 100000);
-          break;
-      }
-    }
 
     // Correlation filter
     if (filterCorrelation !== 'all') {
@@ -178,12 +163,11 @@ export default function TrendingCoinsAnalytics() {
     }
 
     return filtered;
-  }, [data.coins, searchQuery, filterMarketCap, filterCorrelation, filterViews]);
+  }, [data.coins, searchQuery, filterCorrelation, filterViews]);
 
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery('');
-    setFilterMarketCap('all');
     setFilterCorrelation('all');
     setFilterViews('all');
   };
@@ -240,10 +224,8 @@ export default function TrendingCoinsAnalytics() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="correlation">Correlation</SelectItem>
-                <SelectItem value="volume">Volume</SelectItem>
                 <SelectItem value="views">Views</SelectItem>
                 <SelectItem value="mentions">Mentions</SelectItem>
-                <SelectItem value="market_cap">Market Cap</SelectItem>
               </SelectContent>
             </Select>
             <Select value={limit.toString()} onValueChange={(value) => setLimit(parseInt(value))}>
@@ -295,17 +277,6 @@ export default function TrendingCoinsAnalytics() {
               <span className="text-sm font-medium">Filters:</span>
             </div>
             
-            <Select value={filterMarketCap} onValueChange={setFilterMarketCap}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Market Cap" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Market Caps</SelectItem>
-                <SelectItem value="high">High (≥$1M)</SelectItem>
-                <SelectItem value="medium">Medium ($100K-$1M)</SelectItem>
-                <SelectItem value="low">Low (&lt;$100K)</SelectItem>
-              </SelectContent>
-            </Select>
 
             <Select value={filterCorrelation} onValueChange={setFilterCorrelation}>
               <SelectTrigger className="w-32">
@@ -331,7 +302,7 @@ export default function TrendingCoinsAnalytics() {
               </SelectContent>
             </Select>
 
-            {(searchQuery || filterMarketCap !== 'all' || filterCorrelation !== 'all' || filterViews !== 'all') && (
+            {(searchQuery || filterCorrelation !== 'all' || filterViews !== 'all') && (
               <Button
                 variant="outline"
                 size="sm"
@@ -344,7 +315,7 @@ export default function TrendingCoinsAnalytics() {
           </div>
 
           {/* Active Filters Display */}
-          {(searchQuery || filterMarketCap !== 'all' || filterCorrelation !== 'all' || filterViews !== 'all') && (
+          {(searchQuery || filterCorrelation !== 'all' || filterViews !== 'all') && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm text-muted-foreground">Active filters:</span>
               {searchQuery && (
@@ -355,19 +326,6 @@ export default function TrendingCoinsAnalytics() {
                     size="sm"
                     className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
                     onClick={() => setSearchQuery('')}
-                  >
-                    <X className="w-2 h-2" />
-                  </Button>
-                </Badge>
-              )}
-              {filterMarketCap !== 'all' && (
-                <Badge variant="secondary" className="text-xs">
-                  Market Cap: {filterMarketCap}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
-                    onClick={() => setFilterMarketCap('all')}
                   >
                     <X className="w-2 h-2" />
                   </Button>
@@ -433,14 +391,6 @@ export default function TrendingCoinsAnalytics() {
                     </div>
                     <div>
                         <h3 className="font-semibold">{coin.symbol}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Volume: {formatCurrency(coin.trading_volume_24h)}
-                      </p>
-                      {coin.market_cap && (
-                        <p className="text-xs text-muted-foreground">
-                          Market Cap: {formatCurrency(coin.market_cap)}
-                        </p>
-                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -475,14 +425,6 @@ export default function TrendingCoinsAnalytics() {
                       </div>
                         <div>
                           <h3 className="font-semibold">{coin.symbol}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Volume: {formatCurrency(coin.trading_volume_24h)}
-                        </p>
-                        {coin.market_cap && (
-                          <p className="text-xs text-muted-foreground">
-                            Market Cap: {formatCurrency(coin.market_cap)}
-                          </p>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -517,11 +459,6 @@ export default function TrendingCoinsAnalytics() {
                         <p className="text-sm text-muted-foreground">
                           Correlation: {formatCorrelation(coin.correlation_score)}
                         </p>
-                        {coin.market_cap && (
-                          <p className="text-xs text-muted-foreground">
-                            Market Cap: {formatCurrency(coin.market_cap)}
-                          </p>
-                        )}
                       </div>
                         </div>
                     <div className="flex items-center gap-4">
@@ -568,14 +505,6 @@ export default function TrendingCoinsAnalytics() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {coin.market_cap && (
-                        <div className="text-right">
-                          <p className="text-sm font-medium">Market Cap</p>
-                          <p className="text-lg font-bold text-purple-600">
-                            {formatCurrency(coin.market_cap)}
-                          </p>
-                        </div>
-                      )}
                       {coin.total_supply && (
                         <div className="text-right">
                           <p className="text-sm font-medium">Total Supply</p>
