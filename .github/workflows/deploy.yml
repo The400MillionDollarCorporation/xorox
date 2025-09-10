@@ -32,7 +32,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./iris/frontend
+          context: /root/iris/frontend
           file: ./iris/frontend/Dockerfile
           push: true
           tags: |
