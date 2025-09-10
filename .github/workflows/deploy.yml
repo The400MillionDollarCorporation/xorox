@@ -1,0 +1,186 @@
+name: Deploy Next.js Frontend
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+  HOST: ${{ secrets.SSH_HOST }}
+  HOST_USERNAME: ${{ secrets.SSH_USERNAME }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./iris/frontend
+          file: ./iris/frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_USERNAME }}/iris-frontend:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_USERNAME }}/iris-frontend:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_USERNAME }}/iris-frontend:buildcache,mode=max
+
+      - name: Deploy to Ubuntu server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ env.HOST_USERNAME }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Next.js Frontend deployment started at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+            
+            # Create frontend directory if it doesn't exist
+            mkdir -p ~/iris/frontend
+            
+            # Copy .env file from repository to server (if it exists)
+            echo "Setting up environment file..."
+            if [ -f "~/iris/frontend/.env" ]; then
+              echo "✅ Environment file found"
+              # Backup existing .env file
+              cp ~/iris/frontend/.env ~/iris/frontend/.env.backup.$(date +%Y%m%d_%H%M%S)
+            else
+              echo "⚠️ Environment file not found at ~/iris/frontend/.env"
+              echo "Creating minimal .env file..."
+              cat > ~/iris/frontend/.env << 'EOF'
+            # Next.js Environment Configuration
+            NODE_ENV=production
+            NEXT_PUBLIC_API_URL=http://localhost:8080
+            PORT=3000
+            EOF
+            fi
+            
+            # Stop and remove existing container
+            echo "Stopping existing container..."
+            sudo docker stop iris-frontend || true
+            sudo docker rm iris-frontend || true
+            
+            # Pull latest image
+            echo "Pulling latest image..."
+            sudo docker pull ${{ env.DOCKER_USERNAME }}/iris-frontend:latest
+            
+            # Run new container with env file from server
+            echo "Starting new container..."
+            sudo docker run -d \
+              --name iris-frontend \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              -v ~/iris/frontend/.env:/app/.env:ro \
+              ${{ env.DOCKER_USERNAME }}/iris-frontend:latest
+            
+            # Verify deployment
+            echo "Verifying deployment..."
+            sleep 15
+            
+            if sudo docker ps | grep -q iris-frontend; then
+              echo "✅ Container is running successfully"
+              echo "Container ID: $(sudo docker ps -q -f name=iris-frontend)"
+              echo "Container logs:"
+              sudo docker logs --tail 20 iris-frontend
+              
+              # Test if the application is responding
+              echo "Testing application health..."
+              sleep 5
+              if curl -f -s http://localhost:3000 > /dev/null; then
+                echo "✅ Application is responding on port 3000"
+              else
+                echo "⚠️ Application health check failed"
+                echo "Container logs for debugging:"
+                sudo docker logs --tail 30 iris-frontend
+              fi
+            else
+              echo "❌ Container failed to start"
+              echo "Error logs:"
+              sudo docker logs iris-frontend
+              exit 1
+            fi
+            
+            # Update Nginx configuration for the frontend
+            echo "Checking Nginx configuration..."
+            if [ -f "/etc/nginx/sites-enabled/iris" ]; then
+              echo "✅ Nginx configuration found"
+              # Reload nginx to ensure it picks up the new container
+              sudo systemctl reload nginx || echo "⚠️ Nginx reload failed"
+            else
+              echo "⚠️ Nginx configuration not found at /etc/nginx/sites-enabled/iris"
+              echo "Please ensure Nginx is configured to proxy to port 3000"
+            fi
+            
+            echo "Deployment completed at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: Verify Deployment
+        uses: appleboy/ssh-action@master
+        if: success()
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ env.HOST_USERNAME }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            echo "=== Final Deployment Verification ==="
+            
+            # Check container status
+            if sudo docker ps | grep -q iris-frontend; then
+              echo "✅ Container Status: Running"
+              echo "Container Details:"
+              sudo docker inspect iris-frontend --format='Status: {{.State.Status}} | Started At: {{.State.StartedAt}}'
+              echo "Port Mapping:"
+              sudo docker port iris-frontend
+              
+              # Verify env file is mounted
+              echo "Checking environment file:"
+              if sudo docker exec iris-frontend ls -la /app/.env &>/dev/null; then
+                echo "✅ Environment file is mounted"
+                echo "Environment variables (non-sensitive):"
+                sudo docker exec iris-frontend grep -E "^(NODE_ENV|PORT|NEXT_PUBLIC_)" /app/.env || echo "No public env vars found"
+              else
+                echo "⚠️ Environment file not found in container"
+              fi
+              
+              # Check application health
+              echo "Application Health Check:"
+              sleep 5
+              
+              # Test local access
+              if curl -f -s -o /dev/null -w "%{http_code}" http://localhost:3000; then
+                echo "✅ Application is accessible locally on port 3000"
+              else
+                echo "⚠️ Local health check failed"
+              fi
+              
+              # Test through Nginx (if configured)
+              if curl -f -s -o /dev/null -w "%{http_code}" http://localhost:80; then
+                echo "✅ Application is accessible through Nginx"
+              else
+                echo "⚠️ Nginx proxy check failed"
+              fi
+              
+              # Show recent logs
+              echo "Recent application logs:"
+              sudo docker logs --tail 10 iris-frontend
+              
+              echo "🎉 Deployment verification completed successfully!"
+            else
+              echo "❌ Container is not running"
+              echo "Available containers:"
+              sudo docker ps -a
+              exit 1
+            fi
