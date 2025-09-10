@@ -14,17 +14,17 @@ interface SummaryMetrics {
     symbol: string;
     correlation: number;
     volume: number;
-  };
+  } | null;
   volumeLeader: {
     symbol: string;
     volume: number;
     views: number;
-  };
+  } | null;
   socialLeader: {
     symbol: string;
     views: number;
     mentions: number;
-  };
+  } | null;
   marketCapLeader: {
     symbol: string;
     marketCap: number;
@@ -188,42 +188,60 @@ export default function TrendingCoinsSummary() {
   const calculateSummaryMetrics = (coins: any[], totalViews: number) => {
     if (!coins.length) return;
 
-    // Find top performer by correlation
-    const topPerformer = coins.reduce((best, coin) => 
+    // Filter out coins with 0 values for meaningful leaders
+    const coinsWithCorrelation = coins.filter(coin => coin.correlation_score > 0);
+    const coinsWithVolume = coins.filter(coin => coin.trading_volume_24h > 0);
+    const coinsWithViews = coins.filter(coin => coin.tiktok_views_24h > 0);
+    const coinsWithMentions = coins.filter(coin => coin.total_mentions > 0);
+    const coinsWithMarketCap = coins.filter(coin => coin.market_cap > 0);
+
+    // Find top performer by correlation (only if we have coins with correlation > 0)
+    const topPerformer = coinsWithCorrelation.length > 0 
+      ? coinsWithCorrelation.reduce((best, coin) => 
       coin.correlation_score > best.correlation_score ? coin : best
-    );
+        )
+      : null;
 
-    // Find volume leader
-    const volumeLeader = coins.reduce((best, coin) => 
+    // Find volume leader (only if we have coins with volume > 0)
+    const volumeLeader = coinsWithVolume.length > 0
+      ? coinsWithVolume.reduce((best, coin) => 
       coin.trading_volume_24h > best.trading_volume_24h ? coin : best
-    );
+        )
+      : null;
 
-    // Find social leader
-    const socialLeader = coins.reduce((best, coin) => 
+    // Find social leader (only if we have coins with views > 0)
+    const socialLeader = coinsWithViews.length > 0
+      ? coinsWithViews.reduce((best, coin) => 
       coin.tiktok_views_24h > best.tiktok_views_24h ? coin : best
-    );
+        )
+      : null;
+
+    // Find market cap leader (only if we have coins with market cap > 0)
+    const marketCapLeader = coinsWithMarketCap.length > 0
+      ? coinsWithMarketCap.reduce((best, coin) => 
+          (coin.market_cap || 0) > (best.market_cap || 0) ? coin : best
+        )
+      : { symbol: 'N/A', marketCap: 0, supply: 0 };
 
     setMetrics({
       totalCoins: coins.length,
       totalViews24h: totalViews,
-      topPerformer: {
+      topPerformer: topPerformer ? {
         symbol: topPerformer.symbol,
         correlation: topPerformer.correlation_score,
         volume: topPerformer.trading_volume_24h
-      },
-      volumeLeader: {
+      } : null,
+      volumeLeader: volumeLeader ? {
         symbol: volumeLeader.symbol,
         volume: volumeLeader.trading_volume_24h,
         views: volumeLeader.tiktok_views_24h
-      },
-      socialLeader: {
+      } : null,
+      socialLeader: socialLeader ? {
         symbol: socialLeader.symbol,
         views: socialLeader.tiktok_views_24h,
         mentions: socialLeader.total_mentions
-      },
-      marketCapLeader: coins.reduce((best, coin) => 
-        (coin.market_cap || 0) > (best.market_cap || 0) ? coin : best
-      , { symbol: 'N/A', marketCap: 0, supply: 0 })
+      } : null,
+      marketCapLeader: marketCapLeader
     });
   };
 
@@ -298,7 +316,7 @@ export default function TrendingCoinsSummary() {
   }
 
   // Safety check to ensure all required metrics are available
-  if (!metrics.totalCoins || !metrics.topPerformer || !metrics.volumeLeader || !metrics.socialLeader || !metrics.marketCapLeader) {
+  if (!metrics.totalCoins || !metrics.marketCapLeader) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
@@ -437,7 +455,7 @@ export default function TrendingCoinsSummary() {
       {/* Performance Leaders */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
         {/* Top Performer */}
-        {metrics.topPerformer && metrics.topPerformer.symbol && (
+        {metrics.topPerformer && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -464,7 +482,7 @@ export default function TrendingCoinsSummary() {
         )}
 
         {/* Volume Leader */}
-        {metrics.volumeLeader && metrics.volumeLeader.symbol && (
+        {metrics.volumeLeader && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -491,7 +509,7 @@ export default function TrendingCoinsSummary() {
         )}
 
         {/* Social Leader */}
-        {metrics.socialLeader && metrics.socialLeader.symbol && (
+        {metrics.socialLeader && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
