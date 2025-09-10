@@ -448,11 +448,9 @@ export default function TrendingCoinsSummary() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-bold">{metrics.topPerformer.symbol}</div>
-                {metrics.topPerformer.correlation > 0 && (
-                  <div className={`text-sm ${getCorrelationColor(metrics.topPerformer.correlation)}`}>
-                    {formatCorrelation(metrics.topPerformer.correlation)} correlation
-                  </div>
-                )}
+                <div className={`text-sm ${getCorrelationColor(metrics.topPerformer.correlation)}`}>
+                  {formatCorrelation(metrics.topPerformer.correlation)} correlation
+                </div>
               </div>
               <Badge variant="default" className="text-xs">
                 Best Correlation
@@ -485,11 +483,9 @@ export default function TrendingCoinsSummary() {
                 Highest Volume
               </Badge>
             </div>
-            {metrics.volumeLeader.views > 0 && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Views: {formatViews(metrics.volumeLeader.views)}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground mt-2">
+              Views: {formatViews(metrics.volumeLeader.views)}
+            </p>
           </CardContent>
         </Card>
         )}
@@ -506,21 +502,17 @@ export default function TrendingCoinsSummary() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-bold">{metrics.socialLeader.symbol}</div>
-                {metrics.socialLeader.views > 0 && (
-                  <div className="text-sm text-blue-600">
-                    {formatViews(metrics.socialLeader.views)} views
-                  </div>
-                )}
+                <div className="text-sm text-blue-600">
+                  {formatViews(metrics.socialLeader.views)} views
+                </div>
               </div>
               <Badge variant="outline" className="text-xs">
                 Most Viral
               </Badge>
             </div>
-            {metrics.socialLeader.mentions > 0 && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Mentions: {metrics.socialLeader.mentions}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground mt-2">
+              Mentions: {metrics.socialLeader.mentions}
+            </p>
           </CardContent>
         </Card>
         )}
