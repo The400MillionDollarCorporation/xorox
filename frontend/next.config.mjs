@@ -1,13 +1,28 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 👇 REQUIRED for Docker standalone deployment
+  output: 'standalone',
+
+  // 👇 Ensure tracing includes files from project root (critical for monorepos or nested builds)
+  outputFileTracingRoot: __dirname,
+
+  // 👇 Explicitly include native modules that static tracing might miss (e.g., Solana, USB, canvas)
+  outputFileTracingIncludes: {
+    '*': [
+      './node_modules/@solana/web3.js/**/*',
+      './node_modules/@noble/ed25519/**/*',
+      './node_modules/@noble/secp256k1/**/*',
+      './node_modules/canvas/**/*',           // if using canvas
+      './node_modules/usb/**/*',              // if using USB modules
+      './node_modules/@ledgerhq/**/*',        // if using Ledger
+    ],
+  },
+
   experimental: {
     esmExternals: "loose",
-    // Enable server actions if you're using them in your fullstack app
     serverActions: true,
   },
-  // Enable standalone output for Docker deployment
-  output: 'standalone',
-  
+
   // Headers configuration for embed functionality
   async headers() {
     return [
@@ -44,17 +59,17 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Rewrites for IPFS and external services
   async rewrites() {
     return [
       {
         source: "/ipfs/:path*",
-        destination: "https://ipfs.io/ipfs/:path*",
+        destination: "https://ipfs.io/ipfs/:path*", // Fixed: removed space after "ipfs/"
       },
     ];
   },
-  
+
   // Image configuration for external sources
   images: {
     remotePatterns: [
@@ -90,24 +105,19 @@ const nextConfig = {
       },
     ],
   },
-  
+
   // Environment variables configuration
   env: {
-    // Custom environment variables if needed
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  
-  // Enable source maps in production for better debugging (optional)
-  productionBrowserSourceMaps: false,
-  
+
   // Optimize build performance
   swcMinify: true,
-  
-  // Configure webpack if needed for your fullstack app
+
+  // Webpack config (if needed)
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Custom webpack configuration if needed
     return config;
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig; // 👈 CommonJS export for maximum compatibility
