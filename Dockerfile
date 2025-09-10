@@ -44,7 +44,7 @@ RUN apk add --no-cache \
 RUN corepack enable yarn
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY frontend/ ./                   # Copy the rest of the client app
+COPY frontend ./                   # Copy the rest of the client app
 
 # Copy environment file for build (if needed for build-time env vars)
 # Note: Build-time environment variables should be prefixed with NEXT_PUBLIC_
