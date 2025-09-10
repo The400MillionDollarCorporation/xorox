@@ -258,6 +258,11 @@ export default function TrendingCoinsSummary() {
     return `${(score * 100).toFixed(1)}%`;
   };
 
+  // Helper function to check if a value should be displayed (not zero)
+  const shouldDisplayValue = (value: number | undefined | null): boolean => {
+    return value !== undefined && value !== null && !isNaN(value) && value > 0;
+  };
+
 
 
   const getCorrelationColor = (score: number | undefined | null): string => {
@@ -437,7 +442,7 @@ export default function TrendingCoinsSummary() {
       {/* Performance Leaders */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
         {/* Top Performer */}
-        {metrics.topPerformer && metrics.topPerformer.symbol && (
+        {metrics.topPerformer && metrics.topPerformer.symbol && shouldDisplayValue(metrics.topPerformer.volume) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -464,7 +469,7 @@ export default function TrendingCoinsSummary() {
         )}
 
         {/* Volume Leader */}
-        {metrics.volumeLeader && metrics.volumeLeader.symbol && (
+        {metrics.volumeLeader && metrics.volumeLeader.symbol && shouldDisplayValue(metrics.volumeLeader.volume) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -491,7 +496,7 @@ export default function TrendingCoinsSummary() {
         )}
 
         {/* Social Leader */}
-        {metrics.socialLeader && metrics.socialLeader.symbol && (
+        {metrics.socialLeader && metrics.socialLeader.symbol && shouldDisplayValue(metrics.socialLeader.views) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
