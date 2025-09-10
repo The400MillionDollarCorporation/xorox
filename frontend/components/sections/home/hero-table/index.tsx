@@ -212,6 +212,13 @@ export default function HeroTable() {
                 >
                   MENTIONS
                 </SortableTableHeader>
+                <SortableTableHeader
+                  onClick={() => handleSort("latest_market_cap")}
+                  sorted={sortConfig.key === "latest_market_cap"}
+                  direction={sortConfig.direction}
+                >
+                  MCAP
+                </SortableTableHeader>
               </TableRow>
             </TableHeader>
 
@@ -329,6 +336,9 @@ export default function HeroTable() {
                         <TableCell>{getTimeAgo(token.created_at)}</TableCell>
                         <TableCell>{token.views || 0}</TableCell>
                         <TableCell>{token.mentions || 0}</TableCell>
+                        <TableCell>
+                          {formatMarketcap(token.latest_market_cap || 0)}
+                        </TableCell>
                       </TableRow>
                     ))}
                 </React.Fragment>

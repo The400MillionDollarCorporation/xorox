@@ -457,11 +457,38 @@ export default function TrendingCoinsSummary() {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
+              Volume: {formatCurrency(metrics.topPerformer.volume)}
             </p>
           </CardContent>
         </Card>
         )}
 
+        {/* Volume Leader */}
+        {metrics.volumeLeader && metrics.volumeLeader.symbol && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              💰 Volume Leader
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-lg font-bold">{metrics.volumeLeader.symbol}</div>
+                <div className="text-sm text-green-600">
+                  {formatCurrency(metrics.volumeLeader.volume)}
+                </div>
+              </div>
+              <Badge variant="secondary" className="text-xs">
+                Highest Volume
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Views: {formatViews(metrics.volumeLeader.views)}
+            </p>
+          </CardContent>
+        </Card>
+        )}
 
         {/* Social Leader */}
         {metrics.socialLeader && metrics.socialLeader.symbol && (
@@ -490,6 +517,32 @@ export default function TrendingCoinsSummary() {
         </Card>
         )}
 
+        {/* Market Cap Leader */}
+        {metrics.marketCapLeader && metrics.marketCapLeader.symbol !== 'N/A' && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                📊 Market Cap Leader
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg font-bold">{metrics.marketCapLeader.symbol}</div>
+                  <div className="text-sm text-purple-600">
+                    {formatCurrency(metrics.marketCapLeader.marketCap)}
+                  </div>
+                </div>
+                <Badge variant="destructive" className="text-xs">
+                  Highest Value
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Supply: {metrics.marketCapLeader.supply?.toLocaleString() || '0'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );
