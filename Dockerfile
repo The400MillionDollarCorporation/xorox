@@ -30,7 +30,6 @@ COPY frontend/package.json frontend/yarn.lock ./
 RUN echo "Available files in /app:" && ls -la
 
 # Install dependencies with Yarn (ignore optional dependencies that might cause issues)
-#COPY frontend/package.json frontend/yarn.lock ./
 RUN yarn install --frozen-lockfile --network-timeout 300000 --ignore-optional
 
 # Rebuild the source code only when needed
@@ -52,6 +51,7 @@ COPY --from=deps /app/node_modules ./node_modules
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application with Yarn
+COPY frontend/package.json frontend/yarn.lock /app
 RUN yarn build
 
 # Production image, copy all the files and run next
