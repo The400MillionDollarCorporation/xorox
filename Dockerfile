@@ -1,25 +1,28 @@
-version: '3.8'
-services:
-  eduworld-backend:
-    container_name: iris
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ${DOCKER_USERNAME}/iris:latest
-    restart: always
-    ports:
-      - "8080:8080"
-    env_file:
-      - ./frontend/.env  # This line specifies to use the .env file from the backend directory
-  #    - ./.env 
-    environment:
-      - NODE_ENV=production
-    volumes:
-      - ./frontend:/usr/src/app
-      - /usr/src/app/node_modules
-    networks:
-      - app-network
+FROM node:20-alpine
 
-networks:
-  app-network:
-    driver: bridge
+WORKDIR /usr/src/app
+
+# Debug: Show build context contents
+RUN echo "=== Build Context Contents ==="
+RUN ls -la
+
+# Copy package.json
+COPY backend/package.json ./
+
+# Debug: Show after package.json copy
+RUN echo "=== After package.json copy ==="
+RUN ls -la
+
+# Install dependencies
+RUN npm install
+
+# Copy backend directory
+COPY backend/ ./
+
+# Debug: Show final contents
+RUN echo "=== Final Contents ==="
+RUN ls -la
+
+EXPOSE 8080
+
+CMD ["yarn", "start"]
