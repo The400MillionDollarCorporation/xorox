@@ -118,11 +118,6 @@ export default function TrendingCoinsAnalytics() {
     return 'destructive';
   };
 
-  // Helper function to check if a value should be displayed (not zero)
-  const shouldDisplayValue = (value: number | undefined | null): boolean => {
-    return value !== undefined && value !== null && !isNaN(value) && value > 0;
-  };
-
   // Filtered and searched data
   const filteredCoins = useMemo(() => {
     let filtered = [...data.coins];
@@ -438,11 +433,9 @@ export default function TrendingCoinsAnalytics() {
                     </div>
                     <div>
                         <h3 className="font-semibold">{coin.symbol}</h3>
-                      {shouldDisplayValue(coin.trading_volume_24h) && (
-                        <p className="text-sm text-muted-foreground">
-                          Volume: {formatCurrency(coin.trading_volume_24h)}
-                        </p>
-                      )}
+                      <p className="text-sm text-muted-foreground">
+                        Volume: {formatCurrency(coin.trading_volume_24h)}
+                      </p>
                       {coin.market_cap && (
                         <p className="text-xs text-muted-foreground">
                           Market Cap: {formatCurrency(coin.market_cap)}
@@ -457,14 +450,12 @@ export default function TrendingCoinsAnalytics() {
                         {formatCorrelation(coin.correlation_score)}
                       </p>
                     </div>
-                    {shouldDisplayValue(coin.tiktok_views_24h) && (
-                      <div className="text-right">
-                        <p className="text-sm font-medium">Views</p>
-                        <p className="text-lg font-bold text-blue-600">
-                          {formatViews(coin.tiktok_views_24h)}
-                        </p>
-                      </div>
-                    )}
+                    <div className="text-right">
+                      <p className="text-sm font-medium">Views</p>
+                      <p className="text-lg font-bold text-blue-600">
+                        {formatViews(coin.tiktok_views_24h)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -484,11 +475,9 @@ export default function TrendingCoinsAnalytics() {
                       </div>
                         <div>
                           <h3 className="font-semibold">{coin.symbol}</h3>
-                        {shouldDisplayValue(coin.trading_volume_24h) && (
-                          <p className="text-sm text-muted-foreground">
-                            Volume: {formatCurrency(coin.trading_volume_24h)}
-                          </p>
-                        )}
+                        <p className="text-sm text-muted-foreground">
+                          Volume: {formatCurrency(coin.trading_volume_24h)}
+                        </p>
                         {coin.market_cap && (
                           <p className="text-xs text-muted-foreground">
                             Market Cap: {formatCurrency(coin.market_cap)}
@@ -500,14 +489,12 @@ export default function TrendingCoinsAnalytics() {
                       <Badge variant={getCorrelationBadgeVariant(coin.correlation_score)}>
                         {formatCorrelation(coin.correlation_score)}
                       </Badge>
-                      {shouldDisplayValue(coin.tiktok_views_24h) && (
-                        <div className="text-right">
-                          <p className="text-sm font-medium">Views</p>
-                          <p className="text-lg font-bold text-blue-600">
-                            {formatViews(coin.tiktok_views_24h)}
-                          </p>
-                        </div>
-                      )}
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Views</p>
+                        <p className="text-lg font-bold text-blue-600">
+                          {formatViews(coin.tiktok_views_24h)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -538,22 +525,18 @@ export default function TrendingCoinsAnalytics() {
                       </div>
                         </div>
                     <div className="flex items-center gap-4">
-                      {shouldDisplayValue(coin.tiktok_views_24h) && (
-                        <div className="text-right">
-                          <p className="text-sm font-medium">Views</p>
-                          <p className="text-lg font-bold text-blue-600">
-                            {formatViews(coin.tiktok_views_24h)}
-                          </p>
-                        </div>
-                      )}
-                      {shouldDisplayValue(coin.total_mentions) && (
-                        <div className="text-right">
-                          <p className="text-sm font-medium">Mentions</p>
-                          <p className="text-lg font-bold text-purple-600">
-                            {coin.total_mentions}
-                          </p>
-                        </div>
-                      )}
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Views</p>
+                        <p className="text-lg font-bold text-blue-600">
+                          {formatViews(coin.tiktok_views_24h)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Mentions</p>
+                        <p className="text-lg font-bold text-purple-600">
+                          {coin.total_mentions || 0}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
