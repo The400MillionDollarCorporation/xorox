@@ -75,7 +75,7 @@ class TwitterIntegration {
         .from('prices')
         .select(`
           *,
-          tokens (
+          tokens!fk_prices_token_uri (
             name,
             symbol,
             uri
@@ -612,7 +612,7 @@ Format the response as a complete tweet ready to post.`;
         .from('prices')
         .select(`
           *,
-          tokens (
+          tokens!fk_prices_token_uri (
             name,
             symbol
           )
