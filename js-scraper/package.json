@@ -10,7 +10,7 @@
     "test-analysis": "node test_pattern_analysis.mjs",
     "test-db": "node test_database_storage.mjs",
     "test-connection": "node test_database_connection.mjs",
-    "test-telegram": "node test_telegram_scraper.mjs",
+    "test-telegram": "node test-telegram-scraping.mjs",
     "test-pattern-twitter": "node test_pattern_analysis_and_twitter.mjs",
     "setup-db": "node setup_database.mjs",
     "scrape-tiktok": "node index.mjs",
@@ -24,8 +24,7 @@
     "fix-price-errors": "node fix-price-lookup-errors.mjs",
     "add-token-columns": "node add-missing-token-columns.mjs",
     "scrape-outlight": "node run-outlight-scraper.mjs",
-    "test-outlight": "node test-outlight-scraper.mjs",
-    "test-telegram": "node test-telegram-scraping.mjs"
+    "test-outlight": "node test-outlight-scraper.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
@@ -37,6 +36,8 @@
     "node-telegram-bot-api": "^0.64.0",
     "openai": "^4.20.1",
     "puppeteer": "^24.17.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "twitter-api-v2": "^1.15.2"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
