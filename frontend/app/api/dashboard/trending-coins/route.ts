@@ -137,8 +137,11 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Filter out coins with zero messages
+    const coinsWithMessages = trendingCoins.filter(coin => (coin.total_mentions || 0) > 0);
+
     // Sort based on the requested criteria
-    let sortedCoins = [...trendingCoins];
+    let sortedCoins = [...coinsWithMessages];
     switch (sortBy) {
       case 'correlation':
         sortedCoins.sort((a, b) => b.correlation_score - a.correlation_score);
@@ -149,11 +152,14 @@ export async function GET(request: NextRequest) {
       case 'views':
         sortedCoins.sort((a, b) => b.tiktok_views_24h - a.tiktok_views_24h);
         break;
+      case 'mentions':
+        sortedCoins.sort((a, b) => (b.total_mentions || 0) - (a.total_mentions || 0));
+        break;
       case 'market_cap':
         sortedCoins.sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
         break;
       default:
-        sortedCoins.sort((a, b) => b.correlation_score - a.correlation_score);
+        sortedCoins.sort((a, b) => (b.total_mentions || 0) - (a.total_mentions || 0));
     }
 
     // Apply limit
@@ -161,7 +167,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       coins: limitedCoins,
-      total: trendingCoins.length,
+      total: coinsWithMessages.length,
       sortBy,
       limit
     });

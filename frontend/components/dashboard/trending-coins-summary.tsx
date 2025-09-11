@@ -185,23 +185,27 @@ export default function TrendingCoinsSummary() {
   const calculateSummaryMetrics = (coins: any[], totalViews: number) => {
     if (!coins.length) return;
 
+    // Filter out coins with zero messages
+    const coinsWithMessages = coins.filter(coin => (coin.total_mentions || 0) > 0);
+    if (!coinsWithMessages.length) return;
+
     // Find top performer by message count (mentions)
-    const topPerformer = coins.reduce((best, coin) => 
+    const topPerformer = coinsWithMessages.reduce((best, coin) => 
       coin.total_mentions > best.total_mentions ? coin : best
     );
 
     // Find volume leader (now based on messages)
-    const volumeLeader = coins.reduce((best, coin) => 
+    const volumeLeader = coinsWithMessages.reduce((best, coin) => 
       coin.total_mentions > best.total_mentions ? coin : best
     );
 
     // Find social leader (now based on messages)
-    const socialLeader = coins.reduce((best, coin) => 
+    const socialLeader = coinsWithMessages.reduce((best, coin) => 
       coin.total_mentions > best.total_mentions ? coin : best
     );
 
     setMetrics({
-      totalCoins: coins.length,
+      totalCoins: coinsWithMessages.length,
       totalViews24h: totalViews,
       topPerformer: {
         symbol: topPerformer.symbol,
@@ -215,7 +219,7 @@ export default function TrendingCoinsSummary() {
         symbol: socialLeader.symbol,
         messages: socialLeader.total_mentions
       },
-      marketCapLeader: coins.reduce((best, coin) => 
+      marketCapLeader: coinsWithMessages.reduce((best, coin) => 
         (coin.market_cap || 0) > (best.market_cap || 0) ? coin : best
       , { symbol: 'N/A', marketCap: 0, supply: 0 })
     });
