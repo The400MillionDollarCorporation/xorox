@@ -12,18 +12,15 @@ interface SummaryMetrics {
   totalViews24h: number;
   topPerformer: {
     symbol: string;
-    correlation: number;
-    volume: number;
+    messages: number;
   };
   volumeLeader: {
     symbol: string;
-    volume: number;
-    views: number;
+    messages: number;
   };
   socialLeader: {
     symbol: string;
-    views: number;
-    mentions: number;
+    messages: number;
   };
   marketCapLeader: {
     symbol: string;
@@ -188,19 +185,19 @@ export default function TrendingCoinsSummary() {
   const calculateSummaryMetrics = (coins: any[], totalViews: number) => {
     if (!coins.length) return;
 
-    // Find top performer by correlation
+    // Find top performer by message count (mentions)
     const topPerformer = coins.reduce((best, coin) => 
-      coin.correlation_score > best.correlation_score ? coin : best
+      coin.total_mentions > best.total_mentions ? coin : best
     );
 
-    // Find volume leader
+    // Find volume leader (now based on messages)
     const volumeLeader = coins.reduce((best, coin) => 
-      coin.trading_volume_24h > best.trading_volume_24h ? coin : best
+      coin.total_mentions > best.total_mentions ? coin : best
     );
 
-    // Find social leader
+    // Find social leader (now based on messages)
     const socialLeader = coins.reduce((best, coin) => 
-      coin.tiktok_views_24h > best.tiktok_views_24h ? coin : best
+      coin.total_mentions > best.total_mentions ? coin : best
     );
 
     setMetrics({
@@ -208,18 +205,15 @@ export default function TrendingCoinsSummary() {
       totalViews24h: totalViews,
       topPerformer: {
         symbol: topPerformer.symbol,
-        correlation: topPerformer.correlation_score,
-        volume: topPerformer.trading_volume_24h
+        messages: topPerformer.total_mentions
       },
       volumeLeader: {
         symbol: volumeLeader.symbol,
-        volume: volumeLeader.trading_volume_24h,
-        views: volumeLeader.tiktok_views_24h
+        messages: volumeLeader.total_mentions
       },
       socialLeader: {
         symbol: socialLeader.symbol,
-        views: socialLeader.tiktok_views_24h,
-        mentions: socialLeader.total_mentions
+        messages: socialLeader.total_mentions
       },
       marketCapLeader: coins.reduce((best, coin) => 
         (coin.market_cap || 0) > (best.market_cap || 0) ? coin : best
@@ -448,17 +442,14 @@ export default function TrendingCoinsSummary() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-bold">{metrics.topPerformer.symbol}</div>
-                <div className={`text-sm ${getCorrelationColor(metrics.topPerformer.correlation)}`}>
-                  {formatCorrelation(metrics.topPerformer.correlation)} correlation
+                <div className="text-sm text-blue-600">
+                  {metrics.topPerformer.messages.toLocaleString()} messages
                 </div>
               </div>
               <Badge variant="default" className="text-xs">
-                Best Correlation
+                Most Discussed
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Volume: {formatCurrency(metrics.topPerformer.volume)}
-            </p>
           </CardContent>
         </Card>
         )}
@@ -476,16 +467,13 @@ export default function TrendingCoinsSummary() {
               <div>
                 <div className="text-lg font-bold">{metrics.volumeLeader.symbol}</div>
                 <div className="text-sm text-green-600">
-                  {formatCurrency(metrics.volumeLeader.volume)}
+                  {metrics.volumeLeader.messages.toLocaleString()} messages
                 </div>
               </div>
               <Badge variant="secondary" className="text-xs">
-                Highest Volume
+                Most Discussed
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Views: {formatViews(metrics.volumeLeader.views)}
-            </p>
           </CardContent>
         </Card>
         )}
@@ -503,16 +491,13 @@ export default function TrendingCoinsSummary() {
               <div>
                 <div className="text-lg font-bold">{metrics.socialLeader.symbol}</div>
                 <div className="text-sm text-blue-600">
-                  {formatViews(metrics.socialLeader.views)} views
+                  {metrics.socialLeader.messages.toLocaleString()} messages
                 </div>
               </div>
               <Badge variant="outline" className="text-xs">
-                Most Viral
+                Most Discussed
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Mentions: {metrics.socialLeader.mentions}
-            </p>
           </CardContent>
         </Card>
         )}
