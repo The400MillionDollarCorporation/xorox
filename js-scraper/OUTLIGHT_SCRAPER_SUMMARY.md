@@ -7,7 +7,7 @@ Successfully implemented a comprehensive Telegram channel and message scraper fo
 ## ✅ Completed Features
 
 ### 1. **Channel Discovery System**
-- **Dual Scraping Methods**: Implemented both Puppeteer (browser automation) and Cheerio (HTML parsing) for robust channel discovery
+- **Dual Scraping Methods**:  both Puppeteer (browser automation) and Cheerio (HTML parsing) for robust channel discovery
 - **Multiple Detection Patterns**: Scans for Telegram links in various formats (`t.me/`, `telegram.me/`, `@mentions`)
 - **Comprehensive Coverage**: Extracts channels from homepage content, links, and text mentions
 
