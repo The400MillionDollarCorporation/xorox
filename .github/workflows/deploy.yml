@@ -3,8 +3,7 @@ name: Deploy Next.js Frontend
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
