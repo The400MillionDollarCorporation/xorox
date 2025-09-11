@@ -387,7 +387,10 @@ export default function TrendingCoinsAnalytics() {
                       {index + 1}
                     </div>
                     <div>
-                      <h3 className="font-semibold">{coin.name || 'Unknown Token'}</h3>
+                        <h3 className="font-semibold">{coin.symbol}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {coin.name || 'Unknown Token'}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -415,8 +418,11 @@ export default function TrendingCoinsAnalytics() {
                         {index + 1}
                       </div>
                         <div>
-                          <h3 className="font-semibold">{coin.name || 'Unknown Token'}</h3>
-                      </div>
+                          <h3 className="font-semibold">{coin.symbol}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {coin.name || 'Unknown Token'}
+                          </p>
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
@@ -443,8 +449,11 @@ export default function TrendingCoinsAnalytics() {
                         {index + 1}
                       </div>
                         <div>
-                          <h3 className="font-semibold">{coin.name || 'Unknown Token'}</h3>
-                      </div>
+                          <h3 className="font-semibold">{coin.symbol}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {coin.name || 'Unknown Token'}
+                          </p>
+                        </div>
                         </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
@@ -472,7 +481,10 @@ export default function TrendingCoinsAnalytics() {
                         {index + 1}
                       </div>
                       <div>
-                        <h3 className="font-semibold">{coin.name || 'Unknown Token'}</h3>
+                        <h3 className="font-semibold">{coin.symbol}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {coin.name || 'Unknown Token'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
