@@ -176,7 +176,7 @@ async function initBrowser() {
     });
     return browser;
   } catch (error) {
-    console.error('Failed to launch browser:', error);
+    console.error('Failed   to launch browser:', error);
     throw error;
   }
 }
