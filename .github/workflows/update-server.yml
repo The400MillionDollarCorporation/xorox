@@ -8,7 +8,7 @@ env:
   HOST: ${{ secrets.SSH_HOST }}
   HOST_USERNAME: ${{ secrets.SSH_USERNAME }}
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  SERVER_TARGET_DIR: "/${{ secrets.SSH_USERNAME }}/iris"  # Adjust as needed
+  SERVER_TARGET_DIR: "/home/${{ secrets.SSH_USERNAME }}/iris"  # 👈 Fixed path
 
 jobs:
   deploy:
@@ -17,11 +17,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install SSH Key
+      - name: Install SSH Key and Known Hosts
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ env.SSH_PRIVATE_KEY }}
-          known_hosts: github.com  # Optional: add your server's host key for extra security
+          known_hosts: |
+            ${{ env.HOST }}  # 👈 Auto-adds host key
 
       - name: Sync to Server (excluding frontend)
         run: |
