@@ -359,11 +359,10 @@ export default function TrendingCoinsAnalytics() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="correlation">Correlation</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
-            <TabsTrigger value="market">Market Data</TabsTrigger>
           </TabsList>
 
           {/* No Results Message */}
@@ -468,45 +467,6 @@ export default function TrendingCoinsAnalytics() {
             </div>
           </TabsContent>
 
-          <TabsContent value="market" className="space-y-4">
-            <div className="grid gap-4">
-              {filteredCoins
-                .filter(coin => coin.market_cap || coin.total_supply)
-                .sort((a, b) => (b.total_mentions || 0) - (a.total_mentions || 0))
-                .slice(0, 10)
-                .map((coin, index) => (
-                  <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{coin.symbol}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {coin.name || 'Unknown Token'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-sm font-medium">Messages</p>
-                        <p className="text-lg font-bold text-blue-600">
-                          {(coin.total_mentions || 0).toLocaleString()}
-                        </p>
-                      </div>
-                      {coin.market_cap && (
-                        <div className="text-right">
-                          <p className="text-sm font-medium">Market Cap</p>
-                          <p className="text-lg font-bold text-purple-600">
-                            {formatCurrency(coin.market_cap)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </TabsContent>
         </Tabs>
       </CardContent>
     </Card>
