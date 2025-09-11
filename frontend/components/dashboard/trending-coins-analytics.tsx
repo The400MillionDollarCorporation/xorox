@@ -18,9 +18,9 @@ interface TrendingCoinsData {
 }
 
 export default function TrendingCoinsAnalytics() {
-  const [data, setData] = useState<TrendingCoinsData>({ coins: [], total: 0, sortBy: 'correlation', limit: 20 });
+  const [data, setData] = useState<TrendingCoinsData>({ coins: [], total: 0, sortBy: 'mentions', limit: 20 });
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('correlation');
+  const [sortBy, setSortBy] = useState('mentions');
   const [limit, setLimit] = useState(20);
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [lastUpdated, setLastUpdated] = useState<string>('--');
@@ -29,8 +29,7 @@ export default function TrendingCoinsAnalytics() {
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMarketCap, setFilterMarketCap] = useState<string>('all');
-  const [filterCorrelation, setFilterCorrelation] = useState<string>('all');
-  const [filterViews, setFilterViews] = useState<string>('all');
+  const [filterMessages, setFilterMessages] = useState<string>('all');
 
   useEffect(() => {
     // Mark that we're on the client side
@@ -147,45 +146,29 @@ export default function TrendingCoinsAnalytics() {
       }
     }
 
-    // Correlation filter
-    if (filterCorrelation !== 'all') {
-      switch (filterCorrelation) {
+    // Messages filter
+    if (filterMessages !== 'all') {
+      switch (filterMessages) {
         case 'high':
-          filtered = filtered.filter(coin => (coin.correlation_score || 0) >= 0.8);
+          filtered = filtered.filter(coin => (coin.total_mentions || 0) >= 1000);
           break;
         case 'medium':
-          filtered = filtered.filter(coin => (coin.correlation_score || 0) >= 0.6 && (coin.correlation_score || 0) < 0.8);
+          filtered = filtered.filter(coin => (coin.total_mentions || 0) >= 100 && (coin.total_mentions || 0) < 1000);
           break;
         case 'low':
-          filtered = filtered.filter(coin => (coin.correlation_score || 0) < 0.6);
-          break;
-      }
-    }
-
-    // Views filter
-    if (filterViews !== 'all') {
-      switch (filterViews) {
-        case 'high':
-          filtered = filtered.filter(coin => (coin.tiktok_views_24h || 0) >= 10000);
-          break;
-        case 'medium':
-          filtered = filtered.filter(coin => (coin.tiktok_views_24h || 0) >= 1000 && (coin.tiktok_views_24h || 0) < 10000);
-          break;
-        case 'low':
-          filtered = filtered.filter(coin => (coin.tiktok_views_24h || 0) < 1000);
+          filtered = filtered.filter(coin => (coin.total_mentions || 0) < 100);
           break;
       }
     }
 
     return filtered;
-  }, [data.coins, searchQuery, filterMarketCap, filterCorrelation, filterViews]);
+  }, [data.coins, searchQuery, filterMarketCap, filterMessages]);
 
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery('');
     setFilterMarketCap('all');
-    setFilterCorrelation('all');
-    setFilterViews('all');
+    setFilterMessages('all');
   };
 
   const formatSupply = (supply: number): string => {
@@ -239,10 +222,7 @@ export default function TrendingCoinsAnalytics() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="correlation">Correlation</SelectItem>
-                <SelectItem value="volume">Volume</SelectItem>
-                <SelectItem value="views">Views</SelectItem>
-                <SelectItem value="mentions">Mentions</SelectItem>
+                <SelectItem value="mentions">Messages</SelectItem>
                 <SelectItem value="market_cap">Market Cap</SelectItem>
               </SelectContent>
             </Select>
@@ -307,31 +287,19 @@ export default function TrendingCoinsAnalytics() {
               </SelectContent>
             </Select>
 
-            <Select value={filterCorrelation} onValueChange={setFilterCorrelation}>
+            <Select value={filterMessages} onValueChange={setFilterMessages}>
               <SelectTrigger className="w-32">
-                <SelectValue placeholder="Correlation" />
+                <SelectValue placeholder="Messages" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Correlations</SelectItem>
-                <SelectItem value="high">High (≥80%)</SelectItem>
-                <SelectItem value="medium">Medium (60-80%)</SelectItem>
-                <SelectItem value="low">Low (&lt;60%)</SelectItem>
+                <SelectItem value="all">All Messages</SelectItem>
+                <SelectItem value="high">High (≥1K)</SelectItem>
+                <SelectItem value="medium">Medium (100-1K)</SelectItem>
+                <SelectItem value="low">Low (&lt;100)</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select value={filterViews} onValueChange={setFilterViews}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Views" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Views</SelectItem>
-                <SelectItem value="high">High (≥10K)</SelectItem>
-                <SelectItem value="medium">Medium (1K-10K)</SelectItem>
-                <SelectItem value="low">Low (&lt;1K)</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {(searchQuery || filterMarketCap !== 'all' || filterCorrelation !== 'all' || filterViews !== 'all') && (
+            {(searchQuery || filterMarketCap !== 'all' || filterMessages !== 'all') && (
               <Button
                 variant="outline"
                 size="sm"
@@ -344,7 +312,7 @@ export default function TrendingCoinsAnalytics() {
           </div>
 
           {/* Active Filters Display */}
-          {(searchQuery || filterMarketCap !== 'all' || filterCorrelation !== 'all' || filterViews !== 'all') && (
+          {(searchQuery || filterMarketCap !== 'all' || filterMessages !== 'all') && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm text-muted-foreground">Active filters:</span>
               {searchQuery && (
@@ -373,27 +341,14 @@ export default function TrendingCoinsAnalytics() {
                   </Button>
                 </Badge>
               )}
-              {filterCorrelation !== 'all' && (
+              {filterMessages !== 'all' && (
                 <Badge variant="secondary" className="text-xs">
-                  Correlation: {filterCorrelation}
+                  Messages: {filterMessages}
                   <Button
                     variant="ghost"
                     size="sm"
                     className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
-                    onClick={() => setFilterCorrelation('all')}
-                  >
-                    <X className="w-2 h-2" />
-                  </Button>
-                </Badge>
-              )}
-              {filterViews !== 'all' && (
-                <Badge variant="secondary" className="text-xs">
-                  Views: {filterViews}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
-                    onClick={() => setFilterViews('all')}
+                    onClick={() => setFilterMessages('all')}
                   >
                     <X className="w-2 h-2" />
                   </Button>
@@ -434,7 +389,7 @@ export default function TrendingCoinsAnalytics() {
                     <div>
                         <h3 className="font-semibold">{coin.symbol}</h3>
                       <p className="text-sm text-muted-foreground">
-                        Volume: {formatCurrency(coin.trading_volume_24h)}
+                        {coin.name || 'Unknown Token'}
                       </p>
                       {coin.market_cap && (
                         <p className="text-xs text-muted-foreground">
@@ -445,15 +400,9 @@ export default function TrendingCoinsAnalytics() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-sm font-medium">Correlation</p>
-                      <p className={`text-lg font-bold ${getCorrelationColor(coin.correlation_score)}`}>
-                        {formatCorrelation(coin.correlation_score)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">Views</p>
+                      <p className="text-sm font-medium">Messages</p>
                       <p className="text-lg font-bold text-blue-600">
-                        {formatViews(coin.tiktok_views_24h)}
+                        {(coin.total_mentions || 0).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -465,7 +414,7 @@ export default function TrendingCoinsAnalytics() {
           <TabsContent value="correlation" className="space-y-4">
             <div className="grid gap-4">
               {filteredCoins
-                .sort((a, b) => b.correlation_score - a.correlation_score)
+                .sort((a, b) => (b.total_mentions || 0) - (a.total_mentions || 0))
                 .slice(0, 10)
                 .map((coin, index) => (
                   <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
@@ -476,7 +425,7 @@ export default function TrendingCoinsAnalytics() {
                         <div>
                           <h3 className="font-semibold">{coin.symbol}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Volume: {formatCurrency(coin.trading_volume_24h)}
+                          {coin.name || 'Unknown Token'}
                         </p>
                         {coin.market_cap && (
                           <p className="text-xs text-muted-foreground">
@@ -486,13 +435,10 @@ export default function TrendingCoinsAnalytics() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <Badge variant={getCorrelationBadgeVariant(coin.correlation_score)}>
-                        {formatCorrelation(coin.correlation_score)}
-                      </Badge>
                       <div className="text-right">
-                        <p className="text-sm font-medium">Views</p>
+                        <p className="text-sm font-medium">Messages</p>
                         <p className="text-lg font-bold text-blue-600">
-                          {formatViews(coin.tiktok_views_24h)}
+                          {(coin.total_mentions || 0).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -504,7 +450,7 @@ export default function TrendingCoinsAnalytics() {
           <TabsContent value="social" className="space-y-4">
             <div className="grid gap-4">
               {filteredCoins
-                .sort((a, b) => b.tiktok_views_24h - a.tiktok_views_24h)
+                .sort((a, b) => (b.total_mentions || 0) - (a.total_mentions || 0))
                 .slice(0, 10)
                 .map((coin, index) => (
                   <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
@@ -515,7 +461,7 @@ export default function TrendingCoinsAnalytics() {
                         <div>
                           <h3 className="font-semibold">{coin.symbol}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Correlation: {formatCorrelation(coin.correlation_score)}
+                          {coin.name || 'Unknown Token'}
                         </p>
                         {coin.market_cap && (
                           <p className="text-xs text-muted-foreground">
@@ -526,15 +472,9 @@ export default function TrendingCoinsAnalytics() {
                         </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-sm font-medium">Views</p>
+                        <p className="text-sm font-medium">Messages</p>
                         <p className="text-lg font-bold text-blue-600">
-                          {formatViews(coin.tiktok_views_24h)}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">Mentions</p>
-                        <p className="text-lg font-bold text-purple-600">
-                          {coin.total_mentions || 0}
+                          {(coin.total_mentions || 0).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -547,7 +487,7 @@ export default function TrendingCoinsAnalytics() {
             <div className="grid gap-4">
               {filteredCoins
                 .filter(coin => coin.market_cap || coin.total_supply)
-                .sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0))
+                .sort((a, b) => (b.total_mentions || 0) - (a.total_mentions || 0))
                 .slice(0, 10)
                 .map((coin, index) => (
                   <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg">
@@ -568,6 +508,12 @@ export default function TrendingCoinsAnalytics() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Messages</p>
+                        <p className="text-lg font-bold text-blue-600">
+                          {(coin.total_mentions || 0).toLocaleString()}
+                        </p>
+                      </div>
                       {coin.market_cap && (
                         <div className="text-right">
                           <p className="text-sm font-medium">Market Cap</p>
@@ -576,20 +522,6 @@ export default function TrendingCoinsAnalytics() {
                           </p>
                         </div>
                       )}
-                      {coin.total_supply && (
-                        <div className="text-right">
-                          <p className="text-sm font-medium">Total Supply</p>
-                          <p className="text-lg font-bold text-orange-600">
-                            {formatSupply(coin.total_supply)}
-                          </p>
-                        </div>
-                      )}
-                      <div className="text-right">
-                        <p className="text-sm font-medium">Last Updated</p>
-                        <p className="text-xs text-muted-foreground">
-                          {coin.last_updated ? new Date(coin.last_updated).toLocaleDateString() : 'Unknown'}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 ))}
