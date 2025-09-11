@@ -36,6 +36,7 @@ export default function RealTimeTikTokFeed() {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [visibleVideos, setVisibleVideos] = useState(12);
 
   const fetchTikTokData = async () => {
     try {
@@ -86,6 +87,10 @@ export default function RealTimeTikTokFeed() {
     } finally {
       setRefreshing(false);
     }
+  };
+
+  const handleLoadMoreVideos = () => {
+    setVisibleVideos(prev => prev + 12);
   };
 
   useEffect(() => {
@@ -198,7 +203,7 @@ export default function RealTimeTikTokFeed() {
       {/* TikTok Videos Grid */}
       {!loading && tiktoks.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {tiktoks.slice(0, 12).map((tiktok) => {
+        {tiktoks.slice(0, visibleVideos).map((tiktok) => {
           const tiktokMentions = getTokenMentions(tiktok.id);
           
           return (
@@ -290,9 +295,13 @@ export default function RealTimeTikTokFeed() {
       )}
 
       {/* Load More */}
-      {!loading && tiktoks.length > 12 && (
+      {!loading && tiktoks.length > visibleVideos && (
         <div className="text-center mt-8">
-          <Button variant="outline" className="border-iris-primary/30 text-iris-primary">
+          <Button 
+            variant="outline" 
+            className="border-iris-primary/30 text-iris-primary hover:bg-iris-primary/10"
+            onClick={handleLoadMoreVideos}
+          >
             Load More Videos
           </Button>
         </div>
