@@ -1,0 +1,50 @@
+name: Sync Repository to Server (except frontend)
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  HOST: ${{ secrets.SSH_HOST }}
+  HOST_USERNAME: ${{ secrets.SSH_USERNAME }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  SERVER_TARGET_DIR: "/${{ secrets.SSH_USERNAME }}/iris"  # Adjust as needed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          known_hosts: github.com  # Optional: add your server's host key for extra security
+
+      - name: Sync to Server (excluding frontend)
+        run: |
+          echo "🚀 Starting sync to server at ${{ env.HOST }}..."
+          
+          # Ensure target directory exists
+          ssh ${{ env.HOST_USERNAME }}@${{ env.HOST }} "mkdir -p ${{ env.SERVER_TARGET_DIR }}"
+          
+          # Sync with rsync, exclude frontend/
+          rsync -avz \
+            --delete \
+            --exclude='frontend/' \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            ./ \
+            ${{ env.HOST_USERNAME }}@${{ env.HOST }}:${{ env.SERVER_TARGET_DIR }}/
+          
+          echo "✅ Sync completed successfully!"
+          
+          # Optional: Show what's on the server
+          ssh ${{ env.HOST_USERNAME }}@${{ env.HOST }} "ls -la ${{ env.SERVER_TARGET_DIR }} | head -n 20"
+
+      - name: Verify Deployment
+        run: |
+          echo "🔍 Verifying deployment..."
+          ssh ${{ env.HOST_USERNAME }}@${{ env.HOST }} "ls -la ${{ env.SERVER_TARGET_DIR }}/frontend 2>/dev/null && echo '❌ frontend/ still exists on server!' || echo '✅ frontend/ correctly excluded'"
