@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const encoder = new TextEncoder();
   
   // Get the base URL from the request
-  const baseUrl = request.nextUrl.origin;
+  const baseUrl = 'http://localhost:3000';
   
   const stream = new ReadableStream({
     start(controller) {
