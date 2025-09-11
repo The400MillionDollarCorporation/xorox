@@ -1,11 +1,15 @@
 // Place these at the very top of the file, before any other imports
 import { createClient } from '@supabase/supabase-js';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-extra'; // 👈 CHANGED
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'; // 👈 ADDED
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 import { Headers } from 'node-fetch';
 import fs from 'fs';
 import { extractComments, VideoScraper } from "./scraper.mjs";
+
+// 👇 ADD STEALTH PLUGIN
+puppeteer.use(StealthPlugin());
 
 // Polyfill global fetch and Headers
 global.fetch = fetch;
@@ -162,21 +166,27 @@ async function storeTokenMentionsImmediately(tiktokId, comments) {
   }
 }
 
+// 👇 Helper: Random delay to simulate human behavior
+const randomDelay = (minMs, maxMs) => {
+  return new Promise(resolve => setTimeout(resolve, Math.random() * (maxMs - minMs) + minMs));
+};
+
 async function initBrowser() {
   try {
     const browser = await puppeteer.launch({
-      // Remove hardcoded Linux path - let Puppeteer auto-detect on Windows
-      // executablePath: '/usr/bin/google-chrome',
       headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--disable-blink-features=AutomationControlled',
       ]
     });
     return browser;
   } catch (error) {
-    console.error('Failed   to launch browser:', error);
+    console.error('Failed to launch browser:', error);
     throw error;
   }
 }
@@ -184,15 +194,27 @@ async function initBrowser() {
 const verifyPageLoaded = async (page, url, timeout = 60000) => {
   try {
     logger.info(`Loading ${url}...`);
-    await page.goto(url, { waitUntil: "networkidle0", timeout });
-    console.log('waiting for body')
-    await page.waitForSelector("body");
-    console.log('waiting for timeout')
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    
+    await page.goto(url, { 
+      waitUntil: "networkidle0", 
+      timeout 
+    });
+
+    // 👇 Check for human verification or bot detection
+    const isBlocked = await page.$('text=Verify to continue') || 
+                      await page.$('text=Please verify you are a human');
+
+    if (isBlocked) {
+      logger.error('🚨 TikTok is blocking access — likely detected as bot. Try residential proxy.');
+      return false;
+    }
+
+    await page.waitForSelector("body", { timeout: 10000 });
+    await randomDelay(3000, 7000); // 👈 Human-like pause
     logger.info(`Successfully loaded ${url}`);
     return true;
   } catch (e) {
-    logger.error(`Error loading page: ${e}`);
+    logger.error(`Error loading page: ${e.message}`);
     return false;
   }
 };
@@ -220,14 +242,11 @@ const processSearchTerm = async (page, keyword, maxResults = 50) => {
       console.log("\nWaiting for video feed...");
 
       while (results.length < maxResults) {
-        // const videoElements = await page.$$('div[class*="DivItemContainerV2"]');
-        const videoElements = await page.$$(
-          'div[class*="DivItemContainerForSearch"]'
-        );
+        const videoElements = await page.$$('div[class*="DivItemContainerForSearch"]');
 
         if (!videoElements.length) {
           console.log("No video elements found. Waiting...");
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await randomDelay(4000, 8000); // 👈 Randomized wait
           continue;
         }
 
@@ -264,10 +283,13 @@ const processSearchTerm = async (page, keyword, maxResults = 50) => {
         const previousHeight = await page.evaluate(
           "document.documentElement.scrollHeight"
         );
+        
         await page.evaluate(
           "window.scrollTo(0, document.documentElement.scrollHeight)"
         );
-        await new Promise((resolve) => setTimeout(resolve, scrollPauseTime));
+        
+        await randomDelay(2000, 5000); // 👈 Human-like scroll delay
+
         const newHeight = await page.evaluate(
           "document.documentElement.scrollHeight"
         );
@@ -280,12 +302,13 @@ const processSearchTerm = async (page, keyword, maxResults = 50) => {
 
     return results;
   } catch (e) {
-    console.error(`\nError processing search term '${keyword}': ${e}`);
+    console.error(`\nError processing search term '${keyword}': ${e.message}`);
     return results;
   }
 };
 
 const processHashtagTerm = async (page, keyword, maxResults = 50) => {
+  // 👇 FIXED: Removed extra whitespace
   const hashtagUrl = `https://www.tiktok.com/tag/${keyword}`;
   const results = [];
   const scrollPauseTime = 2000;
@@ -302,7 +325,7 @@ const processHashtagTerm = async (page, keyword, maxResults = 50) => {
 
         if (!videoElements.length) {
           console.log("No video elements found. Waiting...");
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await randomDelay(4000, 8000);
           continue;
         }
 
@@ -335,7 +358,7 @@ const processHashtagTerm = async (page, keyword, maxResults = 50) => {
         await page.evaluate(
           "window.scrollTo(0, document.documentElement.scrollHeight)"
         );
-        await new Promise((resolve) => setTimeout(resolve, scrollPauseTime));
+        await randomDelay(2000, 5000);
 
         const newHeight = await page.evaluate(
           "document.documentElement.scrollHeight"
@@ -349,7 +372,7 @@ const processHashtagTerm = async (page, keyword, maxResults = 50) => {
 
     return results;
   } catch (e) {
-    console.error(`\nError processing hashtag term '${keyword}': ${e}`);
+    console.error(`\nError processing hashtag term '${keyword}': ${e.message}`);
     return results;
   }
 };
@@ -379,7 +402,6 @@ const saveCombinedResults = (results) => {
 
 const main = async () => {
   const searchTerms = ["memecoin", "pumpfun", "solana", "crypto", "meme", "bags", "bonk"];
-
   const hashtagTerms = ["memecoin", "solana", "crypto", "pumpfun", "meme", "bags", "bonk"];
 
   const selectedProfile = "Profile 3";
@@ -395,6 +417,29 @@ const main = async () => {
     }
 
     const page = await browser.newPage();
+
+    // 👇 ADD REALISTIC BROWSER FINGERPRINT
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36');
+
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Referer': 'https://www.tiktok.com/',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
+    });
+
+    await page.emulateTimezone('America/New_York');
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'language', { get: () => 'en-US' });
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+      // Hide webdriver flag
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    });
+
     logger.info("Chrome started successfully");
 
     const allResults = [];
@@ -431,7 +476,7 @@ const main = async () => {
           }
         }
       }
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await randomDelay(5000, 10000);
     }
 
     console.log("\nAll search terms processed!");
@@ -466,7 +511,7 @@ const main = async () => {
           }
         }
       }
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await randomDelay(5000, 10000);
     }
 
     if (allResults.length) {
@@ -491,7 +536,7 @@ const main = async () => {
     console.log("Press Enter to close browser...");
     await new Promise((resolve) => process.stdin.once("data", resolve));
   } catch (e) {
-    logger.error(`Unexpected error: ${e}`);
+    logger.error(`Unexpected error: ${e.message}`);
   } finally {
     try {
       if (browser) {
