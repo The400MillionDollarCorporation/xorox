@@ -387,15 +387,7 @@ export default function TrendingCoinsAnalytics() {
                       {index + 1}
                     </div>
                     <div>
-                        <h3 className="font-semibold">{coin.symbol}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {coin.name || 'Unknown Token'}
-                      </p>
-                      {coin.market_cap && (
-                        <p className="text-xs text-muted-foreground">
-                          Market Cap: {formatCurrency(coin.market_cap)}
-                        </p>
-                      )}
+                      <h3 className="font-semibold">{coin.name || 'Unknown Token'}</h3>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -423,15 +415,7 @@ export default function TrendingCoinsAnalytics() {
                         {index + 1}
                       </div>
                         <div>
-                          <h3 className="font-semibold">{coin.symbol}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {coin.name || 'Unknown Token'}
-                        </p>
-                        {coin.market_cap && (
-                          <p className="text-xs text-muted-foreground">
-                            Market Cap: {formatCurrency(coin.market_cap)}
-                          </p>
-                        )}
+                          <h3 className="font-semibold">{coin.name || 'Unknown Token'}</h3>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -459,15 +443,7 @@ export default function TrendingCoinsAnalytics() {
                         {index + 1}
                       </div>
                         <div>
-                          <h3 className="font-semibold">{coin.symbol}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {coin.name || 'Unknown Token'}
-                        </p>
-                        {coin.market_cap && (
-                          <p className="text-xs text-muted-foreground">
-                            Market Cap: {formatCurrency(coin.market_cap)}
-                          </p>
-                        )}
+                          <h3 className="font-semibold">{coin.name || 'Unknown Token'}</h3>
                       </div>
                         </div>
                     <div className="flex items-center gap-4">
@@ -496,15 +472,7 @@ export default function TrendingCoinsAnalytics() {
                         {index + 1}
                       </div>
                       <div>
-                        <h3 className="font-semibold">{coin.symbol}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {coin.name || 'Unknown Token'}
-                        </p>
-                        {coin.address && (
-                          <p className="text-xs text-muted-foreground font-mono">
-                            {coin.address.slice(0, 8)}...{coin.address.slice(-8)}
-                          </p>
-                        )}
+                        <h3 className="font-semibold">{coin.name || 'Unknown Token'}</h3>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
