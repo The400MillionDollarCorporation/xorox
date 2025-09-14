@@ -63,8 +63,12 @@ export default function RealTimeTikTokFeed() {
       console.log('🔗 Mentions data received:', mentionsData);
       
       if (tiktokData.data && Array.isArray(tiktokData.data)) {
-        setTiktoks(tiktokData.data);
-        console.log(`✅ Set ${tiktokData.data.length} TikTok videos`);
+        // Sort TikTok data by created_at timestamp (newest first)
+        const sortedTiktoks = tiktokData.data.sort((a: TikTokData, b: TikTokData) => {
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+        setTiktoks(sortedTiktoks);
+        console.log(`✅ Set ${sortedTiktoks.length} TikTok videos (sorted newest first)`);
       } else {
         console.warn('⚠️ TikTok data is not an array:', tiktokData);
         setTiktoks([]);
@@ -203,10 +207,7 @@ export default function RealTimeTikTokFeed() {
       {/* TikTok Videos Grid */}
       {!loading && tiktoks.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {tiktoks
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, visibleVideos)
-          .map((tiktok) => {
+        {tiktoks.slice(0, visibleVideos).map((tiktok) => {
           const tiktokMentions = getTokenMentions(tiktok.id);
           
           return (

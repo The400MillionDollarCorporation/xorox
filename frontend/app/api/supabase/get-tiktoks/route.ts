@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("tiktoks")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("fetched_at", { ascending: false });
 
     // Add search filter if provided
     if (search) {

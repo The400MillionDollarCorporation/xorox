@@ -64,9 +64,14 @@ export default function AnalyticsDashboard() {
       const videos = tiktokData.data || [];
       const mentions = mentionsData.data || [];
       
+      // Sort videos by created_at timestamp (newest first)
+      const sortedVideos = videos.sort((a: any, b: any) => {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      
       // Calculate totals
-      const totalViews = videos.reduce((sum: number, v: any) => sum + (v.views || 0), 0);
-      const totalComments = videos.reduce((sum: number, v: any) => sum + (v.comments || 0), 0);
+      const totalViews = sortedVideos.reduce((sum: number, v: any) => sum + (v.views || 0), 0);
+      const totalComments = sortedVideos.reduce((sum: number, v: any) => sum + (v.comments || 0), 0);
       
       // Process token mentions
       const tokenCounts = new Map<string, number>();
@@ -84,15 +89,15 @@ export default function AnalyticsDashboard() {
         .sort((a, b) => b.mentionCount - a.mentionCount)
         .slice(0, 5);
       
-      // Generate recent activity
-      const recentActivity = videos.slice(0, 5).map((video: any) => ({
+      // Generate recent activity from newest videos
+      const recentActivity = sortedVideos.slice(0, 5).map((video: any) => ({
         time: video.fetched_at, // Store the raw timestamp
         action: "New TikTok",
         details: `@${video.username} posted with ${video.views} views`
       }));
       
       setAnalytics({
-        totalVideos: videos.length,
+        totalVideos: sortedVideos.length,
         totalViews,
         totalComments,
         totalMentions: mentions.length,
